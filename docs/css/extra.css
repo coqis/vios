@@ -1,0 +1,42 @@
+.center {
+    display: block;
+    margin: 0 auto;
+}
+
+.right {
+    float: right;
+}
+
+.md-typeset .grid.cards>ul>li {
+    display: flex;
+    flex-direction: column;
+    outline: 1px solid green;
+    /* font-size: 100px; */
+}
+
+.grid.cards>ul>li {
+    width: 880px;
+    font-size: 18pt;
+}
+
+.md-typeset .grid {
+    grid-gap: 10px 10px;
+    display: block; 
+    /* grid */
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    margin: 10px 0;
+}
+
+.md-typeset .admonition>*, .md-typeset details>* {
+    box-sizing: border-box;
+    /* font-size: 16pt; */
+}
+
+.grid.cards {
+    flex-grow: 5;
+    /* Probably 2 would be enough, as the grids shouldn't hold too much text to begin with, but to be safe I set it to 5 */
+}
+
+/* .md-typeset pre>code {
+    background-color: antiquewhite;
+} */

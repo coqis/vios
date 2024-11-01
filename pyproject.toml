@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vios"
+version = "2.5.9"
+authors = [
+  { name="YL Feng", email="fengyl@baqis.ac.cn" },
+]
+description = "runtime requirements for systemq"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.10"
+dependencies = [
+    "anyon",
+    "dill",
+    "tqdm",
+    "rich",
+    "loguru",
+    "gitpython",
+    "waveforms",
+    "pyvisa",
+    "pyserial"
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Natural Language :: Chinese (Simplified)",
+  "Natural Language :: English",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: MacOS :: MacOS X",
+  "Programming Language :: Python :: 3.10",
+  "Topic :: Scientific/Engineering :: Physics",
+]
+
+[project.urls]
+"homepage" = "https://quarkstudio.readthedocs.io/en/latest"
+
+[tool.setuptools]
+packages = ["quark.app", "quark.driver", "quark.driver.common", "quark.envelope"]
+py-modules = ["quark.proxy"]
+

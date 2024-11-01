@@ -1,0 +1,16 @@
+# https://pip-tools.readthedocs.io/en/latest/cli/pip-compile/
+# pip-compile -r -U package_name
+mkdocs
+mkdocstrings[python]
+markdown-include
+mkdocs-material
+markdown-exec
+mkdocs-gen-files
+# mkdocs-callouts
+mkdocs-literate-nav
+mkdocs-git-revision-date-localized-plugin
+
+mkdocs-jupyter
+quarkcircuit
+matplotlib
+networkx

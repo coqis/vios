@@ -1,0 +1,203 @@
+site_name: "Project Quark"
+watch: [mkdocs.yml, README.md, quark]
+
+
+nav:
+  - Home:
+    - Home: index.md
+    - cloud: usage/cloudnote.ipynb
+    # - cloud: usage/cloud copy.md
+    # - gallery: gallery.md
+    # - matrix: html/index.html
+  # - Cloud:
+    # - User Guide: usage/cloud.md
+    # - demo: usage/demo.ipynb
+  - Experiment:
+    - QOS: usage/index.md
+    - systemq: usage/systemq.md
+    # - user guide: markdown/qos_tools.md
+    # - bayes: markdown/bayes.md
+    - quarkstudio: 
+      - quarkstudio: usage/quark/index.md
+      - server: usage/quark/server.md
+      - studio: usage/quark/studio.md
+      - canvas: usage/quark/canvas.md
+      - remote: usage/quark/remote.md
+    - waveform:
+      - qlisp:  usage/waveform/index.md
+      - waveform:  usage/waveform/waveform.md
+      # - compiler:  usage/waveform/compiler.md
+    # - scanner: usage/scanner.md
+    # - readout: usage/readout correction.md
+      
+  # defer to gen-files + literate-nav
+  - API Reference:
+      # - systemq: systemq/
+      - modules: modules/
+
+
+theme:
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  name: material
+  custom_dir: docs/override
+  logo: image/dock.png
+  favicon: image/dock.png
+  nav_style: dark
+  highlightjs: true
+  analytics:
+    gtag: G-ABC123
+  features:
+    - announce.dismiss
+    - content.action.edit
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    - content.tooltips
+    # - header.autohide
+    - navigation.prune
+    # - navigation.footer
+    - navigation.indexes
+    # - navigation.sections # expand toc on the left
+    - navigation.tracking
+    - navigation.instant
+    - navigation.tabs
+    # - navigation.tabs.sticky # hide tabs when scrolling down
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/git-alt
+
+
+extra_css:
+  - css/extra.css # center
+  - css/material.css
+  - css/mkdocstrings.css
+  - css/insiders.css
+
+
+extra_javascript:
+  - javascript/mathjax.js
+  # - https://polyfill.io/v3/polyfill.min.js?features=es6
+  # - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  # - https://unpkg.com/mathjax@3.2.2/es5/tex-mml-chtml.js
+  - javascript/tex-mml-chtml.js
+
+
+markdown_extensions:
+# see https://facelessuser.github.io/pymdown-extensions/extensions/arithmatex/
+  - abbr
+  - attr_list
+  - tables
+  - admonition
+  # - callouts:
+  #     strip_period: no
+  - footnotes
+  - md_in_html
+  # - pymdownx.blocks.admonition
+  # - pymdownx.blocks.details
+  - pymdownx.details # Collapsible blocks
+  - pymdownx.superfences:
+      custom_fences:
+      - name: mermaid
+        class: mermaid
+        format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.arithmatex: # math
+      generic: true
+  - pymdownx.blocks.tab:
+      alternate_style: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.magiclink
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.tabbed:
+      alternate_style: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - toc:
+      permalink: "¤"
+
+plugins:
+  - autorefs
+  - search
+  - markdown-exec
+  - mkdocs-jupyter:
+      execute: false
+      include_source: True
+  # - mkdocs-pdf
+  - gen-files:
+      scripts:
+      - scripts.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  # - coverage
+  - mkdocstrings:
+      # https://squidfunk.github.io/mkdocs-material/
+      handlers:
+      # See: https://mkdocstrings.github.io/python/usage/
+        python:
+          paths: [src]
+          options:
+            members_order: source # alphabetical
+            # docstring_options:
+            #   ignore_init_summary: true
+            # docstring_section_style: list
+            docstring_section_style: table
+            filters: ["!^_[^_]", "!QuarkProxy"]
+            heading_level: 1
+            inherited_members: true
+            merge_init_into_class: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_source: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            summary: true
+            separate_signature: false
+            show_signature_annotations: true
+            signature_crossrefs: true
+            unwrap_annotated: true
+            show_docstring_functions: true
+            show_docstring_classes: true
+            show_docstring_modules: true
+  - git-revision-date-localized:
+      # https://henrywhitaker3.github.io/mkdocs-material-dark-theme/plugins/revision-date/
+      enable_creation_date: true
+      type: timeago
+
+
+
+extra:
+  version:
+    provider: mike
+  social:
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/quarkstudio/
+      name: quarkstudio
+    - icon: fontawesome/brands/github
+      link: https://github.com/
+      name: quarkstudio
+  generator: false # hide Made with Material for MkDocs
+
+repo_url: https://gitee.com/
+repo_name: baqis/quarkstudio
+
+copyright: Copyright &copy; 2020 - 2024 BAQIS
