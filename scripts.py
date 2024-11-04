@@ -72,12 +72,12 @@ def generate(src: list[Path], dst: str = 'reference', included: str = 'quark', e
 
 
 #!
-import quark.circuit
-print('*'*50, quark.circuit)
+# import quark.circuit
+# print('*'*50, quark.circuit)
 
-extra = Path(quark.circuit.__file__).parents[2]
+# extra = Path(quark.circuit.__file__).parents[2]
 
-generate([Path(__file__).parent, extra], # uninstall quarkstudio
+generate([Path(__file__).parent], # uninstall quarkstudio
          'modules',
          included='quark/',
          excluded='scripts|tests|sphinx')
