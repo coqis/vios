@@ -23,6 +23,7 @@ nav:
       - studio: usage/quark/studio.md
       - canvas: usage/quark/canvas.md
       - remote: usage/quark/remote.md
+    - quarkcircuit: usage/quark/example.ipynb
     - waveform:
       - qlisp:  usage/waveform/index.md
       - waveform:  usage/waveform/waveform.md

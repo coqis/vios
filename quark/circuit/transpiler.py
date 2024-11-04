@@ -22,11 +22,24 @@ into formats that are more suitable for execution on hardware backends"""
 
 import networkx as nx
 from typing import Literal
-from .circuit import *
+from .circuit import QuantumCircuit
 from .matrix import gate_matrix_dict, u_mat, id_mat
 from .dag import qc2dag
-from .routing_helpers import *
-from .decompose_helpers import *
+from .routing_helpers import (distance_matrix_element,
+                              mapping_node_to_gate_info,
+                              is_correlation_on_front_layer,
+                              heuristic_function,
+                              create_extended_successor_set,
+                              update_initial_mapping,
+                              update_coupling_graph,
+                              update_decay_parameter)
+from .decompose_helpers import (h2u,
+                                s2u,
+                                cx_decompose,
+                                cy_decompose,
+                                swap_decompose,
+                                iswap_decompose,
+                                u_dot_u)
 from .backend import Backend
 from .layout_helpers import Layout
 

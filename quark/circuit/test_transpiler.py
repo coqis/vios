@@ -6,7 +6,6 @@ def call_quarkcircuit_transpiler(
         chip_name: Literal['Baihua'] = 'Baihua',
         use_priority: bool = True,
         initial_mapping: list | None = None,
-        coupling_map: list[tuple] | None = None,
         optimize_level = 0,
         ):
     
@@ -14,7 +13,6 @@ def call_quarkcircuit_transpiler(
     chip_backend = Backend(chip_name)
     qct = Transpiler(qc,chip_backend=chip_backend).run(use_priority=use_priority,
                                                       initial_mapping=initial_mapping,
-                                                      coupling_map=coupling_map,
                                                       optimize_level=optimize_level)
 
     return qct.to_qlisp
