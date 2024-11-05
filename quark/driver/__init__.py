@@ -111,14 +111,13 @@ mdev = '''
 │}                                          │                                                             │
 └───────────────────────────────────────────┴─────────────────────────────────────────────────────────────┘
 ```
-- > If you don't know the current version of Python, ***read the above***!!!
-- > If you don't know where systemq is installed, ***read the above***!!!
-- > If you don't know how to set up the instrument, ***read the above***!!!
+- > ***If you don't know the current version of Python, read the above***!!!
+- > ***If you don't know where systemq is installed, read the above***!!!
+- > ***If you don't know how to set up the instrument, read the above***!!!
 '''
 
 
 def is_main_process():
-    """Check whether the current process is the main one"""
     import multiprocessing as mp
 
     return mp.current_process().name == 'MainProcess'
