@@ -487,7 +487,8 @@ class QuarkProxy(object):
         if meta['status'] in ['Finished', 'Archived']:
             try:
                 # data: list[dict] = result['data']['count']
-                data: list[np.ndarray] = result['data']['count']
+                signal = meta['other'].get('signal', 'count')
+                data: list[np.ndarray] = result['data'][signal]
                 status = 'Finished'
             except Exception as e:
                 logger.error(f'Failed to postprocess result: {e}')
