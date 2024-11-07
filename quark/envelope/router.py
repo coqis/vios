@@ -47,7 +47,7 @@ def savefig(result):
 def schedule():
     """Execute pre-set scheduled jobs
 
-    Example: the scheduling rules are specified by `etc.schedule` using
+    Example: the scheduling rules are specified by `etc.server.schedule` using
         |key|type|note|
         |---|---|---|
         |year|int, str|4-digit number|

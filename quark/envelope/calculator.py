@@ -36,7 +36,7 @@ def calculate(step: str, target: str, cmd: list, preview: dict = {}) -> tuple:
         target (str): hardware channel like **AWG.CH1.Offset**
         cmd (list): command, in the type of tuple **(ctype, value, unit, kwds)**, where ctype
             must be one of **WRITE/READ/WAIT**, see `assembler.preprocess` for more details. 
-        preview (dict): `QuarkCanvas` settings from `etc.preview`
+        preview (dict): `QuarkCanvas` settings from `etc.canvas`
 
     Returns:
         tuple: (preprocessed result, sampled waveform to be shown in the `QuarkCanvas`)
@@ -113,7 +113,7 @@ def plot(target: str, cmd: dict, preview: dict = {}, delay: float = 0.0) -> dict
     Args:
         target (str): hardware channel
         cmd (dict): see calculator
-        preview (dict, optional): from **etc.preview**. Defaults to {}.
+        preview (dict, optional): from **etc.canvas**. Defaults to {}.
         delay (float, optional): time delay for the channel. Defaults to 0.0.
 
     Returns:
