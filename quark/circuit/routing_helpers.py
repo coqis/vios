@@ -21,7 +21,11 @@
 
 import networkx as nx
 from networkx import floyd_warshall_numpy
-from .circuit import QuantumCircuit
+from .circuit import (QuantumCircuit,
+                      one_qubit_gates_avaliable,
+                      two_qubit_gates_avaliable,
+                      one_qubit_parameter_gates_avaliable,
+                      functional_gates_avaliable,)
 
 def distance_matrix_element(qubit1:int,qubit2:int,coupling_graph:nx.Graph) -> int:
     """Computes the distance between two qubits in a coupling graph.
