@@ -28,7 +28,7 @@ from quark.proxy import loadv
 from .systemq import Waveform, sample_waveform, wave_eval
 
 
-def calculate(step: str, target: str, cmd: list, preview: dict = {}) -> tuple:
+def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
     """preprocess each command such as predistortion and sampling
 
     Args:
@@ -36,7 +36,7 @@ def calculate(step: str, target: str, cmd: list, preview: dict = {}) -> tuple:
         target (str): hardware channel like **AWG.CH1.Offset**
         cmd (list): command, in the type of tuple **(ctype, value, unit, kwds)**, where ctype
             must be one of **WRITE/READ/WAIT**, see `assembler.preprocess` for more details. 
-        preview (dict): `QuarkCanvas` settings from `etc.canvas`
+        canvas (dict): `QuarkCanvas` settings from `etc.canvas`
 
     Returns:
         tuple: (preprocessed result, sampled waveform to be shown in the `QuarkCanvas`)
@@ -99,7 +99,7 @@ def calculate(step: str, target: str, cmd: list, preview: dict = {}) -> tuple:
                'track': kwds['track'], 'shared': kwds['shared']}
 
     try:
-        line = plot(target, cmd, preview, delay)
+        line = plot(target, cmd, canvas, delay)
     except Exception as e:
         logger.error(
             f"{'>'*30}'  failed to calculate waveform', {e}, {type(e).__name__}")
@@ -107,28 +107,28 @@ def calculate(step: str, target: str, cmd: list, preview: dict = {}) -> tuple:
     return (step, target, cmd), line
 
 
-def plot(target: str, cmd: dict, preview: dict = {}, delay: float = 0.0) -> dict:
+def plot(target: str, cmd: dict, canvas: dict = {}, delay: float = 0.0) -> dict:
     """sample waveforms needed to be shown in the `QuarkCanvas`
 
     Args:
         target (str): hardware channel
         cmd (dict): see calculator
-        preview (dict, optional): from **etc.canvas**. Defaults to {}.
+        canvas (dict, optional): from **etc.canvas**. Defaults to {}.
         delay (float, optional): time delay for the channel. Defaults to 0.0.
 
     Returns:
         dict: _description_
     """
-    if not preview.get('filter', []):
+    if not canvas.get('filter', []):
         return {}
 
-    if cmd[-1]['target'].split('.')[0] not in preview['filter'] or cmd[-1]['sid'] < 0:
+    if cmd[-1]['target'].split('.')[0] not in canvas['filter'] or cmd[-1]['sid'] < 0:
         return {}
 
     if target.endswith('Waveform'):
 
         srate = cmd[-1]['srate']
-        t1, t2 = preview['range']
+        t1, t2 = canvas['range']
         xr = slice(int(t1*srate), int(t2*srate))
 
         val = cmd[1]
@@ -148,7 +148,7 @@ def plot(target: str, cmd: dict, preview: dict = {}, delay: float = 0.0) -> dict
             xx, yy = xt, yt
 
         line = {'xdata': xx, 'ydata': yy, 'suptitle': cmd[-1]["sid"]}
-        color = preview.get('color', None)
+        color = canvas.get('color', None)
         if color and isinstance(color, (list, tuple)):
             line['color'] = tuple(color)
 
