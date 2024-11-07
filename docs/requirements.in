@@ -11,6 +11,6 @@ mkdocs-literate-nav
 mkdocs-git-revision-date-localized-plugin
 
 mkdocs-jupyter
-quarkcircuit
+# quarkcircuit
 matplotlib
 networkx
