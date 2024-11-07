@@ -20,26 +20,29 @@
 r"""This module contains the Transpiler class, which is designed to convert quantum circuits 
 into formats that are more suitable for execution on hardware backends"""
 
+import numpy as np
 import networkx as nx
 from typing import Literal
-from .circuit import QuantumCircuit
+from .circuit import (QuantumCircuit,
+                      one_qubit_gates_avaliable,
+                      two_qubit_gates_avaliable,
+                      one_qubit_parameter_gates_avaliable,
+                      functional_gates_avaliable)
 from .matrix import gate_matrix_dict, u_mat, id_mat
 from .dag import qc2dag
 from .routing_helpers import (distance_matrix_element,
                               mapping_node_to_gate_info,
                               is_correlation_on_front_layer,
                               heuristic_function,
-                              create_extended_successor_set,
                               update_initial_mapping,
                               update_coupling_graph,
                               update_decay_parameter)
-from .decompose_helpers import (h2u,
-                                s2u,
-                                cx_decompose,
+from .decompose_helpers import (cx_decompose,
                                 cy_decompose,
                                 swap_decompose,
                                 iswap_decompose,
                                 u_dot_u)
+from .utils import u3_decompose
 from .backend import Backend
 from .layout_helpers import Layout
 
@@ -107,7 +110,23 @@ class Transpiler:
         self.largest_qubits_index = max(self.initial_mapping) + 1
 
     def run_select_layout(self,use_priority: bool = True, initial_mapping: list | None = None, coupling_map: list[tuple] | None = None):
+        """
+        Selects the quantum circuit layout and performs transpiling based on the provided mapping and coupling configuration.
+    
+        Args:
+            use_priority (bool, optional): Whether to use qubits recommended by the backend. Defaults to True. 
+                If set to False, transpilation will be performed based on the provided `initial_mapping` and `coupling_map`.
 
+            initial_mapping (list | None, optional): A list representing the mapping of virtual qubits to physical qubits. 
+                The ith element corresponds to the physical qubit that maps to the ith virtual qubit.
+                
+            coupling_map (list[tuple] | None, optional): A list of tuples representing the coupling between physical qubits. 
+                If `use_priority` is set to False, and both `initial_mapping` and `coupling_map` are provided, transpilation 
+                will proceed based on these parameters.
+    
+        Returns:
+            QuantumCircuit: A quantum circuit with the selected layout and transpiled gates.
+        """
         self._select_layout(use_priority = use_priority, initial_mapping = initial_mapping, coupling_map = coupling_map)
         self._mapping_to_physical_qubits_layout()
         qc = QuantumCircuit(self.largest_qubits_index,self.ncbits_used)
@@ -456,6 +475,7 @@ class Transpiler:
             if gate in one_qubit_gates_avaliable.keys():
                 gate_matrix = gate_matrix_dict[gate]
                 theta,phi,lamda,_ = u3_decompose(gate_matrix)
+                print(('u',theta,phi,lamda,gate_info[-1]))
                 new.append(('u',theta,phi,lamda,gate_info[-1]))
             elif gate in one_qubit_parameter_gates_avaliable.keys():
                 if gate == 'u':

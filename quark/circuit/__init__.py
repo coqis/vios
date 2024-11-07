@@ -18,47 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 r"""
-The `quark.circuit` module aims to provide tools for constructing, visualizing, and transpiling quantum circuits.
-
-1. **Installation**
-
-    Run the following command to install:
-
-    ```bash
-    pip install quarkcircuit
-    ```
-
-2. **Construct a quantum circuit**
-
-    Example usage:
-
-    ```python
-    from quark.circuit import QuantumCircuit
-    qc = QuantumCircuit(3, 3)
-    qc.h(0)
-    qc.cx(0, 1)
-    qc.cx(0, 2)
-    qc.measure_all()
-    ```
-
-3. **Visualization**
-
-    To visualize the circuit:
-
-    ```python
-    qc.draw()  # or qc.draw_simply()
-    ```
-
-4. **Transpilation**
-
-    To transpile the circuit with optimization:
-
-    ```python
-    from quark.circuit import Transpiler
-    qct = Transpiler(qc).run(optimize_level=1)
-    qct.draw()
-    ```
-
+The quark.circuit module provides tools for constructing, visualizing, and transpiling quantum circuits.
 """
 
 from .circuit_wapper import QuantumCircuitWrapper

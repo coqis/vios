@@ -277,7 +277,7 @@ def zyz_decompose(mat: np.ndarray) -> tuple[float, float, float, float]:
     phi_lam_diff = 2 * np.angle(v[1, 0])
     phi = (phi_lam_sum + phi_lam_diff) / 2
     lam = (phi_lam_sum - phi_lam_diff) / 2
-    return theta, phi, lam, alpha
+    return float(theta), float(phi), float(lam), float(alpha)
 
 def u3_decompose(mat: np.ndarray) -> tuple[float, float, float, float]:
     r"""

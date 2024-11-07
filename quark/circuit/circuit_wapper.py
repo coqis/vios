@@ -22,8 +22,7 @@ This module contains the QuantumWrapper class, which provides an interface to co
 quantum circuits produced by MindQuantum and Qiskit into OpenQASM 2.0 string representation.
 """
 
-from typing_extensions import Literal
-from typing import Type
+from typing import Type,Literal
 
 class QuantumCircuitWrapper:
     r"""

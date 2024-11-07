@@ -26,11 +26,13 @@ import networkx as nx
 import numpy as np
 import json
 import matplotlib.pyplot as plt 
+from quark import connect
 from typing import Literal
 
 def load_chip_configuration(chip_name):
-    with open('./' + chip_name + '_previous-1.json','r') as file:
-        chip_info = json.load(file)
+    ss = connect('QuarkServer',host="172.16.18.22",port=2088)
+    ss.login('baqis')
+    chip_info  = ss.snapshot()
     print(f'{chip_name} configuration load done!')
     return chip_info
 
