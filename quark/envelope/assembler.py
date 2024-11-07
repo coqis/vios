@@ -215,16 +215,16 @@ def assemble(sid: int, instruction: dict[str, list[str, str, Any, str]], **kw):
                 continue
 
             kwds = {'sid': sid, 'target': target,
-                    'track': query('etc.track'),
-                    'shared': query('etc.shared'),
-                    'filter': query('etc.filter')}
+                    'track': query('etc.server.track'),
+                    'shared': query('etc.server.shared'),
+                    'filter': query('etc.driver.filter')}
             if 'CH' in target or ctype == 'WAIT':
                 _target = target
             else:
                 try:
                     # logical channel to hardware channel
                     context = query(target.split('.', 1)[0])
-                    mapping = query('etc.mapping')
+                    mapping = query('etc.driver.mapping')
                     _target = decode(target, context, mapping)
                     kwds.update({"context": context})
                 except (ValueError, KeyError) as e:
