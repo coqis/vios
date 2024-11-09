@@ -215,7 +215,7 @@ def assemble(sid: int, instruction: dict[str, list[str, str, Any, str]], **kw):
                 continue
 
             kwds = {'sid': sid, 'target': target,
-                    'track': query('etc.server.track'),
+                    'track': query('etc.server.review'),
                     'shared': query('etc.server.shared'),
                     'filter': query('etc.driver.filter')}
             if 'CH' in target or ctype == 'WAIT':
