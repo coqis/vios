@@ -107,8 +107,8 @@ mdev = '''
 │        "type": "remote",                  │         "name": "VirtualDevice", # filename of the driver   │
 │        "host": "192.168.1.42",            │         "port": 40052, # service port                       │
 │        "port": 40052                      │        }                                                    │
-│        }                                  │ }                                                           │
-│}                                          │                                                             │
+│        }                                  │ "adc":{...}                                                 │
+│}                                          │ }                                                           │
 └───────────────────────────────────────────┴─────────────────────────────────────────────────────────────┘
 ```
 - > ***If you don't know the current version of Python, read the above***!!!

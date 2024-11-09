@@ -15,32 +15,60 @@
     ??? note "checkpoint demo"
         ```python
         {
+            {
             "etc": {
-                "root": "c:\\systemq",
-                "driver": "dev", 
-                "concurrent": true, 
-                "workers": 1,
-                "delay": 10.0, 
-                "cached": 5,
-                "review": [0], 
-                "track": [0],
-                "preview": {"range": [9.39e-05, 9.8e-05],
-                            "filter": []},
-                "filesize": 4000.0,
-                "timeout": null,
-                "filter": ["DA1","DA2"],
-                "mapping": { 
-                    "setting_LO": "LO.Frequency",
-                    "setting_POW": "LO.Power",
-                    "setting_OFFSET": "ZBIAS.Offset",
-                    "waveform_RF_I": "I.Waveform",
-                    "waveform_RF_Q": "Q.Waveform",
-                    "waveform_TRIG": "TRIG.Marker1",
-                    "waveform_SW": "SW.Marker1",
-                    "waveform_Z": "Z.Waveform",
-                    "setting_PNT": "ADC.PointNumber",
-                    "setting_SHOT": "ADC.Shot",
-                    "setting_TRIGD": "ADC.TriggerDelay"
+                "driver": {
+                    "path": "dev",
+                    "concurrent": true,
+                    "timeout": 30.0,
+                    "filter": [
+                        "send Waveform or np.array"
+                    ],
+                    "mapping": {
+                        "setting_LO": "LO.Frequency",
+                        "setting_POW": "LO.Power",
+                        "setting_OFFSET": "ZBIAS.Offset",
+                        "waveform_RF_I": "I.Waveform",
+                        "waveform_RF_Q": "Q.Waveform",
+                        "waveform_TRIG": "TRIG.Marker1",
+                        "waveform_DDS": "DDS.Waveform",
+                        "waveform_SW": "SW.Marker1",
+                        "waveform_Z": "Z.Waveform",
+                        "setting_PNT": "ADC.PointNumber",
+                        "setting_SHOT": "ADC.Shot",
+                        "setting_TRIGD": "ADC.TriggerDelay"
+                    },
+                    "root": "C:\\Users\\NUC\\Desktop\\quarkstudio\\systemqos"
+                },
+                "server": {
+                    "workers": 1,
+                    "shared": 0,
+                    "delay": 10.0,
+                    "cached": 5,
+                    "review": [
+                        0,
+                        1,
+                        10
+                    ],
+                    "schedule": {
+                        "job": {
+                            "hour": "2"
+                        }
+                    },
+                    "filesize": 4000.0
+                },
+                "canvas": {
+                    "range": [
+                        0,
+                        0.0001
+                    ],
+                    "filter": []
+                },
+                "cloud": {
+                    "host": "172.16.1.251",
+                    "online": false,
+                    "station": "Dongling"
+                    }
                 }
             },
             "Q0101": {
@@ -461,31 +489,43 @@
 ```python
 {
     "etc": {
-        "root": "c:\\systemq", # systemq location
-        "driver": "dev", # driver path relative to systemq
-        "concurrent": True, # open device concurrently if True
-        "workers": 1, # number of compilation processes
-        "delay": 10.0, # maximum delay(in the unit of second) for feed
-        "cached": 5, # number of cached task
-        "review": [0], # index of cached step
-        "track": [0], # index of recorded step details
-        "preview": {"range": [9.39e-05, 9.8e-05], # time range in QuarkCanvas
-                    "filter": []}, # specify the targets to be displayed in QuarkCanvas
-        "filesize": 4000.0, # maximum size of an hdf5 file
-        "timeout": None, # device execution timeout
-        "filter": ["DA1","DA2"], # send waveform object to the device in the list
-        "mapping": { # mapping between logical channel and hardware channel
-            "setting_LO": "LO.Frequency", # see driver for more details about device attributes
-            "setting_POW": "LO.Power",
-            "setting_OFFSET": "ZBIAS.Offset",
-            "waveform_RF_I": "I.Waveform",
-            "waveform_RF_Q": "Q.Waveform",
-            "waveform_TRIG": "TRIG.Marker1",
-            "waveform_SW": "SW.Marker1",
-            "waveform_Z": "Z.Waveform",
-            "setting_PNT": "ADC.PointNumber",
-            "setting_SHOT": "ADC.Shot",
-            "setting_TRIGD": "ADC.TriggerDelay"
+        "driver": {
+            "path": "dev", # driver path relative to systemq
+            "concurrent": True, # open device concurrently if True
+            "timeout": 30.0, # device execution timeout
+            "filter": ["send Waveform or np.array to device in the list"],
+            "mapping": { # mapping between logical channel and hardware channel
+                "setting_LO": "LO.Frequency", # see driver for more details about device attributes
+                "setting_POW": "LO.Power",
+                "setting_OFFSET": "ZBIAS.Offset",
+                "waveform_RF_I": "I.Waveform",
+                "waveform_RF_Q": "Q.Waveform",
+                "waveform_TRIG": "TRIG.Marker1",
+                "waveform_DDS": "DDS.Waveform",
+                "waveform_SW": "SW.Marker1",
+                "waveform_Z": "Z.Waveform",
+                "setting_PNT": "ADC.PointNumber",
+                "setting_SHOT": "ADC.Shot",
+                "setting_TRIGD": "ADC.TriggerDelay"
+            },
+            "root": "~/Desktop/systemq" # systemq location
+        },
+        "server": {
+            "workers": 1, # number of compilation processes
+            "shared": 0,
+            "delay": 10.0, # maximum delay(in the unit of second) for feed
+            "cached": 5, # number of cached task
+            "review": [0, 1, 10], # index of cached step
+            "schedule": {
+                "job": {
+                    "hour": "2"
+                }
+            },
+            "filesize": 4000.0 # maximum size of an hdf5 file
+        },
+        "canvas": {
+            "range": [0, 0.0001], # time range in QuarkCanvas
+            "filter": [] # targets to be displayed in QuarkCanvas
         }
     }
 }
