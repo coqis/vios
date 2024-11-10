@@ -356,7 +356,7 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
     wf, index = {}, 0
     for target, value in cmds.items():
         if isinstance(value[1], Waveform):
-            _target = value[-1]['target'].split('.')[0]
+            _target = value[-1]['target']  # .split('.')[0]
             if _target.startswith(tuple(keys)):
                 value[-1]['srate'] = srate
                 value[-1]['start'] = start
@@ -364,7 +364,10 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
                 value[-1]['filter'] = []
                 if not calibrate:
                     for ch, val in value[-1]['calibration'].items():
-                        val['delay'] = 0
+                        try:
+                            val['delay'] = 0
+                        except Exception as e:
+                            logger.error(f'{target, ch, val, e}')
 
                 xt = np.arange(start, stop, 1/srate)/unit
                 (_, _, cmd), _ = calculate('main', target, value)
@@ -374,7 +377,7 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
                 plt.plot(xt, wf[_target])
                 plt.text(xt[-1], np.mean(wf[_target]), _target, va='center')
                 plt.xlim(xt[0]-space, xt[-1]+space)
-                print(xt[0], _target)
+                # print(xt[0], _target)
     # plt.axis('off')
     # plt.legend(tuple(wf))
     return wf
