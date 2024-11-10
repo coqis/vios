@@ -29,7 +29,8 @@ Abstract: about driver
 try:
     # import URL from dev in systemq
     try:
-        from dev import URL
+        # from dev import URL
+        URL = 'Not Found'
     except ImportError as e:
         from systemq.dev import URL
 except Exception as e:

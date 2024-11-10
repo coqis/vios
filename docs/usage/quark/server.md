@@ -38,7 +38,7 @@
                         "setting_SHOT": "ADC.Shot",
                         "setting_TRIGD": "ADC.TriggerDelay"
                     },
-                    "root": "C:\\Users\\NUC\\Desktop\\quarkstudio\\systemqos"
+                    "root": "~/Desktop/systemq"
                 },
                 "server": {
                     "workers": 1,

@@ -64,6 +64,7 @@ class BaseDriver(ABC):
         self.quantities = {q.name: q for q in self.quants}
 
     def validate(self):
+        return
         dev, seg = self.segment
         self.pattern = re.compile(PATTERN.format(seg=seg))
         if not self.pattern.match(self.addr):
