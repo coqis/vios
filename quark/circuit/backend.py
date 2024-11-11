@@ -33,8 +33,12 @@ def load_chip_configuration(chip_name):
     ss = connect('QuarkServer',host="172.16.18.22",port=2088)
     ss.login('baqis')
     chip_info  = ss.snapshot()
-    print(f'{chip_name} configuration load done!')
-    return chip_info
+    if chip_info:
+        print(f'{chip_name} configuration loading done!')
+        return chip_info
+    else:
+        print(f'{chip_name} configuration loading failed!')
+        return None
 
 class Backend:
     """A class to represent a quantum hardware backend as a nx.Graph.

@@ -119,7 +119,7 @@ def heuristic_function(front_layer: list, dag: 'nx.DiGraph', coupling_graph: 'nx
     E = create_extended_successor_set(F, dag)
     min_score_swap_qubits = list(swap_gate_info[1:])
     size_E = len(E)
-    if size_E ==0:
+    if size_E == 0:
         size_E = 1
     size_F = len(F)
     W = 0.5
@@ -129,15 +129,12 @@ def heuristic_function(front_layer: list, dag: 'nx.DiGraph', coupling_graph: 'nx
     for node in F:
         qubit1, qubit2 = dag.nodes[node]['qubits']
         f_distance += distance_matrix_element(qubit1,qubit2,coupling_graph)
-    #print('E',E)
     for node in E:
         qubit1, qubit2 = dag.nodes[node]['qubits']
         e_distance += distance_matrix_element(qubit1,qubit2,coupling_graph)
     f_distance = f_distance / size_F
-    #print('------------',size_E, e_distance)
     e_distance = W * (e_distance / size_E)
     H = max_decay * (f_distance + e_distance)
-    #print(swap_gate_info, max_decay, f_distance, e_distance, H)
     return H
 
 def create_extended_successor_set(front_layer: list, dag: 'nx.DiGraph') -> list:

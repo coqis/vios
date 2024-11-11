@@ -131,16 +131,15 @@ class Transpiler:
         self._mapping_to_physical_qubits_layout()
         qc = QuantumCircuit(self.largest_qubits_index,self.ncbits_used)
         qc.gates = self.gates
+        qc.physical_qubits_espression = True
         return qc
 
     def _select_layout(self,use_priority: bool = True, initial_mapping: list|None = None, coupling_map: list[tuple]|None = None):
         # update initial_mapping, coupling_map, largest_qubits_index
         if use_priority and (initial_mapping is None and coupling_map is None):
             self._choose_layout_from_chip_backend(use_priority=True) 
-            print(f'Layout qubits {self.initial_mapping} selected from chip backend priority qubits, the coupling map is {self.coupling_map}.')
         elif not use_priority and initial_mapping is None:
             self._choose_layout_from_chip_backend(use_priority=False) 
-            print(f'Layout qubits {self.initial_mapping} selected from Transpile algorithm by set key="fidelity" and topology="linear1", the coupling map is {self.coupling_map}.')
         elif not use_priority and initial_mapping is not None:
             self.initial_mapping = initial_mapping
             if coupling_map is not None:
@@ -148,8 +147,16 @@ class Transpiler:
             else:
                 subgraph = self.chip_backend.graph.subgraph(self.initial_mapping)
                 self.coupling_map = list(subgraph.edges)
-            print(f'Layout qubits {self.initial_mapping} come from your custom, the coupling map is {self.coupling_map}.')
+            print(f'Layout qubits {self.initial_mapping} come from your custom.')
+            print(f'The selected layout coupling map is {self.coupling_map}')
+
         self.largest_qubits_index = max(self.initial_mapping) + 1
+
+        subgraph = self.chip_backend.graph.subgraph(self.initial_mapping)
+        subgraph_fidelity = np.array([data['weight'] for _, _, data in subgraph.edges(data=True)])
+        fidelity_mean = np.mean(subgraph_fidelity)
+        fidelity_var  = np.var(subgraph_fidelity)  
+        print('The average fidelity of the coupler(s) between the selected qubits is {}, and the variance of the fidelity is {}'.format(fidelity_mean,fidelity_var))
         return self 
 
     def _choose_layout_from_chip_backend(self, use_priority: bool = True, 
@@ -189,10 +196,12 @@ class Transpiler:
             for qubits in priority_qubits_list:
                 if len(qubits) == self.nqubits_used:
                     layout = qubits
+                    print(f'Layout qubits {list(layout)} selected from chip backend priority qubits.')
                     break
             else:
                 print(f"No priority qubits with {self.nqubits_used} qubits found, it will set use_priority as 'False' to search.")
                 layout = Layout(self.nqubits_used, self.chip_backend).select_layout(key,topology,printdetails=printdetails)
+                print(f'Layout qubits {list(layout)} selected from Transpile algorithm by set key = {key} and topology = {topology}.')
         else:
             layout = Layout(self.nqubits_used, self.chip_backend).select_layout(key,topology,printdetails=printdetails)
         if drawgraph:
@@ -200,8 +209,10 @@ class Transpiler:
             self.chip_backend.draw()   
 
         subgraph = self.chip_backend.graph.subgraph(layout)
-        self.coupling_map = list(subgraph.edges)
         self.initial_mapping = list(layout)
+        self.coupling_map = list(subgraph.edges)
+        print(f'The selected layout coupling map is {self.coupling_map}')
+        
         return None
     
     def _mapping_to_physical_qubits_layout(self):
@@ -339,6 +350,7 @@ class Transpiler:
         self._basic_routing()
         qc = QuantumCircuit(self.largest_qubits_index,self.ncbits_used)
         qc.gates = self.gates
+        qc.physical_qubits_espression = True
         return qc 
     
     def _sabre_routing_once(self,dag):
@@ -356,7 +368,6 @@ class Transpiler:
             ncycle += 1
             #print('='*50,ncycle)
             #print(front_layer,self.initial_mapping)
-            
             execute_node_list = []
             for node in front_layer:
                 gate = node.split('_')[0]
@@ -419,7 +430,7 @@ class Transpiler:
         self.gates = new
         return None
     
-    def _sabre_routing(self, iterations: int = 1):
+    def _sabre_routing(self, iterations: int = 5):
         """Routing based on the Sabre algorithm.
         Args:
             iterations (int, optional): The number of iterations. Defaults to 1.
@@ -434,6 +445,7 @@ class Transpiler:
             else:
                 self.source_gates.reverse()
                 self.gates = self.source_gates.copy()
+            #print('check',idx,initial_map)
             self._mapping_to_physical_qubits_layout()
             qc = QuantumCircuit(self.largest_qubits_index,self.ncbits_used)
             qc.gates = self.gates
@@ -448,7 +460,7 @@ class Transpiler:
 
         return self
 
-    def run_sabre_routing(self, iterations: int = 1) -> QuantumCircuit:
+    def run_sabre_routing(self, iterations: int = 5) -> QuantumCircuit:
         """Routing based on the initial mapping.
 
         Args:
@@ -461,6 +473,7 @@ class Transpiler:
         self._sabre_routing(iterations = iterations)
         qc = QuantumCircuit(self.largest_qubits_index,self.ncbits_used)
         qc.gates = self.gates
+        qc.physical_qubits_espression = True
         return qc
 
     def _basic_gates(self) -> 'Transpiler':
@@ -475,7 +488,6 @@ class Transpiler:
             if gate in one_qubit_gates_avaliable.keys():
                 gate_matrix = gate_matrix_dict[gate]
                 theta,phi,lamda,_ = u3_decompose(gate_matrix)
-                print(('u',theta,phi,lamda,gate_info[-1]))
                 new.append(('u',theta,phi,lamda,gate_info[-1]))
             elif gate in one_qubit_parameter_gates_avaliable.keys():
                 if gate == 'u':
@@ -517,6 +529,7 @@ class Transpiler:
         self._basic_gates()
         qc =  QuantumCircuit(self.largest_qubits_index, self.ncbits_used)
         qc.gates = self.gates
+        qc.physical_qubits_espression = True
         return qc
 
     def _gate_optimize(self) -> 'Transpiler':
@@ -617,6 +630,7 @@ class Transpiler:
 
         qc =  QuantumCircuit(self.largest_qubits_index, self.ncbits_used)
         qc.gates = self.gates
+        qc.physical_qubits_espression = True
         return qc
             
     def run(self, use_priority: bool = True, initial_mapping: list|None = None, coupling_map: list[tuple]|None = None, optimize_level: 0|1 = 1) -> 'QuantumCircuit':
@@ -631,6 +645,6 @@ class Transpiler:
         if optimize_level == 0:
             return self._select_layout(use_priority=use_priority, initial_mapping=initial_mapping, coupling_map=coupling_map)._basic_routing()._basic_gates().run_gate_optimize()
         elif optimize_level == 1:
-            return self._select_layout(use_priority=use_priority, initial_mapping=initial_mapping, coupling_map=coupling_map)._sabre_routing(iterations=3)._basic_gates().run_gate_optimize()
+            return self._select_layout(use_priority=use_priority, initial_mapping=initial_mapping, coupling_map=coupling_map)._sabre_routing()._basic_gates().run_gate_optimize()
         else:
             raise(ValueError('More optimize level is not support now!'))

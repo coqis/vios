@@ -177,6 +177,7 @@ class QuantumCircuit:
 
         self.gates = []
         self.lines_use = []
+        self.physical_qubits_espression = False
 
     def from_openqasm2(self,openqasm2_str: str) -> None:
         r"""
@@ -869,15 +870,19 @@ class QuantumCircuit:
         nlines = 2 * self.nqubits + 1 + len(str(self.ncbits))
         gates_element = list('— ' * self.nqubits) + ['═'] + [' '] * len(str(self.ncbits))
         gates_initial = copy.deepcopy(gates_element)
+        if self.physical_qubits_espression:
+            qubits_expression = 'Q'
+        else:
+            qubits_expression = 'q'
         for i in range(nlines):
             if i in range(0, 2 * self.nqubits, 2):
                 qi = i // 2
                 if len(str(qi)) == 1:
-                    qn = f'q[{qi:<1}]  '
+                    qn = qubits_expression + f'[{qi:<1}]  '
                 elif len(str(qi)) == 2:
-                    qn = f'q[{qi:<2}] '
+                    qn = qubits_expression + f'[{qi:<2}] '
                 elif len(str(qi)) == 3:
-                    qn = f'q[{qi:<3}]'
+                    qn = qubits_expression + f'[{qi:<3}]'
                 gates_initial[i] = qn
             elif i in [2 * self.nqubits]:
                 if len(str(self.ncbits)) == 1:
