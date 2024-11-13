@@ -80,7 +80,8 @@ def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
                                      support_waveform_object=support_waveform_object)
         except Exception as e:
             # KeyError: 'calibration'
-            logger.error(f'Failed to sample waveform: {e}')
+            logger.error(f"Failed to sample waveform: {e}(@{kwds['target']})")
+            raise e
             if func.start is None:
                 func.start = 0
             if func.stop is None:

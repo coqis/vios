@@ -92,28 +92,28 @@ def submit(task: dict, block: bool = False, preview: list = [], **kwds):
     Example: description of a task
         ``` {.py3 linenums="1"}
         {
-            'metainfo': {'name': f'{filename}: /s21',  # s21 is the name of the dataset
-                                # extra arguments for compiler and others
-                                'other': {'shots': 1234, 'signal': 'iq', 'autorun': False}},
-            'taskinfo': {'STEP': {'main': ['WRITE', ('freq', 'offset', 'power')],  # main is reserved
-                                  'step2': ['WRITE', 'trig'],
-                                  'step3': ['WAIT', 0.8101],  # wait for some time in the unit of second
-                                  'READ': ['READ', 'read'],
-                                  'step5': ['WAIT', 0.202]},
-                         'INIT': [('Trigger.CHAB.TRIG', 0, 'any')],  # initialization of the task
-                         'POST': [('Trigger.CHAB.TRIG', 0, 'any')],  # reset of the task
-                         'CIRQ': ['cc'],  # list of circuits in the type of qlisp
-                         'RULE': ['<gate.Measure.Q1.params.frequency> = <Q0.setting.LO>+<Q2.setting.LO> +1250'],
-                         'LOOP': {'freq': [('Q0.setting.LO', np.linspace(0, 10, 2), 'Hz'),
-                                            ('gate.Measure.Q1.index',  np.linspace(0, 1, 2), 'Hz')],
-                                   'offset': [('M0.setting.TRIGD', np.linspace(0, 10, 1), 'Hz'),
-                                              ('Q2.setting.LO', np.linspace(0, 10, 1), 'Hz')],
-                                   'power': [('Q3.setting.LO', np.linspace(0, 10, 15), 'Hz'),
-                                             ('Q4.setting.POW', np.linspace(0, 10, 15), 'Hz')],
-                                   'trig': [('Trigger.CHAB.TRIG', 0, 'any')],
-                                   'read': ['NA10.CH1.TraceIQ', 'M0.setting.POW']
-                                }
-                        },
+            'meta': {'name': f'{filename}: /s21',  # s21 is the name of the dataset
+                     # extra arguments for compiler and others
+                     'other': {'shots': 1234, 'signal': 'iq', 'autorun': False}},
+            'body': {'step': {'main': ['WRITE', ('freq', 'offset', 'power')],  # main is reserved
+                              'step2': ['WRITE', 'trig'],
+                              'step3': ['WAIT', 0.8101],  # wait for some time in the unit of second
+                              'READ': ['READ', 'read'],
+                              'step5': ['WAIT', 0.202]},
+                     'init': [('Trigger.CHAB.TRIG', 0, 'any')],  # initialization of the task
+                     'post': [('Trigger.CHAB.TRIG', 0, 'any')],  # reset of the task
+                     'cirq': ['cc'],  # list of circuits in the type of qlisp
+                     'rule': ['<gate.Measure.Q1.params.frequency> = <Q0.setting.LO>+<Q2.setting.LO> +1250'],
+                     'loop': {'freq': [('Q0.setting.LO', np.linspace(0, 10, 2), 'Hz'),
+                                       ('gate.Measure.Q1.index',  np.linspace(0, 1, 2), 'Hz')],
+                              'offset': [('M0.setting.TRIGD', np.linspace(0, 10, 1), 'Hz'),
+                                         ('Q2.setting.LO', np.linspace(0, 10, 1), 'Hz')],
+                              'power': [('Q3.setting.LO', np.linspace(0, 10, 15), 'Hz'),
+                                        ('Q4.setting.POW', np.linspace(0, 10, 15), 'Hz')],
+                              'trig': [('Trigger.CHAB.TRIG', 0, 'any')],
+                              'read': ['NA10.CH1.TraceIQ', 'M0.setting.POW']
+                            }
+                    },
         }
         ```
 
@@ -129,9 +129,9 @@ def submit(task: dict, block: bool = False, preview: list = [], **kwds):
         trig = [(t, 0, 'au') for t in ss.query('station.triggercmds')]
 
     if preview:
-        ss.update('etc.preview.filter', preview)  # waveforms to be previewed
+        ss.update('etc.canvas.filter', preview)  # waveforms to be previewed
 
-    task['taskinfo']['LOOP']['trig'] = trig
+    task['body']['loop']['trig'] = trig
     t = Task(task)
     t.server = ss
     t.plot = plot if kwds.get('plot', False) else False
@@ -174,7 +174,7 @@ def get_data_by_tid(tid: int, signal: str, shape: tuple | list = [], **kwds) -> 
     info, data = get_dataset_by_tid(tid, signal, shape)
 
     if kwds.get('plot', False) and signal:
-        task = Task({'metainfo': info['meta']})
+        task = Task({'meta': info['meta']})
         task.meta = info['meta']
         task.data = {signal: data[signal]}
         task.index = len(data[signal]) + 1

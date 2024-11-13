@@ -223,7 +223,7 @@ class Task(object):
         self.plot = plot
 
         self.data: dict[str, np.ndarray] = {}  # retrieve data from server
-        self.meta = {}  # metainfo like axis
+        self.meta = {}  # meta info like axis
         self.index = 0  # index of data already retrieved
         self.last = 0  # last index of retrieved data
 
@@ -231,7 +231,7 @@ class Task(object):
 
     @cached_property
     def name(self):
-        return self.task['metainfo'].get('name', 'Unknown')
+        return self.task['meta'].get('name', 'Unknown')
 
     @cached_property
     def ctx(self):
@@ -242,7 +242,7 @@ class Task(object):
         """
         self.stime = time.time()  # start time
         try:
-            circuit = self.task['taskinfo']['CIRQ']
+            circuit = self.task['body']['cirq']
             if isinstance(circuit, list) and callable(circuit[0]):
                 circuit[0] = inspect.getsource(circuit[0])
         except Exception as e:
@@ -308,7 +308,7 @@ class Task(object):
         Returns:
             dict: _description_
         """
-        review = ['circ', 'ini', 'raw', 'ctx', 'byp']
+        review = ['cirq', 'ini', 'raw', 'ctx', 'byp']
         track = ['debug', 'trace']
         if stage in review:
             r = self.server.review(self.tid, index)
@@ -439,18 +439,18 @@ class QuarkProxy(object):
         except Exception as e:
             bias = []
             logger.error(f'Failed to get bias of coupler, {e}!')
-        circuit = [bias+c for c in task['taskinfo']['CIRQ']]
-        task['taskinfo']['CIRQ'] = circuit
+        circuit = [bias+c for c in task['body']['cirq']]
+        task['body']['cirq'] = circuit
 
         qlisp = ',\n'.join([str(op) for op in circuit[0]])
-        qasm = task['metainfo']['coqis']['qasm']
+        qasm = task['meta']['coqis']['qasm']
         logger.info(f"\n{'>'*36}qasm:\n{qasm}\n{'>'*36}qlisp:\n[{qlisp}]")
 
         t: Task = submit(task, block=block)  # local machine
         if block:
             t.bar(0.2, disable=False)  # if block is True
-        eid = task['metainfo']['coqis']['eid']
-        user = task['metainfo']['coqis']['user']
+        eid = task['meta']['coqis']['eid']
+        user = task['meta']['coqis']['user']
         logger.warning(f'task {t.tid}[{eid}, {user}] will be executed!')
 
         return t.tid

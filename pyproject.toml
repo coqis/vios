@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vios"
-version = "2.6.3"
+version = "2.6.4"
 authors = [
   { name="YL Feng", email="fengyl@baqis.ac.cn" },
 ]
@@ -20,8 +20,7 @@ dependencies = [
     "loguru",
     "gitpython",
     "waveforms",
-    "pyvisa",
-    "pyserial"
+    "pyvisa"
 ]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
@@ -41,6 +40,6 @@ classifiers = [
 "homepage" = "https://quarkstudio.readthedocs.io/en/latest"
 
 [tool.setuptools]
-packages = ["quark.app", "quark.driver", "quark.driver.common", "quark.envelope"]
+packages = ["quark.app", "quark.driver", "quark.envelope"]
 py-modules = ["quark.proxy"]
 
