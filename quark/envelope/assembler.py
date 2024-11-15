@@ -21,18 +21,14 @@
 
 
 import os
-import time
 from typing import Any
 
-import numpy as np
 from loguru import logger
 
+from quark.interface import Context, Pulse, Workflow
 from quark.proxy import dumpv
 
-from .systemq import (CompilerContext, Waveform, WaveVStack, _form_signal,
-                      get_all_channels, qcompile, square, stdlib, wave_eval)
-
-cfg = CompilerContext({})  # cfg (CompilerContext): 线路编绎所需配置
+cfg = Context({})
 
 
 def initialize(snapshot, **kwds):
@@ -45,7 +41,7 @@ def initialize(snapshot, **kwds):
         snapshot (_type_): frozen snapshot for current task
 
     Returns:
-        cfg (CompilerContext): CompilerContext to be used in compilation
+        cfg (Context): Context to be used in compilation
 
     """
     if isinstance(snapshot, int):
@@ -122,56 +118,8 @@ def ccompile(sid: int, instruction: dict, circuit: list, **kwds) -> tuple:
         ```
 
     """
-    # kwds['signal'] = _form_signal(kwds.get('signal'))
-    # kwds['lib'] = kwds.get('lib', stdlib)
 
-    ctx = kwds.pop('ctx', cfg)
-    ctx._getGateConfig.cache_clear()
-    ctx.snapshot().cache = kwds.pop('cache', {})
-
-    # align_right = kwds.pop('align_right', True)
-    # waveform_length = kwds.pop('waveform_length', 98e-6)
-    if kwds.get('fillzero', False):  # whether to initialize all channels to zero()
-        compiled = {'main': [('WRITE', target, 'zero()', '')
-                             for target in get_all_channels(ctx)]}
-    else:
-        compiled = {}
-
-    # code = _compile(circuit, cfg=ctx, **kwds)
-
-    # if align_right:
-    #     delay = waveform_length - code.end
-
-    #     code.waveforms = {k: v >> delay for k, v in code.waveforms.items()}
-    #     code.measures = {
-    #         k:
-    #         Capture(v.qubit, v.cbit, v.time + delay, v.signal,
-    #                 v.params, v.hardware, v.shift + delay)
-    #         for k, v in code.measures.items()
-    #     }
-
-    # cmds, datamap = assembly_code(code)
-    code, (cmds, datamap) = qcompile(circuit,
-                                     lib=kwds.get('lib', stdlib),
-                                     cfg=kwds.get('cfg', ctx),
-                                     signal=_form_signal(kwds.get('signal')),
-                                     shots=kwds.get('shots', 1024),
-                                     context=kwds.get('context', {}),
-                                     arch=kwds.get('arch', 'baqis'),
-                                     align_right=kwds.get('align_right', True),
-                                     waveform_length=kwds.get('waveform_length', 98e-6))
-
-    for cmd in cmds:
-        ctype = type(cmd).__name__  # WRITE,TRIG,READ
-        if ctype == 'WRITE':
-            step = 'main'
-        else:
-            step = ctype
-        op = (ctype, cmd.address, cmd.value, 'au')
-        if step in compiled:
-            compiled[step].append(op)
-        else:
-            compiled[step] = [op]
+    compiled, datamap = Workflow.qcompile(circuit, **(kwds | {'ctx': cfg}))
 
     # merge loop body with compiled result
     for step, _cmds in compiled.items():
@@ -248,9 +196,9 @@ def assemble(sid: int, instruction: dict[str, list[str, str, Any, str]], **kw):
             try:
                 if _target in scmd and 'waveform' in target.lower():
                     if isinstance(scmd[_target][1], str):
-                        scmd[_target][1] = wave_eval(scmd[_target][1])
+                        scmd[_target][1] = Pulse.fromstr(scmd[_target][1])
                     if isinstance(cmd[1], str):
-                        cmd[1] = wave_eval(cmd[1])
+                        cmd[1] = Pulse.fromstr(cmd[1])
                     scmd[_target][1] += cmd[1]
                 else:
                     scmd[_target] = cmd
@@ -322,21 +270,6 @@ def decode(target: str, context: dict, mapping: dict = MAPPING) -> str:
     return channel
 
 
-WINDOW = square(500e-3) >> 150e-3
-
-
-def equal(a, b):
-    if isinstance(a, WaveVStack) or isinstance(b, WaveVStack):
-        return False
-    if isinstance(a, Waveform) and isinstance(b, Waveform):
-        return (a*WINDOW) == (b*WINDOW)
-    try:
-        return a == b
-    except Exception as e:
-        # logger.warning(f'Failed to compare {e}')
-        return False
-
-
 def preprocess(sid: int, instruction: dict[str, dict[str, list[str, Any, str, dict]]]):
     """filters and paramters 
 
@@ -371,7 +304,7 @@ def preprocess(sid: int, instruction: dict[str, dict[str, list[str, Any, str, di
             try:
                 kwds = cmd[-1]
                 # 重复指令缓存比较, 如果与上一步相同, 则跳过执行
-                if target in bypass and target.endswith(SUFFIX) and equal(bypass[target][0], cmd[1]):
+                if target in bypass and target.endswith(SUFFIX) and Pulse.compare(bypass[target][0], cmd[1]):
                     continue
                 bypass[target] = (cmd[1], kwds['target'])
 

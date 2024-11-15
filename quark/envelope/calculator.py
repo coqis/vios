@@ -23,9 +23,7 @@
 import numpy as np
 from loguru import logger
 
-from quark.proxy import loadv
-
-from .systemq import Waveform, sample_waveform, wave_eval
+from quark.interface import Pulse, Workflow
 
 
 def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
@@ -53,48 +51,9 @@ def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
     if ctype != 'WRITE':
         return (step, target, cmd), line
 
-    if isinstance(value, str):
-        try:
-            func = wave_eval(value)
-        except SyntaxError as e:
-            func = value
-    else:
-        func = value
+    sampled = target.startswith(tuple(kwds.get('filter', ['zzzzz'])))
 
-    delay = 0
-
-    # sm, _value = loadv(func) # _value[:] = _value*10
-
-    if isinstance(func, Waveform):
-        if target.startswith(tuple(kwds.get('filter', ['zzzzz']))):
-            support_waveform_object = True
-        else:
-            support_waveform_object = False
-
-        try:
-            ch = kwds['target'].split('.')[-1]
-            delay = kwds['calibration'][ch].get('delay', 0)
-            cmd[1] = sample_waveform(func, kwds['calibration'][ch],
-                                     sample_rate=kwds['srate'],
-                                     start=kwds.get('start', 0), stop=kwds.get('LEN', 98e-6),
-                                     support_waveform_object=support_waveform_object)
-        except Exception as e:
-            # KeyError: 'calibration'
-            logger.error(f"Failed to sample waveform: {e}(@{kwds['target']})")
-            raise e
-            if func.start is None:
-                func.start = 0
-            if func.stop is None:
-                func.stop = 60e-6
-            if func.sample_rate is None:
-                func.sample_rate = kwds['srate']
-
-            if support_waveform_object:
-                cmd[1] = func
-            else:
-                cmd[1] = func.sample()
-    else:
-        cmd[1] = func
+    cmd[1], delay = Workflow.calculate(value, **(kwds | {'sampled': sampled}))
 
     cmd[-1] = {'sid': kwds['sid'], 'target': kwds['target'], 'srate': kwds['srate'],
                'track': kwds['track'], 'shared': kwds['shared']}
@@ -132,9 +91,9 @@ def plot(target: str, cmd: dict, canvas: dict = {}, delay: float = 0.0) -> dict:
         t1, t2 = canvas['range']
         xr = slice(int(t1*srate), int(t2*srate))
 
-        val = cmd[1]
-        if isinstance(val, Waveform):
-            val = val.sample()
+        val = Pulse.sample(cmd[1])
+        # if isinstance(val, Waveform):
+        #     val = val.sample()
 
         xt = (np.arange(len(val))/srate)[xr] - delay
         yt = val[xr]

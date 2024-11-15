@@ -23,9 +23,7 @@
 import numpy as np
 from loguru import logger
 
-from .systemq import baqisArchitecture, get_arch, register_arch
-
-register_arch(baqisArchitecture)
+from quark.interface import Workflow
 
 
 def demodulate(raw_data, **kwds):
@@ -85,7 +83,7 @@ def process(raw_data, **kwds):
                     result['data'] = raw_data['READ']['NA'].pop('CH1.S')
             result['extra'] = raw_data
         else:
-            result = get_arch(dataMap['arch']).assembly_data(raw_data, dataMap)
+            result = Workflow.analyze(raw_data, dataMap)
 
             for k, v in result.items():
                 if isinstance(v, dict):  # k: count or remote_count
