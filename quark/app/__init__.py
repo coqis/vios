@@ -345,7 +345,7 @@ def plot(task: Task, append: bool = False):
 
 
 def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
-            start: float = 0, stop: float = 100e-6, srate: float = 5e9,
+            start: float = 0, stop: float = 100e-6, srate: float = 0,
             unit: float = 1e-6, offset: float = 0, space: float = 0):
     import matplotlib.pyplot as plt
     from waveforms import Waveform
@@ -358,7 +358,8 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
         if isinstance(value[1], Waveform):
             _target = value[-1]['target']  # .split('.')[0]
             if _target.startswith(tuple(keys)):
-                value[-1]['srate'] = srate
+                if srate:
+                    value[-1]['srate'] = srate
                 value[-1]['start'] = start
                 value[-1]['LEN'] = stop
                 value[-1]['filter'] = []
