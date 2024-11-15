@@ -360,6 +360,8 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
             if _target.startswith(tuple(keys)):
                 if srate:
                     value[-1]['srate'] = srate
+                else:
+                    srate = value[-1]['srate']
                 value[-1]['start'] = start
                 value[-1]['LEN'] = stop
                 value[-1]['filter'] = []
