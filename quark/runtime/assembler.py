@@ -53,7 +53,7 @@ def initialize(snapshot, **kwds):
     return cfg
 
 
-def ccompile(sid: int, instruction: dict, circuit: list, **kwds) -> tuple:
+def ccompile(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], circuit: list, **kwds) -> tuple:
     """compile circuits to commands(saved in **instruction**)
 
     Args:
@@ -127,17 +127,20 @@ def ccompile(sid: int, instruction: dict, circuit: list, **kwds) -> tuple:
             instruction[step].extend(_cmds)
         else:
             instruction[step] = _cmds
+
     assemble(sid, instruction,
              prep=kwds.get('prep', False),
              hold=kwds.get('hold', False))
+
     if sid == 0:
         kwds['restore'] = cfg.initial
         kwds['clear'] = True
     logger.info(f'Step {sid} compiled >>>>>>>>>>>>>')
+
     return instruction, {'dataMap': datamap} | kwds
 
 
-def assemble(sid: int, instruction: dict[str, list[str, str, Any, str]], **kw):
+def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], **kw):
     """assemble compiled instruction(see cccompile) to corresponding devices
 
     Args:
