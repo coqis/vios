@@ -128,8 +128,8 @@ def submit(task: dict, block: bool = False, preview: list = [], **kwds):
         ss = login(verbose=False)
         trig = [(t, 0, 'au') for t in ss.query('station.triggercmds')]
 
-    if preview:
-        ss.update('etc.canvas.filter', preview)  # waveforms to be previewed
+    # if preview:
+    ss.update('etc.canvas.filter', preview)  # waveforms to be previewed
 
     task['body']['loop']['trig'] = trig
     t = Task(task)
