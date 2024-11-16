@@ -59,7 +59,7 @@ def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
                'track': kwds['track'], 'shared': kwds['shared']}
 
     try:
-        line = plot(target, cmd, canvas, delay)
+        line = sample(target, cmd, canvas, delay)
     except Exception as e:
         logger.error(
             f"{'>'*30}'  failed to calculate waveform', {e}, {type(e).__name__}")
@@ -67,7 +67,7 @@ def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
     return (step, target, cmd), line
 
 
-def plot(target: str, cmd: dict, canvas: dict = {}, delay: float = 0.0) -> dict:
+def sample(target: str, cmd: dict, canvas: dict = {}, delay: float = 0.0) -> dict:
     """sample waveforms needed to be shown in the `QuarkCanvas`
 
     Args:
@@ -92,22 +92,11 @@ def plot(target: str, cmd: dict, canvas: dict = {}, delay: float = 0.0) -> dict:
         xr = slice(int(t1*srate), int(t2*srate))
 
         val = Pulse.sample(cmd[1])
-        # if isinstance(val, Waveform):
-        #     val = val.sample()
 
         xt = (np.arange(len(val))/srate)[xr] - delay
         yt = val[xr]
 
-        try:
-            nz = np.argwhere(np.abs(np.diff(yt)) > 1e-6).squeeze()
-            nz = np.hstack((0, nz-1, nz, nz+1, len(yt)-1))
-            # nz.sort(kind='mergesort')
-            nz = np.unique(nz[nz >= 0])
-            xx, yy = xt[nz], yt[nz]
-        except Exception as e:
-            xx, yy = xt, yt
-
-        line = {'xdata': xx, 'ydata': yy, 'suptitle': cmd[-1]["sid"]}
+        line = {'xdata': xt, 'ydata': yt, 'suptitle': cmd[-1]["sid"]}
         color = canvas.get('color', None)
         if color and isinstance(color, (list, tuple)):
             line['color'] = tuple(color)

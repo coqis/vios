@@ -87,7 +87,7 @@ def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, tid: 
         tuple: context that contains cfg, translated result
     """
     from .app import get_config_by_tid
-    from .envelope import ccompile, initialize
+    from .runtime import ccompile, initialize
     ctx = initialize(cfg) if cfg else initialize(get_config_by_tid(tid))
     return ctx, ccompile(0, {}, circuit, signal='iq', prep=True)
 

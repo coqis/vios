@@ -350,7 +350,7 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
     import matplotlib.pyplot as plt
     from waveforms import Waveform
 
-    from quark.envelope import calculate
+    from quark.runtime import calculate
 
     plt.figure()
     wf, index = {}, 0

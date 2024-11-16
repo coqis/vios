@@ -74,45 +74,45 @@ def ccompile(sid: int, instruction: dict, circuit: list, **kwds) -> tuple:
 
         print(instruction) # before assemble
         {'main': [('WRITE', 'Q0503.waveform.DDS', <waveforms.waveform.Waveform at 0x291381b6c80>, ''),
-                ('WRITE', 'M5.waveform.DDS', <waveforms.waveform.Waveform at 0x291381b7f40>, ''),
-                ('WRITE', 'ADx86_159.CH5.Shot', 1024, ''),
-                ('WRITE', 'ADx86_159.CH5.Coefficient', {'start': 2.4000000000000003e-08,
-                                                        'stop': 4.0299999999999995e-06,
-                                                        'wList': [{'Delta': 6932860000.0,
-                                                                    'phase': 0,
-                                                                    'weight': 'const(1)',
-                                                                    'window': (0, 1024),
-                                                                    'w': None,
-                                                                    't0': 3e-08,
-                                                                    'phi': -0.7873217091999384,
-                                                                    'threshold': 2334194991.172387}]}, ''),
-                ('WRITE', 'ADx86_159.CH5.TriggerDelay', 7e-07, ''),
-                ('WRITE', 'ADx86_159.CH5.CaptureMode', 'alg', ''),
-                ('WRITE', 'ADx86_159.CH5.StartCapture', 54328, '')],
-        'READ': [('READ', 'ADx86_159.CH5.IQ', 'READ', '')]
+                  ('WRITE', 'M5.waveform.DDS', <waveforms.waveform.Waveform at 0x291381b7f40>, ''),
+                  ('WRITE', 'ADx86_159.CH5.Shot', 1024, ''),
+                  ('WRITE', 'ADx86_159.CH5.Coefficient', {'start': 2.4000000000000003e-08,
+                                                          'stop': 4.0299999999999995e-06,
+                                                          'wList': [{'Delta': 6932860000.0,
+                                                                     'phase': 0,
+                                                                     'weight': 'const(1)',
+                                                                     'window': (0, 1024),
+                                                                     'w': None,
+                                                                     't0': 3e-08,
+                                                                     'phi': -0.7873217091999384,
+                                                                     'threshold': 2334194991.172387}]}, ''),
+                  ('WRITE', 'ADx86_159.CH5.TriggerDelay', 7e-07, ''),
+                  ('WRITE', 'ADx86_159.CH5.CaptureMode', 'alg', ''),
+                  ('WRITE', 'ADx86_159.CH5.StartCapture', 54328, '')],
+         'READ': [('READ', 'ADx86_159.CH5.IQ', 'READ', '')]
         }
 
         print(datamap)
         {'dataMap': {'cbits': {0: ('READ.ADx86_159.CH5', 
-                                    0, 
-                                    6932860000.0, 
-                                    {'duration': 4e-06,
-                                     'amp': 0.083,
-                                     'frequency': 6932860000.0,
-                                     'phase': [[-1, 1], [-1, 1]],
-                                     'weight': 'const(1)',
-                                     'phi': -0.7873217091999384,
-                                     'threshold': 2334194991.172387,
-                                     'ring_up_amp': 0.083,
-                                     'ring_up_waist': 0.083,
-                                     'ring_up_time': 5e-07,
-                                     'w': None},
-                                    3e-08,
-                                    2.4000000000000003e-08,
-                                    4.0299999999999995e-06)
+                                   0, 
+                                   6932860000.0, 
+                                   {'duration': 4e-06,
+                                    'amp': 0.083,
+                                    'frequency': 6932860000.0,
+                                    'phase': [[-1, 1], [-1, 1]],
+                                    'weight': 'const(1)',
+                                    'phi': -0.7873217091999384,
+                                    'threshold': 2334194991.172387,
+                                    'ring_up_amp': 0.083,
+                                    'ring_up_waist': 0.083,
+                                    'ring_up_time': 5e-07,
+                                    'w': None},
+                                   3e-08,
+                                   2.4000000000000003e-08,
+                                   4.0299999999999995e-06)
                                 },
-                    'signal': 2,
-                    'arch': 'baqis'
+                     'signal': 2,
+                     'arch': 'baqis'
                     }
         }
         ```
@@ -212,7 +212,7 @@ def assemble(sid: int, instruction: dict[str, list[str, str, Any, str]], **kw):
         return preprocess(sid, instruction)
 
 
-# mapping logical attribute to hardware attribute
+# mapping logical channel to hardware channel
 MAPPING = {
     "setting_LO": "LO.Frequency",
     "setting_POW": "LO.Power",
@@ -229,7 +229,7 @@ MAPPING = {
 }
 
 
-# commands filters
+# command filters
 SUFFIX = ('Waveform', 'Shot', 'Coefficient', 'TriggerDelay')
 
 

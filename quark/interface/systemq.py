@@ -165,20 +165,6 @@ class Workflow(object):
         else:
             compiled = {}
 
-        # code = _compile(circuit, cfg=ctx, **kwds)
-
-        # if align_right:
-        #     delay = waveform_length - code.end
-
-        #     code.waveforms = {k: v >> delay for k, v in code.waveforms.items()}
-        #     code.measures = {
-        #         k:
-        #         Capture(v.qubit, v.cbit, v.time + delay, v.signal,
-        #                 v.params, v.hardware, v.shift + delay)
-        #         for k, v in code.measures.items()
-        #     }
-
-        # cmds, datamap = assembly_code(code)
         code, (cmds, datamap) = qcompile(circuit,
                                          lib=kwds.get('lib', stdlib),
                                          cfg=kwds.get('cfg', ctx),
