@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vios"
-version = "2.6.4"
+version = "2.6.5"
 authors = [
   { name="YL Feng", email="fengyl@baqis.ac.cn" },
 ]
@@ -40,6 +40,6 @@ classifiers = [
 "homepage" = "https://quarkstudio.readthedocs.io/en/latest"
 
 [tool.setuptools]
-packages = ["quark.app", "quark.driver", "quark.envelope"]
+packages = ["quark.app", "quark.driver", "quark.interface", "quark.runtime"]
 py-modules = ["quark.proxy"]
 

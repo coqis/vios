@@ -87,6 +87,13 @@ def get_record_by_tid(tid: int, table: str = 'task'):
         logger.error(f'Record not found: {e}!')
 
 
+def get_record_by_rid(rid: int, table: str = 'task'):
+    try:
+        return sql.execute(f'select * from {table} where id="{rid}"').fetchall()[0]
+    except Exception as e:
+        logger.error(f'Record not found: {e}!')
+
+
 def get_record_list_by_name(task: str, start: str, stop: str, table: str = 'task'):
     try:
         return sql.execute(f'select * from {table} where name like "%{task}%" and created between "{start}" and "{stop}" limit 100').fetchall()
