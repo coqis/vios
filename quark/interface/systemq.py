@@ -165,17 +165,15 @@ class Workflow(object):
         else:
             compiled = {}
 
-        code, (cmds, datamap) = qcompile(circuit,
-                                         lib=kwds.get('lib', stdlib),
-                                         cfg=kwds.get('cfg', ctx),
-                                         signal=_form_signal(
-                                             kwds.get('signal')),
-                                         shots=kwds.get('shots', 1024),
-                                         context=kwds.get('context', {}),
-                                         arch=kwds.get('arch', 'baqis'),
-                                         align_right=kwds.get(
-                                             'align_right', True),
-                                         waveform_length=kwds.get('waveform_length', 98e-6))
+        _, (cmds, dmap) = qcompile(circuit,
+                                   lib=kwds.get('lib', stdlib),
+                                   cfg=kwds.get('cfg', ctx),
+                                   signal=_form_signal(kwds.get('signal')),
+                                   shots=kwds.get('shots', 1024),
+                                   context=kwds.get('context', {}),
+                                   arch=kwds.get('arch', 'baqis'),
+                                   align_right=kwds.get('align_right', True),
+                                   waveform_length=kwds.get('waveform_length', 98e-6))
 
         for cmd in cmds:
             ctype = type(cmd).__name__  # WRITE,TRIG,READ
@@ -188,7 +186,7 @@ class Workflow(object):
                 compiled[step].append(op)
             else:
                 compiled[step] = [op]
-        return compiled, datamap
+        return compiled, dmap
 
     @classmethod
     def calculate(cls, value, **kwds):

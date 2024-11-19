@@ -75,23 +75,6 @@ def setlog(prefix: str = ''):
     logger.configure(**config)
 
 
-def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, tid: int = 0) -> tuple:
-    """translate circuit to executable commands(i.e., waveforms or settings)
-
-    Args:
-        circuit (list, optional): qlisp circuit. Defaults to [(('Measure', 0), 'Q1001')].
-        cfg (dict, optional): parameters of qubits in the circuit. Defaults to {}.
-        tid (int, optional): task id used to load cfg. Defaults to 0.
-
-    Returns:
-        tuple: context that contains cfg, translated result
-    """
-    from .app import get_config_by_tid
-    from .runtime import ccompile, initialize
-    ctx = initialize(cfg) if cfg else initialize(get_config_by_tid(tid))
-    return ctx, ccompile(0, {}, circuit, signal='iq', prep=True)
-
-
 TABLE = string.digits+string.ascii_uppercase
 
 

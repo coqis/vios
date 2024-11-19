@@ -27,8 +27,6 @@ Abstract: about app
 
 import time
 from collections import defaultdict
-from ipaddress import ip_address
-from pathlib import Path
 from threading import current_thread
 
 import numpy as np
@@ -37,8 +35,8 @@ from loguru import logger
 from quark import connect
 from quark.proxy import Task, startup
 
-from ._data import (get_config_by_tid, get_dataset_by_tid, get_record_by_tid,
-                    get_record_list_by_name, sql)
+from ._data import (get_config_by_tid, get_dataset_by_tid, get_record_by_rid,
+                    get_record_by_tid, get_record_list_by_name, sql)
 
 srv = startup.get('quarkserver', {})
 host, port = srv.get('host', '127.0.0.1'), srv.get('port', 2088)
@@ -342,6 +340,22 @@ def plot(task: Task, append: bool = False):
             _vs.append(data)  # append new data to the canvas
     except Exception as e:
         logger.error(f'Failed to update viewer: {e}')
+
+
+def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, tid: int = 0, **kwds) -> tuple:
+    """translate circuit to executable commands(i.e., waveforms or settings)
+
+    Args:
+        circuit (list, optional): qlisp circuit. Defaults to [(('Measure', 0), 'Q1001')].
+        cfg (dict, optional): parameters of qubits in the circuit. Defaults to {}.
+        tid (int, optional): task id used to load cfg. Defaults to 0.
+
+    Returns:
+        tuple: context that contains cfg, translated result
+    """
+    from quark.runtime import ccompile, initialize
+    ctx = initialize(cfg if cfg else get_config_by_tid(tid))
+    return ctx, ccompile(0, {}, circuit, signal='iq', prep=True, **kwds)
 
 
 def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
