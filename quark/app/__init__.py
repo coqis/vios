@@ -33,14 +33,12 @@ import numpy as np
 from loguru import logger
 
 from quark import connect
-from quark.proxy import Task, startup
+from quark.proxy import Task
 
-from ._data import (get_config_by_tid, get_dataset_by_tid, get_record_by_rid,
-                    get_record_by_tid, get_record_list_by_name, sql)
+from ._data import (get_config_by_tid, get_dataset_by_tid,
+                    get_record_by_rid, get_record_by_tid, sql)
 
-srv = startup.get('quarkserver', {})
-host, port = srv.get('host', '127.0.0.1'), srv.get('port', 2088)
-sp = defaultdict(lambda: connect('QuarkServer', host, port))
+sp = {}  # defaultdict(lambda: connect('QuarkServer', host, port))
 _vs = connect('QuarkViewer', port=2086)
 
 
@@ -51,11 +49,12 @@ def signup(user: str, system: str, **kwds):
         user (str): name of the user
         system (str): name of the system(i.e. the name of the cfg file)
     """
-    s = sp[current_thread().name]
+    s = login()
     logger.info(s.adduser(user, system, **kwds))
+    s.login(user)  # relogin
 
 
-def login(user: str = 'baqis', verbose: bool = True):
+def login(user: str = 'baqis', host: str = '127.0.0.1', verbose: bool = True):
     """login to the server as **user**
 
     Args:
@@ -65,11 +64,14 @@ def login(user: str = 'baqis', verbose: bool = True):
     Returns:
         _type_: a connection to the server
     """
-    s = sp[current_thread().name]
-    m = s.login(srv.get('user', user))
-    if verbose:
-        logger.info(m)
-    return s
+    try:
+        return sp[current_thread().name]
+    except KeyError as e:
+        s = sp[current_thread().name] = connect('QuarkServer', host, 2088)
+        m = s.login(user)
+        if verbose:
+            logger.info(m)
+        return s
 
 
 def submit(task: dict, block: bool = False, preview: list = [], **kwds):
