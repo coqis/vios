@@ -50,6 +50,7 @@ class Layout:
         self.nqubits = nqubits
         self.graph = chip_backend.graph
         self.size = chip_backend.size
+        self.priority_qubits = chip_backend.priority_qubits
         self.ncore = os.cpu_count() // 2 
         self.fidelity_mean_threshold = 0.9
 
@@ -151,7 +152,7 @@ class Layout:
         """
         subgraph = self.graph.subgraph(nodes)
         subgraph_degree = dict(subgraph.degree())
-        subgraph_fidelity = np.array([data['weight'] for _, _, data in subgraph.edges(data=True)])
+        subgraph_fidelity = np.array([data['fidelity'] for _, _, data in subgraph.edges(data=True)])
         fidelity_mean = np.mean(subgraph_fidelity)
         fidelity_var  = np.var(subgraph_fidelity)  
         if fidelity_mean >= self.fidelity_mean_threshold:
@@ -256,7 +257,7 @@ class Layout:
                                   str(nonlinear[0]),self.nqubits*5,nonlinear[1],nonlinear[2])\
                                   )
                     
-        return linear1_subgraph_list_sort[:5],linear2_subgraph_list_sort[:5],cycle_subgraph_list_sort[:5],nonlinear_subgraph_list_sort[:5]
+        return linear1_subgraph_list_sort[:1],linear2_subgraph_list_sort[:1],cycle_subgraph_list_sort[:1],nonlinear_subgraph_list_sort[:1]
     
     def sort_subgraph_according_var_fidelity(self,printdetails: bool = True):
         """
@@ -308,9 +309,9 @@ class Layout:
                                   str(nonlinear[0]),self.nqubits*5,nonlinear[1],nonlinear[2])\
                                   )
 
-        return linear1_subgraph_list_sort[:5],linear2_subgraph_list_sort[:5],cycle_subgraph_list_sort[:5],nonlinear_subgraph_list_sort[:5]
+        return linear1_subgraph_list_sort[:1],linear2_subgraph_list_sort[:1],cycle_subgraph_list_sort[:1],nonlinear_subgraph_list_sort[:1]
 
-    def select_layout(self,
+    def select_layout_from_backend(self,
                       key: Literal['fidelity_mean', 'fidelity_var'] = 'fidelity_var',
                       topology: Literal['cycle', 'linear1', 'linear', 'nonlinear'] = 'linear1',
                       printdetails: bool = False):
@@ -337,13 +338,68 @@ class Layout:
         elif key == 'fidelity_var':
             linear1_list,linear2_list,cycle_list,nonlinear_list = self.sort_subgraph_according_var_fidelity(printdetails=printdetails)
         
-        if topology == 'cycle':
-            subgraph_nodes = cycle_list[0][0]
-        elif topology == 'linear1':
-            subgraph_nodes = linear1_list[0][0]
+        if topology == 'linear1':
+            if len(linear1_list) == 0:
+                print(f'There is no {self.nqubits} qubits that meets both key = {key} and topology = {topology}. Please change the conditions.')
+                exit(1)
+            else:
+                return linear1_list[0][0]
         elif topology == 'linear2':
-            subgraph_nodes = linear2_list[0][0]
+            if len(linear2_list) == 0:
+                print(f'There is no {self.nqubits} qubits that meets both key = {key} and topology = {topology}. Please change the conditions.')
+                exit(1)
+            else:
+                return linear2_list[0][0]
+        elif topology == 'cycle':
+            if len(cycle_list) == 0:
+                print(f'There is no {self.nqubits} qubits that meets both key = {key} and topology = {topology}. Please change the conditions.')
+                exit(1)
+            else:
+                return cycle_list[0][0]
         elif topology == 'nonlinear':
-            subgraph_nodes = nonlinear_list[0][0]
-
-        return subgraph_nodes
+            if len(nonlinear_list) == 0:
+                print(f'There is no {self.nqubits} qubits that meets both key = {key} and topology = {topology}. Please change the conditions.')
+                exit(1)
+            else:
+                return nonlinear_list[0][0]
+    
+    def selected_layout(self, use_priority: bool = True, initial_mapping: list | dict = {'key':'fidelity_var','topology':'linear1'},
+                        coupling_map: list[tuple] | None = None):
+        if use_priority:
+            priority_qubits_list = self.priority_qubits
+            for qubits in priority_qubits_list:
+                if len(qubits) == self.nqubits:
+                    initial_mapping = list(qubits)
+                    subgraph = self.graph.subgraph(initial_mapping)
+                    coupling_map = list(subgraph.edges)
+                    print(f'Layout qubits {list(initial_mapping)} are derived from the chip backend priority qubits, \nwith the corresponding coupling being {coupling_map}.')
+                    break
+            else:
+                print(f'No priority qubits with {self.nqubits} qubits found. Please provide a list of qubits as the initial_mapping, \nor set initial_mapping = {{\'key\': \'fidelity_var\' or \'fidelity_mean\', \'topology\': \'linear1\' or \'linear2\' or \'cycle\' or \'nonlinear\'}} for the search.')
+        else:
+            if isinstance(initial_mapping,list):
+                assert(len(initial_mapping) == self.nqubits)
+                if coupling_map is None:
+                    subgraph = self.graph.subgraph(initial_mapping)
+                    coupling_map = list(subgraph.edges)
+                    print(f'Layout qubits {initial_mapping} are user-defined, with the corresponding coupling being {coupling_map}.')
+                else:
+                    check = [x for pair in coupling_map for x in pair]
+                    assert(set(check) == set(initial_mapping))
+                    print(f'Layout qubits {initial_mapping} and corresponding coupling {coupling_map} \nare user-defined, and may not match the actual backend information.')
+            elif isinstance(initial_mapping, dict):
+                if 'key' not in initial_mapping.keys():
+                    print('Please provide \'key\' type!')
+                if 'topology' not in initial_mapping.keys():
+                    print('Please provide \'topology\' type!')
+                key_copy = initial_mapping['key']
+                topology_copy = initial_mapping['topology']
+                select_initial_mapping = self.select_layout_from_backend(key=key_copy,topology=topology_copy)
+                initial_mapping = list(select_initial_mapping)
+                subgraph = self.graph.subgraph(initial_mapping)
+                coupling_map = list(subgraph.edges)
+                print(f'Layout qubits {initial_mapping} are selected by the Transpile algorithm using key = {key_copy} and topology = {topology_copy}, \nwith the corresponding coupling being {coupling_map}.')
+            else:
+                raise(ValueError(f'The initial_mapping should be a list or a dict, here you input is {type(initial_mapping)}'))
+                exit(1)
+        return initial_mapping, coupling_map

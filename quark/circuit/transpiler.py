@@ -52,32 +52,17 @@ class Transpiler:
     qubits (via swap gates) within the circuit to overcome limited
     qubit connectivity.
     """
-    def __init__(self, qc: QuantumCircuit | str | list, chip_backend: Backend|None = None):
+    def __init__(self, qc: QuantumCircuit | str | list, chip_backend: Backend):
         
         r"""Obtain basic information from input quantum circuit.
 
         Args:
             qc (QuantumCircuit | str | list): The quantum circuit to be transpiled. Can be a QuantumCircuit object or OpenQASM 2.0 str or qlisp list.
 
-            chip_name (Literal['Baihua']): The quantum chip backend to use for automatic selection of `initial_mapping` and `coupling_map` 
-                when both are set to None. Default is 'Baihua'. Only used when `use_priority =  True` and no custom `initial_mapping` or 
-                `coupling_map` is provided.
-
-            use_priority (bool): If True, the transpiler will use the recommended qubit layout and coupling map of the specified chip (`chip_name`). 
-                If False, `initial_mapping` and `coupling_map` must be provided manually for custom transpilation. Defaults to True.
-
-            initial_mapping (list | None): A list representing the mapping of virtual qubits to physical qubits. The position in the list 
-                corresponds to the virtual qubit, and the value at that position corresponds to the physical qubit. This mapping must align 
-                with the `coupling_map`. If None, and `use_priority=True`, a default mapping will be selected based on the `chip_name`.
-
-            coupling_map (list[tuple] | None): A list of tuples representing the connectivity between physical qubits on the quantum chip. 
-                If `use_priority=True` and no `coupling_map` is provided, the default connectivity for the chip (`chip_name`) will be used. 
-                If `use_priority=False`, this parameter must be provided together with `initial_mapping`.
+            chip_backend (Backend): An instance of the Backend class that contains the information about the quantum chip to be used for layout selection
 
         Raises:
             TypeError: The quantum circuit format is incorrect.
-            ValueError: If `initial_mapping` and `coupling_map` are inconsistent, or if an invalid combination of `use_priority`, 
-            `initial_mapping`, and `coupling_map` is provided.
         """
 
         if isinstance(qc, QuantumCircuit):
@@ -109,111 +94,19 @@ class Transpiler:
         self.coupling_map = [(i,i+1) for i in range(qc.nqubits-1)]
         self.largest_qubits_index = max(self.initial_mapping) + 1
 
-    def run_select_layout(self,use_priority: bool = True, initial_mapping: list | None = None, coupling_map: list[tuple] | None = None):
-        """
-        Selects the quantum circuit layout and performs transpiling based on the provided mapping and coupling configuration.
-    
-        Args:
-            use_priority (bool, optional): Whether to use qubits recommended by the backend. Defaults to True. 
-                If set to False, transpilation will be performed based on the provided `initial_mapping` and `coupling_map`.
-
-            initial_mapping (list | None, optional): A list representing the mapping of virtual qubits to physical qubits. 
-                The ith element corresponds to the physical qubit that maps to the ith virtual qubit.
-                
-            coupling_map (list[tuple] | None, optional): A list of tuples representing the coupling between physical qubits. 
-                If `use_priority` is set to False, and both `initial_mapping` and `coupling_map` are provided, transpilation 
-                will proceed based on these parameters.
-    
-        Returns:
-            QuantumCircuit: A quantum circuit with the selected layout and transpiled gates.
-        """
-        self._select_layout(use_priority = use_priority, initial_mapping = initial_mapping, coupling_map = coupling_map)
-        self._mapping_to_physical_qubits_layout()
-        qc = QuantumCircuit(self.largest_qubits_index,self.ncbits_used)
-        qc.gates = self.gates
-        qc.physical_qubits_espression = True
-        return qc
-
-    def _select_layout(self,use_priority: bool = True, initial_mapping: list|None = None, coupling_map: list[tuple]|None = None):
+    def _select_layout(self,use_priority: bool = True, initial_mapping: list|dict = {'key':'fidelity_var','topology':'linear1'}, coupling_map: list[tuple]|None = None):
         # update initial_mapping, coupling_map, largest_qubits_index
-        if use_priority and (initial_mapping is None and coupling_map is None):
-            self._choose_layout_from_chip_backend(use_priority=True) 
-        elif not use_priority and initial_mapping is None:
-            self._choose_layout_from_chip_backend(use_priority=False) 
-        elif not use_priority and initial_mapping is not None:
-            self.initial_mapping = initial_mapping
-            if coupling_map is not None:
-                self.coupling_map  = coupling_map
-            else:
-                subgraph = self.chip_backend.graph.subgraph(self.initial_mapping)
-                self.coupling_map = list(subgraph.edges)
-            print(f'Layout qubits {self.initial_mapping} come from your custom.')
-            print(f'The selected layout coupling map is {self.coupling_map}')
-
+        self.initial_mapping,self.coupling_map = Layout(self.nqubits_used,self.chip_backend).selected_layout(use_priority=use_priority,
+                                                                                                   initial_mapping=initial_mapping,
+                                                                                                   coupling_map=coupling_map)
         self.largest_qubits_index = max(self.initial_mapping) + 1
 
         subgraph = self.chip_backend.graph.subgraph(self.initial_mapping)
-        subgraph_fidelity = np.array([data['weight'] for _, _, data in subgraph.edges(data=True)])
+        subgraph_fidelity = np.array([data['fidelity'] for _, _, data in subgraph.edges(data=True)])
         fidelity_mean = np.mean(subgraph_fidelity)
         fidelity_var  = np.var(subgraph_fidelity)  
         print('The average fidelity of the coupler(s) between the selected qubits is {}, and the variance of the fidelity is {}'.format(fidelity_mean,fidelity_var))
         return self 
-
-    def _choose_layout_from_chip_backend(self, use_priority: bool = True, 
-                                         key: Literal['fidelity_var','fidelity_main'] = 'fidelity_var', 
-                                         topology: Literal['linear1','linear2','cycle','nonlinear'] = 'linear1', 
-                                         printdetails: bool = False, drawgraph: bool = False):
-        r"""Automatically select an appropriate initial_mapping and coupling_map when both are None.
-
-        Args:
-            chip_info (dict): Information about the quantum chip, including available qubits and their properties.
-            use_priority (bool): If True, the function will first attempt to select qubits from the chip's 
-                listed priority qubits. If no suitable priority qubits are found, the function will use 
-                the `key` and `topology` parameters to guide the selection process. Default is True.
-            key (Literal['fidelity_var', 'fidelity_main']): Criterion for selecting qubits when priority qubits 
-                are not available or do not meet the requirements. The key can be:
-                - 'fidelity_var': Select qubits based on variance of fidelity.
-                - 'fidelity_main': Select qubits based on the main of fidelity. 
-                Default is 'fidelity_var'.
-            topology (Literal['linear1', 'linear2', 'cycle', 'nonlinear']): Specifies the desired qubit 
-                connectivity topology. Options include:
-                - 'linear1': Linear and connected, with all qubits in the same row of the chip.
-                - 'linear2': Linear and connected, with nodes not in the same row.
-                - 'cycle': Contains a cycle topology.
-                - 'nonlinear': A nonlinear topology.
-                Default is 'linear1'.
-            printdetails (bool): If True, the function will print detailed information about the selected 
-                layout and the decision process. Default is False.
-            drawgraph (bool): If True, the function will draw a graph representing the selected qubit 
-                connectivity and layout. Default is False.
-
-        Returns:
-            Transpiler: Update self initial_mapping and coupling_map information.
-        """
-
-        if use_priority:
-            priority_qubits_list = self.chip_backend.priority_qubits
-            for qubits in priority_qubits_list:
-                if len(qubits) == self.nqubits_used:
-                    layout = qubits
-                    print(f'Layout qubits {list(layout)} selected from chip backend priority qubits.')
-                    break
-            else:
-                print(f"No priority qubits with {self.nqubits_used} qubits found, it will set use_priority as 'False' to search.")
-                layout = Layout(self.nqubits_used, self.chip_backend).select_layout(key,topology,printdetails=printdetails)
-                print(f'Layout qubits {list(layout)} selected from Transpile algorithm by set key = {key} and topology = {topology}.')
-        else:
-            layout = Layout(self.nqubits_used, self.chip_backend).select_layout(key,topology,printdetails=printdetails)
-        if drawgraph:
-            self.chip_backend.picknodes = layout
-            self.chip_backend.draw()   
-
-        subgraph = self.chip_backend.graph.subgraph(layout)
-        self.initial_mapping = list(layout)
-        self.coupling_map = list(subgraph.edges)
-        print(f'The selected layout coupling map is {self.coupling_map}')
-        
-        return None
     
     def _mapping_to_physical_qubits_layout(self):
         """Map the virtual quantum circuit to physical qubits directly.
@@ -248,6 +141,31 @@ class Transpiler:
                     new.append((gate,qubit0))
         self.gates = new
         return None
+    
+    def run_select_layout(self, use_priority: bool = True, initial_mapping: list|dict = {'key':'fidelity_var','topology':'linear1'}, coupling_map: list[tuple] | None = None):
+        """
+        Selects the quantum circuit layout and performs transpiling based on the provided mapping and coupling configuration.
+    
+        Args:
+            use_priority (bool, optional): Whether to use qubits recommended by the backend. Defaults to True. 
+                If set to False, transpilation will be performed based on the provided `initial_mapping` and `coupling_map`.
+
+            initial_mapping (list | None, optional): A list representing the mapping of virtual qubits to physical qubits. 
+                The ith element corresponds to the physical qubit that maps to the ith virtual qubit.
+                
+            coupling_map (list[tuple] | None, optional): A list of tuples representing the coupling between physical qubits. 
+                If `use_priority` is set to False, and both `initial_mapping` and `coupling_map` are provided, transpilation 
+                will proceed based on these parameters.
+    
+        Returns:
+            QuantumCircuit: A quantum circuit with the selected layout and transpiled gates.
+        """
+        self._select_layout(use_priority = use_priority, initial_mapping = initial_mapping, coupling_map = coupling_map)
+        self._mapping_to_physical_qubits_layout()
+        qc = QuantumCircuit(self.largest_qubits_index,self.ncbits_used)
+        qc.gates = self.gates
+        qc.physical_qubits_espression = True
+        return qc
     
     @property
     def coupling_graph(self):
@@ -633,7 +551,7 @@ class Transpiler:
         qc.physical_qubits_espression = True
         return qc
             
-    def run(self, use_priority: bool = True, initial_mapping: list|None = None, coupling_map: list[tuple]|None = None, optimize_level: 0|1 = 1) -> 'QuantumCircuit':
+    def run(self, use_priority: bool = True, initial_mapping: list|dict = {'key':'fidelity_var','topology':'linear1'}, coupling_map: list[tuple]|None = None, optimize_level: 0|1 = 1) -> 'QuantumCircuit':
         r"""Run the transpile program.
 
         Args:
