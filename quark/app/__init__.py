@@ -25,6 +25,7 @@ Abstract: about app
     usefull functions for users to interact with `QuarkServer` and database
 """
 
+import sys
 import time
 from collections import defaultdict
 from threading import current_thread
@@ -35,8 +36,8 @@ from loguru import logger
 from quark import connect
 from quark.proxy import Task
 
-from ._data import (get_config_by_tid, get_dataset_by_tid,
-                    get_record_by_rid, get_record_by_tid, sql)
+from ._data import (get_config_by_tid, get_dataset_by_tid, get_record_by_rid,
+                    get_record_by_tid, sql)
 
 sp = {}  # defaultdict(lambda: connect('QuarkServer', host, port))
 _vs = connect('QuarkViewer', port=2086)
@@ -183,24 +184,26 @@ def get_data_by_tid(tid: int, signal: str, shape: tuple | list = [], **kwds) -> 
     return {'data': data, 'meta': info['meta']}
 
 
-def update_remote_wheel(filenames: list[str], host: str = '127.0.0.1'):
+def update_remote_wheel(filenames: list[str], host: str = '127.0.0.1', sudo: bool = False):
     """update the package on remote device
 
     Args:
         filenames (list[str]): packages (downloaded from PyPI) location
         host (str, optional): IP address of remote device. Defaults to '127.0.0.1'.
     """
+    if sudo:
+        assert sys.platform != 'win32', 'sudo can not be used on windows'
+
     wheel = {}
     for filename in filenames:
         with open(filename, 'rb') as f:
             wheel[filename] = f.read()
     rs = connect('QuarkRemote', host=host, port=2087)
-    logger.info(rs.install(wheel))
+    logger.info(rs.install(wheel, sudo))
 
     for alias, info in rs.info().items():
-        if isinstance(info, dict):
-            rs.reopen(alias, info)
-            logger.warning(f'{alias} restarted!')
+        rs.reopen(alias)
+        logger.warning(f'{alias} restarted!')
     return rs
 
 
