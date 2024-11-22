@@ -130,7 +130,7 @@ class Backend:
             - When `save_svg_fname` is provided, the drawing will be saved as an SVG file.
         """
         import matplotlib.pyplot as plt 
-        from matplotlib.colors import Normalize
+        from matplotlib.colors import Normalize,LinearSegmentedColormap
         from matplotlib.cm import ScalarMappable 
 
         edge_fidelity = nx.get_edge_attributes(self.graph, 'fidelity') 
@@ -138,7 +138,7 @@ class Backend:
             min_fidelity = sorted(list(edge_fidelity.values()))[0]
             max_fidelity = sorted(list(edge_fidelity.values()))[-1]
             edge_norm = Normalize(vmin = min_fidelity, vmax = max_fidelity)
-            edge_cmap = plt.get_cmap('Blues')
+            edge_cmap = LinearSegmentedColormap.from_list('truncated_blues', plt.get_cmap('Blues')(np.linspace(0.31, 1.0, 1000)))  #plt.get_cmap('Blues')
             edge_colors = [ScalarMappable(norm = edge_norm, cmap = edge_cmap).to_rgba(fidelity) for fidelity in edge_fidelity.values()]
         else:
             edge_colors = ['#083776' for edge in self.graph.edges()]
@@ -146,23 +146,18 @@ class Backend:
         edge_labels = {}
         for k,v in edge_fidelity.items():
             fidelity = np.round(v, 3)
-            if 1>= fidelity >0:
-                if show_couplers_fidelity:
-                    edge_labels[k] = fidelity
-                else:
-                    edge_labels[k] = self.graph.edges[k].get('index')
-            elif fidelity == 0:
-                if show_couplers_fidelity:
-                    edge_labels[k] = ''
-                else:
-                    edge_labels[k] = self.graph.edges[k].get('index')
+            if show_couplers_fidelity:
+                edge_labels[k] = fidelity
+            else:
+                edge_labels[k] = self.graph.edges[k].get('index')
 
         if show_quibts_attributes != '':
             node_attributes = nx.get_node_attributes(self.graph,show_quibts_attributes)
             min_attributes = sorted(list(node_attributes.values()))[0]
             max_attributes = sorted(list(node_attributes.values()))[-1]
             node_norm = Normalize(vmin = min_attributes, vmax = max_attributes)
-            node_cmap = plt.get_cmap('Blues') 
+            node_cmap = LinearSegmentedColormap.from_list('truncated_blues', plt.get_cmap('Blues')(np.linspace(0.31, 1.0, 1000))) #plt.get_cmap('Blues') 
+
             node_colors = [ScalarMappable(norm = node_norm, cmap = node_cmap).to_rgba(attribute) for attribute in node_attributes.values()]
             node_labels =  {node: np.round(attr, 2) for node, attr in node_attributes.items()}  # 将 'T1' 属性作为标签   
             node_font_size = 8 
@@ -207,11 +202,10 @@ class Backend:
 
         fig, ax = plt.subplots(figsize=figsize,) #facecolor='none'
         pos = nx.get_node_attributes(self.graph, 'coordinate') 
-        nx.draw(self.graph, pos,ax=ax, with_labels=False, node_color=node_colors, node_size=800, edgecolors='white',  # for node edge\
-                edge_color = edge_colors ,width = 18,) #'#5a7f8e'
+        nx.draw(self.graph, pos,ax=ax, with_labels=False, node_color=node_colors, node_size=800, edgecolors='white',edge_color = edge_colors ,width = 18,) 
         nx.draw_networkx_labels(self.graph,pos,labels=node_labels,font_size=node_font_size, font_color='white')
         nx.draw_networkx_edge_labels(self.graph, pos, edge_labels=edge_labels,font_size=8, font_color='white',bbox=dict(facecolor='none', edgecolor='none'))
-        
+
         if show_quibts_attributes:
             if show_quibts_attributes == 'T1':
                 show_label = 'T1 ($\mu s$)'
