@@ -28,6 +28,7 @@ Abstract: about app
 import sys
 import time
 from collections import defaultdict
+from pathlib import Path
 from threading import current_thread
 
 import numpy as np
@@ -184,22 +185,24 @@ def get_data_by_tid(tid: int, signal: str, shape: tuple | list = [], **kwds) -> 
     return {'data': data, 'meta': info['meta']}
 
 
-def update_remote_wheel(filenames: list[str], host: str = '127.0.0.1', sudo: bool = False):
+def update_remote_wheel(wheel: str, index: str | Path, host: str = '127.0.0.1', sudo: bool = False):
     """update the package on remote device
 
     Args:
-        filenames (list[str]): packages (downloaded from PyPI) location
+        wheel (str): package to be installed.
+        index (str): location of required packages (downloaded from PyPI).
         host (str, optional): IP address of remote device. Defaults to '127.0.0.1'.
     """
     if sudo:
         assert sys.platform != 'win32', 'sudo can not be used on windows'
 
-    wheel = {}
-    for filename in filenames:
+    links = {}
+    for filename in Path(index).glob('*.whl'):
         with open(filename, 'rb') as f:
-            wheel[filename] = f.read()
+            print(f'{filename} will be installed!')
+            links[filename.parts[-1]] = f.read()
     rs = connect('QuarkRemote', host=host, port=2087)
-    logger.info(rs.install(wheel, sudo))
+    logger.info(rs.install(wheel, links, sudo))
 
     for alias, info in rs.info().items():
         rs.reopen(alias)
