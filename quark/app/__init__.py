@@ -37,8 +37,8 @@ from loguru import logger
 from quark import connect
 from quark.proxy import Task
 
-from ._data import (get_config_by_tid, get_dataset_by_tid, get_record_by_rid,
-                    get_record_by_tid, sql)
+# get_record_by_rid, get_record_by_tid, sql
+from ._data import get_config_by_tid
 
 sp = {}  # defaultdict(lambda: connect('QuarkServer', host, port))
 _vs = connect('QuarkViewer', port=2086)
@@ -67,13 +67,14 @@ def login(user: str = 'baqis', host: str = '127.0.0.1', verbose: bool = True):
         _type_: a connection to the server
     """
     try:
-        return sp[current_thread().name]
+        s = sp[current_thread().name]
     except KeyError as e:
         s = sp[current_thread().name] = connect('QuarkServer', host, 2088)
-        m = s.login(user)
-        if verbose:
-            logger.info(m)
-        return s
+
+    m = s.login(user)
+    if verbose:
+        logger.info(m)
+    return s
 
 
 def submit(task: dict, block: bool = False, preview: list = [], **kwds):
@@ -173,6 +174,7 @@ def get_data_by_tid(tid: int, signal: str, shape: tuple | list = [], **kwds) -> 
     Returns:
         dict: data、metainfo
     """
+    from ._data import get_dataset_by_tid
     info, data = get_dataset_by_tid(tid, signal, shape)
 
     if kwds.get('plot', False) and signal:
