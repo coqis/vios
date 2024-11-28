@@ -21,7 +21,7 @@
 
 import networkx as nx
 from networkx import floyd_warshall_numpy
-from .circuit import (QuantumCircuit,
+from .quantumcircuit import (QuantumCircuit,
                       one_qubit_gates_avaliable,
                       two_qubit_gates_avaliable,
                       one_qubit_parameter_gates_avaliable,

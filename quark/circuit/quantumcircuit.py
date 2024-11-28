@@ -164,12 +164,15 @@ class QuantumCircuit:
         if len(args) == 0:
             self.nqubits = None
             self.ncbits = self.nqubits
+            self.qubits = []
         elif len(args) == 1:
             self.nqubits = args[0]
             self.ncbits = self.nqubits
+            self.qubits = [i for i in range(self.nqubits)]
         elif len(args) == 2:
             self.nqubits = args[0]
             self.ncbits = args[1]
+            self.qubits = [i for i in range(self.nqubits)]
         else:
             raise ValueError("Support only QuantumCircuit(), QuantumCircuit(nqubits) or QuantumCircuit(nqubits,ncbits).")
         
@@ -196,13 +199,16 @@ class QuantumCircuit:
         # update self.gates
         self._openqasm2_to_gates()
         
-    def from_qlisp(self, qlisp: list) -> None:
+    def from_qlisp(self, qlisp: list|str) -> None:
         r"""
         Initializes the QuantumCircuit object based on the given qlisp list.
 
         Args:
             qlisp (list): A list representing a quantum circuit in qlisp format.
         """
+        if isinstance(qlisp, str):
+            import ast
+            qlisp = ast.literal_eval(qlisp)
         new_gates, qubit_used,cbit_used = self._qlisp_to_gates(qlisp)
         self.nqubits = max(qubit_used, default=0) + 1 
         self.ncbits = max(cbit_used, default=0) + 1
@@ -631,7 +637,7 @@ class QuantumCircuit:
             ValueError: If qubit out of circuit range.
         """
         if not qubits: # it will add barrier for all qubits
-            self.gates.append(('barrier', tuple(range(self.nqubits))))
+            self.gates.append(('barrier', tuple(self.qubits)))
         else:
             if max(qubits) < self.nqubits:
                 self.gates.append(('barrier', qubits))
@@ -669,8 +675,9 @@ class QuantumCircuit:
         r"""
         Adds measurement to all qubits.
         """
-        qubitlst = [i for i in range(self.nqubits)]
-        cbitlst = [i for i in range(self.ncbits)]
+        qubitlst = [i for i in sorted(self.qubits)]
+        cbitlst = [i for i in range(len(qubitlst))]
+        #cbitlst = [i for i in range(self.ncbits)]
         self.gates.append(('measure', qubitlst,cbitlst))
 
     @property
@@ -716,7 +723,11 @@ class QuantumCircuit:
         r"""
         Parse gate information from an input OpenQASM 2.0 string, and update self.gates
         """
+        #print('check',self.from_openqasm2_str)
         for line in self.from_openqasm2_str.splitlines():
+            #print('check',line)
+            if line == '':
+                continue
             gate = line.split()[0].split('(')[0]
             position = [int(num) for num in re.findall(r'\d+', line)]
             if gate in one_qubit_gates_avaliable.keys():
@@ -775,7 +786,9 @@ class QuantumCircuit:
             elif gate in ['barrier']:
                 qlisp.append((gate.capitalize(), tuple('Q'+str(i) for i in gate_info[1])))
             elif gate in ['measure']:
-                qlisp.append(((gate.capitalize(), gate_info[2][0]), 'Q'+str(gate_info[1][0])))
+                for idx,cbit in enumerate(gate_info[2]):
+                    qlisp.append(((gate.capitalize(), cbit), 'Q'+str(gate_info[1][idx])))
+                #qlisp.append(((gate.capitalize(), gate_info[2][0]), 'Q'+str(gate_info[1][0])))
         return qlisp
     
     def _qlisp_to_gates(self, qlisp: list) -> tuple[list, list, list]:
@@ -1182,3 +1195,10 @@ class QuantumCircuit:
         formatted_string = fline.replace("\n", "<br>").replace(" ", "&nbsp;")
         html_content = f'<div style="overflow-x: auto; white-space: nowrap; font-family: consolas;">{formatted_string}</div>'
         display(HTML(html_content))
+
+    def plot_with_qiskit(self):
+        from qiskit import QuantumCircuit as qiskitQC
+        from qiskit.visualization import circuit_drawer
+
+        cir = qiskitQC.from_qasm_str(self.to_openqasm2)
+        return circuit_drawer(cir,output="mpl",idle_wires=False, style = {'backgroundcolor':'#EEEEEE','linecolor':'grey'})

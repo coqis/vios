@@ -44,20 +44,27 @@ def load_chip_basic_info(chip_name):
 class Backend:
     """A class to represent a quantum hardware backend as a nx.Graph.
     """
-    def __init__(self,chip_name: Literal['Baihua','Custom']):
+    def __init__(self,chip: Literal['Baihua','Custom'] | dict):
         """Initialize a Backend object.
 
         Args:
-            chip_name (str): Chip name, currently only 'Baihua' is avaliable.
+            chip (str): Chip name, currently only 'Baihua' is avaliable.
         """
-        if chip_name == 'Baihua':
-            self.chip_info = load_chip_basic_info(chip_name)
+        if isinstance(chip,dict):
+            self.chip_info = chip
             print('The last calibration time was',self.chip_info['calibration_time'])
             self.size = self.chip_info['size']
             self.priority_qubits = ast.literal_eval(self.chip_info['priority_qubits'])
             self.qubits_with_attributes = self._collect_qubits_with_attributes()
             self.couplers_with_attributes = self._collect_couplers_with_attributes()
-        elif chip_name == 'Custom':
+        elif chip == 'Baihua':
+            self.chip_info = load_chip_basic_info(chip)
+            print('The last calibration time was',self.chip_info['calibration_time'])
+            self.size = self.chip_info['size']
+            self.priority_qubits = ast.literal_eval(self.chip_info['priority_qubits'])
+            self.qubits_with_attributes = self._collect_qubits_with_attributes()
+            self.couplers_with_attributes = self._collect_couplers_with_attributes()
+        elif chip == 'Custom':
             print("Please set 'edges_with_attributes' as a list of tuples and 'nodes_with_attributes' as a dictionary.")
             self.chip_info = dict()
             self.size = (0,0)
@@ -65,7 +72,7 @@ class Backend:
             self.couplers_with_attributes = list()
             self.priority_qubits = []
         else:
-            raise(ValueError(f'Wrong chip name! {chip_name}'))
+            raise(ValueError(f'Wrong chip name! {chip}'))
     
     @property
     def graph(self):

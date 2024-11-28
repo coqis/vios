@@ -21,8 +21,8 @@ r"""
 The quark.circuit module provides tools for constructing, visualizing, and transpiling quantum circuits.
 """
 
-from .circuit_wapper import QuantumCircuitWrapper
-from .circuit import (
+from .quantumcircuit_wapper import QuantumCircuitWrapper
+from .quantumcircuit import (
     QuantumCircuit,
     generate_ghz_state,
     generate_random_circuit,

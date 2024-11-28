@@ -23,9 +23,8 @@ Tools for converting between directed acyclic graphs (DAGs) and quantum circuits
 
 import numpy as np
 import networkx as nx
-import matplotlib.pyplot as plt
 
-from .circuit import (
+from .quantumcircuit import (
     QuantumCircuit, 
     one_qubit_gates_avaliable,
     two_qubit_gates_avaliable,
@@ -39,6 +38,8 @@ def draw_dag(dag, output='dag_figure.png'):
         dag (nx.DiGraph): The quantum circuit represented as a directed acyclic graph.
         output (str, optional): The filename for saving the generated DAG image. Defaults to 'dag_figure.png'.
     """
+    import matplotlib.pyplot as plt
+    
     A = nx.nx_agraph.to_agraph(dag)
 
     for node in A.nodes():

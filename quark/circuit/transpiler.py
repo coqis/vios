@@ -23,7 +23,7 @@ into formats that are more suitable for execution on hardware backends"""
 import numpy as np
 import networkx as nx
 from typing import Literal
-from .circuit import (QuantumCircuit,
+from .quantumcircuit import (QuantumCircuit,
                       one_qubit_gates_avaliable,
                       two_qubit_gates_avaliable,
                       one_qubit_parameter_gates_avaliable,
@@ -70,14 +70,16 @@ class Transpiler:
             self.nqubits_used = qc.nqubits
             self.ncbits_used = qc.ncbits
         elif isinstance(qc, str):
+            qc_str = qc
             qc = QuantumCircuit()
-            qc.from_openqasm2(qc)
+            qc.from_openqasm2(qc_str)
             self.gates = qc.gates
             self.nqubits_used = qc.nqubits
             self.ncbits_used = qc.ncbits
         elif isinstance(qc, list):
+            qc_list = qc
             qc = QuantumCircuit()
-            qc.from_qlisp(qc)
+            qc.from_qlisp(qc_list)
             self.gates = qc.gates
             self.nqubits_used = qc.nqubits
             self.ncbits_used = qc.ncbits
@@ -99,6 +101,7 @@ class Transpiler:
         self.initial_mapping,self.coupling_map = Layout(self.nqubits_used,self.chip_backend).selected_layout(use_priority=use_priority,
                                                                                                    initial_mapping=initial_mapping,
                                                                                                    coupling_map=coupling_map)
+        print('check',self.initial_mapping)
         self.largest_qubits_index = max(self.initial_mapping) + 1
 
         subgraph = self.chip_backend.graph.subgraph(self.initial_mapping)
@@ -164,6 +167,7 @@ class Transpiler:
         self._mapping_to_physical_qubits_layout()
         qc = QuantumCircuit(self.largest_qubits_index,self.ncbits_used)
         qc.gates = self.gates
+        qc.qubits = self.initial_mapping
         qc.physical_qubits_espression = True
         return qc
     
@@ -268,6 +272,7 @@ class Transpiler:
         self._basic_routing()
         qc = QuantumCircuit(self.largest_qubits_index,self.ncbits_used)
         qc.gates = self.gates
+        qc.qubits = self.initial_mapping
         qc.physical_qubits_espression = True
         return qc 
     
@@ -391,6 +396,7 @@ class Transpiler:
         self._sabre_routing(iterations = iterations)
         qc = QuantumCircuit(self.largest_qubits_index,self.ncbits_used)
         qc.gates = self.gates
+        qc.qubits = self.initial_mapping
         qc.physical_qubits_espression = True
         return qc
 
@@ -447,6 +453,7 @@ class Transpiler:
         self._basic_gates()
         qc =  QuantumCircuit(self.largest_qubits_index, self.ncbits_used)
         qc.gates = self.gates
+        qc.qubits = self.initial_mapping
         qc.physical_qubits_espression = True
         return qc
 
@@ -548,6 +555,7 @@ class Transpiler:
 
         qc =  QuantumCircuit(self.largest_qubits_index, self.ncbits_used)
         qc.gates = self.gates
+        qc.qubits = self.initial_mapping
         qc.physical_qubits_espression = True
         return qc
             
