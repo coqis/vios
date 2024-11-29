@@ -374,47 +374,52 @@ class Layout:
                     coupling_map = list(subgraph.edges)
                     print(f'Layout qubits {list(initial_mapping)} are derived from the chip backend priority qubits, \nwith the corresponding coupling being {coupling_map}.')
                     break
-            else:
-                print(f'No priority qubits with {self.nqubits} qubits found. it will check the initial mapping settings for search')
-                if isinstance(initial_mapping,list):
-                    assert(len(initial_mapping) == self.nqubits)
-                    if coupling_map is None:
-                        subgraph = self.graph.subgraph(initial_mapping)
-                        coupling_map = list(subgraph.edges)
-                        print(f'Layout qubits {initial_mapping} are user-defined, with the corresponding coupling being {coupling_map}.')
-                    else:
-                        check = [x for pair in coupling_map for x in pair]
-                        assert(set(check) == set(initial_mapping))
-                        raise(ValueError(f'Layout qubits {initial_mapping} and corresponding coupling {coupling_map} \nare user-defined, and may not match the actual backend information.'))
-                elif isinstance(initial_mapping, dict):
-                    if 'key' not in initial_mapping.keys():
-                        print('Please provide \'key\' type!')
-                    if 'topology' not in initial_mapping.keys():
-                        print('Please provide \'topology\' type!')
-                    key_first = initial_mapping['key']
-                    topology_first = initial_mapping['topology']
-
-                    all_keys = ['fidelity_var','fidelity_mean']
-                    all_topologys = ['linear1','linear2','cycle','nonlinear']
-                    all_keys.remove(key_first)
-                    all_topologys.remove(topology_first)
-
-                    key_list = [key_first,] + all_keys
-                    topology_list = [topology_first,] + all_topologys
-
-                    select_initial_mapping = []
-                    for key in key_list:
-                        for topology in topology_list:
-                            while select_initial_mapping == []:
-                                select_initial_mapping = self.select_layout_from_backend(key=key,topology=topology)
-
-                    initial_mapping = list(select_initial_mapping)
+        else:
+            print(f'No priority qubits with {self.nqubits} qubits found. it will check the initial mapping settings for search')
+            if isinstance(initial_mapping,list):
+                assert(len(initial_mapping) == self.nqubits)
+                if coupling_map is None:
                     subgraph = self.graph.subgraph(initial_mapping)
                     coupling_map = list(subgraph.edges)
-                    print(f'Layout qubits {initial_mapping} are selected by the Transpile algorithm using key = {key} and topology = {topology}, \nwith the corresponding coupling being {coupling_map}.')
+                    print(f'Layout qubits {initial_mapping} are user-defined, with the corresponding coupling being {coupling_map}.')
                 else:
-                    raise(ValueError(f'The initial_mapping should be a list or a dict, here you input is {type(initial_mapping)}'))
-                    exit(1)
+                    check = [x for pair in coupling_map for x in pair]
+                    assert(set(check) == set(initial_mapping))
+                    raise(ValueError(f'Layout qubits {initial_mapping} and corresponding coupling {coupling_map} \nare user-defined, and may not match the actual backend information.'))
+            elif isinstance(initial_mapping, dict):
+                if 'key' not in initial_mapping.keys():
+                    print('Please provide \'key\' type!')
+                if 'topology' not in initial_mapping.keys():
+                    print('Please provide \'topology\' type!')
+                key_first = initial_mapping['key']
+                topology_first = initial_mapping['topology']
+
+                all_keys = ['fidelity_var','fidelity_mean']
+                all_topologys = ['linear1','linear2','cycle','nonlinear']
+                all_keys.remove(key_first)
+                all_topologys.remove(topology_first)
+
+                key_list = [key_first,] + all_keys
+                topology_list = [topology_first,] + all_topologys
+
+                print(key_list)
+                print(topology_list)
+                select_initial_mapping = []
+                for key in key_list:
+                    for topology in topology_list:
+                        while select_initial_mapping == []:
+                            select_initial_mapping = self.select_layout_from_backend(key=key,topology=topology)
+
+                print(select_initial_mapping)
+
+                initial_mapping = list(select_initial_mapping)
+                subgraph = self.graph.subgraph(initial_mapping)
+                coupling_map = list(subgraph.edges)
+                print(f'Layout qubits {initial_mapping} are selected by the Transpile algorithm using key = {key} and topology = {topology}, \nwith the corresponding coupling being {coupling_map}.')
+            else:
+                raise(ValueError(f'The initial_mapping should be a list or a dict, here you input is {type(initial_mapping)}'))
+                exit(1)
+                
         return initial_mapping, coupling_map
     
 
