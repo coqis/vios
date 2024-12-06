@@ -167,7 +167,7 @@ class Workflow(object):
 
         _, (cmds, dmap) = qcompile(circuit,
                                    lib=kwds.get('lib', stdlib),
-                                   cfg=kwds.get('cfg', ctx),
+                                   cfg=kwds.get('ctx', ctx),
                                    signal=_form_signal(kwds.get('signal')),
                                    shots=kwds.get('shots', 1024),
                                    context=kwds.get('context', {}),

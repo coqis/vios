@@ -28,7 +28,7 @@ from loguru import logger
 from quark.interface import Context, Pulse, Workflow
 from quark.proxy import dumpv
 
-cfg = Context({})
+ctx = Context({})
 
 
 def initialize(snapshot, **kwds):
@@ -41,16 +41,20 @@ def initialize(snapshot, **kwds):
         snapshot (_type_): frozen snapshot for current task
 
     Returns:
-        cfg (Context): Context to be used in compilation
+        ctx (Context): Context to be used in compilation
 
     """
+    global ctx
+    ctx = Context({})
+    # logger.warning('context for compiler initialized ...')
+
     if isinstance(snapshot, int):
         return os.getpid()
-    cfg.reset(snapshot)
-    cfg.initial = kwds.get('initial', {'restore': []})
-    cfg.bypass = kwds.get('bypass', {})
-    cfg._keys = kwds.get('keys', [])
-    return cfg
+    ctx.reset(snapshot)
+    ctx.initial = kwds.get('initial', {'restore': []})
+    ctx.bypass = kwds.get('bypass', {})
+    ctx._keys = kwds.get('keys', [])
+    return ctx
 
 
 def ccompile(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], circuit: list, **kwds) -> tuple:
@@ -68,7 +72,7 @@ def ccompile(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
         ``` {.py3 linenums="1"}
         from quark import connect
         s = connect('QuarkServer')
-        cfg = initialize(s.snapshot())
+        ctx = initialize(s.snapshot())
         circuit = [(('Measure',0),'Q0503')]
         instruction, datamap =ccompile(0,circuit,signal='iq')
 
@@ -119,7 +123,7 @@ def ccompile(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
 
     """
 
-    compiled, datamap = Workflow.qcompile(circuit, **(kwds | {'ctx': cfg}))
+    compiled, datamap = Workflow.qcompile(circuit, **(kwds | {'ctx': ctx}))
 
     # merge loop body with compiled result
     for step, _cmds in compiled.items():
@@ -133,7 +137,7 @@ def ccompile(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
              hold=kwds.get('hold', False))
 
     if sid == 0:
-        kwds['restore'] = cfg.initial
+        kwds['restore'] = ctx.initial
         kwds['clear'] = True
     logger.info(f'Step {sid} compiled >>>>>>>>>>>>>')
 
@@ -152,9 +156,9 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
     """
 
     try:
-        query = kw.get('ctx', cfg).query
+        query = kw.get('ctx', ctx).query
     except AttributeError as e:
-        query = cfg.query
+        query = ctx.query
 
     for step, operations in instruction.items():
         if not isinstance(operations, list):
@@ -162,7 +166,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
         scmd = {}
         for ctype, target, value, unit in operations:
             if step.lower() == 'update':
-                cfg.update(target, value)
+                ctx.update(target, value)
                 continue
 
             kwds = {'sid': sid, 'target': target,
@@ -185,7 +189,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                 if sid == 0 and not kw.get('hold', False):
                     init = query(target.removesuffix(
                         '.I').removesuffix('.Q'))
-                    cfg.initial['restore'].append((ctype, target, init, unit))
+                    ctx.initial['restore'].append((ctype, target, init, unit))
 
             # get sample rate from device
             if ctype != 'WAIT':
@@ -295,8 +299,8 @@ def preprocess(sid: int, instruction: dict[str, dict[str, list[str, Any, str, di
                 - context (dict): target location like Q0101
     """
     if sid == 0:
-        cfg.bypass.clear()
-    bypass = cfg.bypass
+        ctx.bypass.clear()
+    bypass = ctx.bypass
 
     shared = []
     for step, operations in instruction.items():
