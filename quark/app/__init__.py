@@ -39,9 +39,8 @@ from quark.proxy import Task
 
 # get_record_by_rid, get_record_by_tid, sql
 from ._data import get_config_by_tid
-from ._view import plot
 
-sp = {}  # defaultdict(lambda: connect('QuarkServer', host, port))
+_sp = {}  # defaultdict(lambda: connect('QuarkServer', host, port))
 
 
 def signup(user: str, system: str, **kwds):
@@ -67,9 +66,9 @@ def login(user: str = 'baqis', host: str = '127.0.0.1', verbose: bool = True):
         _type_: a connection to the server
     """
     try:
-        s = sp[current_thread().name]
+        s = _sp[current_thread().name]
     except KeyError as e:
-        s = sp[current_thread().name] = connect('QuarkServer', host, 2088)
+        s = _sp[current_thread().name] = connect('QuarkServer', host, 2088)
 
     m = s.login(user)
     if verbose:
@@ -124,6 +123,8 @@ def submit(task: dict, block: bool = False, preview: list = [], **kwds):
         * `bugs`
     """
 
+    from ._view import plot
+
     if 'backend' in kwds:  # from master
         ss = kwds['backend']
         trig = []
@@ -175,6 +176,8 @@ def get_data_by_tid(tid: int, signal: str, shape: tuple | list = [], **kwds) -> 
         dict: data、metainfo
     """
     from ._data import get_dataset_by_tid
+    from ._view import plot
+
     info, data = get_dataset_by_tid(tid, signal, shape)
 
     if kwds.get('plot', False) and signal:
@@ -182,7 +185,7 @@ def get_data_by_tid(tid: int, signal: str, shape: tuple | list = [], **kwds) -> 
         task.meta = info['meta']
         task.data = {signal: data[signal]}
         task.index = len(data[signal]) + 1
-        plot(task)
+        plot(task, backend=kwds.get('backend', 'studio'))
 
     return {'data': data, 'meta': info['meta']}
 

@@ -25,9 +25,11 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+import h5py
 import matplotlib.image as mim
 import matplotlib.pyplot as plt
 import numpy as np
+
 from quark import loads
 
 from ._data import get_record_list_by_name, get_record_set_by_name
@@ -98,10 +100,10 @@ def mplot(fig, data):
 
 def demo(fig):
     # demo: read image file
-    img = np.rot90(mim.imread(
-        Path(__file__).parents[2]/'tests/test/mac.png'), 2)
-    img = np.moveaxis(img, [0, -1], [-1, 0])
-    fig.layer({'name': 'example of image', 'zdata': img})
+    # img = np.rot90(mim.imread(
+    #     Path(__file__).parents[2]/'tests/test/mac.png'), 2)
+    # img = np.moveaxis(img, [0, -1], [-1, 0])
+    # fig.layer({'name': 'example of image', 'zdata': img})
 
     # demo: show image from array
     fig.layer(
@@ -133,7 +135,7 @@ def demo(fig):
     axes = fig.subplot(4, 4)
     for ax in axes[::2]:
         cmap = random.choice(plt.colormaps())
-        ax.imshow(img[0, :, :], colormap=cmap, title=cmap)
+        # ax.imshow(img[0, :, :], colormap=cmap, title=cmap)
     for ax in axes[1::2]:
         ax.plot(np.sin(2*np.pi*0.707*tlist)/tlist,
                 title='vcplot',
@@ -148,9 +150,19 @@ def demo(fig):
                     ['r', 'g', 'b', 'k', 'c', 'm', 'y', (31, 119, 180)]))
 
 
-def qplot(fig, dataset: list):
-    # print('ptype', dataset)
-    return demo(fig)
+def qplot(fig, dataset: list[str]):
+    print('ptype', dataset)
+
+    filename, dsname = dataset
+
+    if filename.endswith('hdf5'):
+        with h5py.File(filename) as f:
+            ds = f[dsname]
+            info = loads(dict(ds.parent.attrs).get('snapshot', '{}'))
+            shape = info['meta']['other']['shape']
+            data = ds[:].reshape(*shape, 2)
+    print(info, data)
+    return  # demo(fig)
 
     data, meta = dataset
     cfg = loads(meta)

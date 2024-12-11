@@ -56,6 +56,8 @@ def plot(task: Task, append: bool = False, backend: str = 'viewer'):
     """
 
     viewer = _vs[backend]
+    if backend == 'studio':
+        viewer.clear()
 
     if 'population' in str(task.meta['other']['signal']):
         signal = 'population'
