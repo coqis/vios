@@ -33,21 +33,29 @@ from quark.proxy import QUARK
 sql = sqlite3.connect(QUARK/'checkpoint.db', check_same_thread=False)
 
 
-def get_dataset_by_tid(tid: int, signal: str, shape: tuple | list = []):
+def get_dataset_by_tid(tid: int, signal: str = ''):
     filename, dataset = get_record_by_tid(tid)[7:9]
 
     info, data = {}, {}
     with h5py.File(filename) as f:
         group = f[dataset]
         info = loads(dict(group.attrs).get('snapshot', '{}'))
-        if not shape:
-            if not info:
-                shape = -1
-                info['meta'] = {}
-            else:
-                shape = []
+        if not info:
+            shape = -1
+            info['meta'] = {}
+        else:
+            shape = []
+            try:
+                shape = info['meta']['other']['shape']
+            except Exception as e:
                 for k, v in info['meta']['axis'].items():
                     shape.extend(tuple(v.values())[0].shape)
+
+        if not signal:
+            signal = info['meta'].setdefault(
+                'other', {}).setdefault('signal', '')
+        else:
+            signal = signal
 
         for k in group.keys():
             if k != signal or not signal:
