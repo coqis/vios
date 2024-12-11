@@ -96,7 +96,7 @@ def sample(target: str, cmd: dict, canvas: dict = {}, delay: float = 0.0) -> dic
         xt = (np.arange(len(val))/srate)[xr] - delay
         yt = val[xr]
 
-        line = {'xdata': xt, 'ydata': yt, 'suptitle': cmd[-1]["sid"]}
+        line = {'xdata': xt, 'ydata': yt, 'suptitle': str(cmd[-1]["sid"])}
         color = canvas.get('color', None)
         if color and isinstance(color, (list, tuple)):
             line['color'] = tuple(color)
