@@ -20,8 +20,6 @@
 r"""
 This module contains the Backend class, which processes superconducting chip information into an undirected graph representation. It also supports the creation of custom undirected graphs to serve as virtual chips.
 """
-
-import ast
 import networkx as nx
 import numpy as np
 from typing import Literal
@@ -51,20 +49,24 @@ class Backend:
             chip (str): Chip name, currently only 'Baihua' is avaliable.
         """
         if isinstance(chip,dict):
+            self.chip_name = ' '
             self.chip_info = chip
             print('The last calibration time was',self.chip_info['calibration_time'])
             self.size = self.chip_info['size']
-            self.priority_qubits = ast.literal_eval(self.chip_info['priority_qubits'])
+            self.priority_qubits = self.chip_info['priority_qubits']
             self.qubits_with_attributes = self._collect_qubits_with_attributes()
             self.couplers_with_attributes = self._collect_couplers_with_attributes()
-        elif chip == 'Baihua':
+        elif chip in ['Baihua','Haituo']:
+            self.chip_name = chip
             self.chip_info = load_chip_basic_info(chip)
             print('The last calibration time was',self.chip_info['calibration_time'])
             self.size = self.chip_info['size']
-            self.priority_qubits = ast.literal_eval(self.chip_info['priority_qubits'])
+            self.priority_qubits = self.chip_info['priority_qubits']
             self.qubits_with_attributes = self._collect_qubits_with_attributes()
             self.couplers_with_attributes = self._collect_couplers_with_attributes()
+            
         elif chip == 'Custom':
+            self.chip_name = chip
             print("Please set 'edges_with_attributes' as a list of tuples and 'nodes_with_attributes' as a dictionary.")
             self.chip_info = dict()
             self.size = (0,0)
@@ -207,7 +209,7 @@ class Backend:
             edge_colors = edge_colors_update
             edge_labels = edge_labels_update
 
-        fig, ax = plt.subplots(figsize=figsize,) #facecolor='none'
+        fig, ax = plt.subplots(figsize=figsize) #facecolor='none'
         pos = nx.get_node_attributes(self.graph, 'coordinate') 
         nx.draw(self.graph, pos,ax=ax, with_labels=False, node_color=node_colors, node_size=800, edgecolors='white',edge_color = edge_colors ,width = 18,) 
         nx.draw_networkx_labels(self.graph,pos,labels=node_labels,font_size=node_font_size, font_color='white')
@@ -236,8 +238,12 @@ class Backend:
             edge_cbar = fig.colorbar(edge_sm, ax=ax, orientation='horizontal',  pad=0.001, fraction=0.0333, aspect=25)# 调整颜色条大小和位置，放置在底部
             edge_cbar.set_label('CZ fidelity')
 
-        #plt.title("Baihua chip")
-        #plt.subplots_adjust(left=0.001, right=0.999, top=0.999, bottom=0.001)
+        xlim = ax.get_xlim()
+        ylim = ax.get_ylim()
+        xpos = (xlim[0] + xlim[1]) / 2
+        ypos = ylim[1] * 0.75 
+        ax.text(xpos, ypos, f'{self.chip_name}', va='center', ha='center', fontsize=24, fontweight='bold', color='k', family='serif')
+
         if save_svg_fname:
             plt.savefig(save_svg_fname + '.svg', transparent=True, dpi=300, bbox_inches='tight') 
         plt.show()

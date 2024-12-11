@@ -52,14 +52,14 @@ class Transpiler:
     qubits (via swap gates) within the circuit to overcome limited
     qubit connectivity.
     """
-    def __init__(self, qc: QuantumCircuit | str | list, chip_backend: Backend):
+    def __init__(self, qc: QuantumCircuit | str | list, chip_backend: Backend|None = None):
         
         r"""Obtain basic information from input quantum circuit.
 
         Args:
             qc (QuantumCircuit | str | list): The quantum circuit to be transpiled. Can be a QuantumCircuit object or OpenQASM 2.0 str or qlisp list.
 
-            chip_backend (Backend): An instance of the Backend class that contains the information about the quantum chip to be used for layout selection
+            chip_backend (Backend): An instance of the Backend class that contains the information about the quantum chip to be used for layout selection. Defaults to None
 
         Raises:
             TypeError: The quantum circuit format is incorrect.
@@ -67,8 +67,9 @@ class Transpiler:
 
         if isinstance(qc, QuantumCircuit):
             self.gates = qc.gates
-            self.nqubits_used = qc.nqubits
+            self.nqubits_used = len(qc.qubits) #qc.nqubits
             self.ncbits_used = qc.ncbits
+            self.params_value = qc.params_value
         elif isinstance(qc, str):
             qc_str = qc
             qc = QuantumCircuit()
@@ -76,13 +77,15 @@ class Transpiler:
             self.gates = qc.gates
             self.nqubits_used = qc.nqubits
             self.ncbits_used = qc.ncbits
+            self.params_value = qc.params_value
         elif isinstance(qc, list):
             qc_list = qc
             qc = QuantumCircuit()
             qc.from_qlisp(qc_list)
             self.gates = qc.gates
-            self.nqubits_used = qc.nqubits
+            self.nqubits_used = len(qc.qubits) #qc.nqubits
             self.ncbits_used = qc.ncbits
+            self.params_value = qc.params_value
         else:
             raise TypeError("Expected a Quark QuantumCircuit or OpenQASM 2.0 or qlisp, but got a {}.".format(type(qc)))
         
@@ -90,18 +93,16 @@ class Transpiler:
 
         self.chip_backend = chip_backend
 
-        # update initial_mapping and coupling map
-        # self._physical_qubits_layout(chip_backend,use_priority,initial_mapping,coupling_map)
-        self.initial_mapping = [i for i in range(qc.nqubits)]
-        self.coupling_map = [(i,i+1) for i in range(qc.nqubits-1)]
+        self.initial_mapping = qc.qubits
+        self.coupling_map = [(self.initial_mapping[i],self.initial_mapping[i+1]) for i in range(len(self.initial_mapping)-1)]
         self.largest_qubits_index = max(self.initial_mapping) + 1
 
-    def _select_layout(self,use_priority: bool = True, initial_mapping: list|dict = {'key':'fidelity_var','topology':'linear1'}, coupling_map: list[tuple]|None = None):
-        # update initial_mapping, coupling_map, largest_qubits_index
+    def _select_layout(self,use_priority: bool = True, initial_mapping: list|dict = {'key':'fidelity_var','topology':'linear1'}):
+        # select layout from the Backend! update initial_mapping, coupling_map, largest_qubits_index
+        if self.chip_backend is None:
+            raise(TypeError('Please specify a Backend, otherwise a layout cannot be selected!'))
         self.initial_mapping,self.coupling_map = Layout(self.nqubits_used,self.chip_backend).selected_layout(use_priority=use_priority,
-                                                                                                   initial_mapping=initial_mapping,
-                                                                                                   coupling_map=coupling_map)
-        print('check',self.initial_mapping)
+                                                                                                   initial_mapping=initial_mapping)
         self.largest_qubits_index = max(self.initial_mapping) + 1
 
         subgraph = self.chip_backend.graph.subgraph(self.initial_mapping)
@@ -145,7 +146,7 @@ class Transpiler:
         self.gates = new
         return None
     
-    def run_select_layout(self, use_priority: bool = True, initial_mapping: list|dict = {'key':'fidelity_var','topology':'linear1'}, coupling_map: list[tuple] | None = None):
+    def run_select_layout(self, use_priority: bool = True, initial_mapping: list|dict = {'key':'fidelity_var','topology':'linear1'}):
         """
         Selects the quantum circuit layout and performs transpiling based on the provided mapping and coupling configuration.
     
@@ -163,12 +164,17 @@ class Transpiler:
         Returns:
             QuantumCircuit: A quantum circuit with the selected layout and transpiled gates.
         """
-        self._select_layout(use_priority = use_priority, initial_mapping = initial_mapping, coupling_map = coupling_map)
+        self._select_layout(use_priority = use_priority, initial_mapping = initial_mapping)
         self._mapping_to_physical_qubits_layout()
         qc = QuantumCircuit(self.largest_qubits_index,self.ncbits_used)
         qc.gates = self.gates
         qc.qubits = self.initial_mapping
+        qc.params_value = self.params_value
         qc.physical_qubits_espression = True
+        if self.chip_backend is not None:
+            if self.chip_backend.chip_name == 'Haituo':
+                qc.adjust_index(132)
+                print(f'Tip: When setting Haituo chip as backend, the quibit index starts at 132.')
         return qc
     
     @property
@@ -273,14 +279,21 @@ class Transpiler:
         qc = QuantumCircuit(self.largest_qubits_index,self.ncbits_used)
         qc.gates = self.gates
         qc.qubits = self.initial_mapping
+        qc.params_value = self.params_value
         qc.physical_qubits_espression = True
+        if self.chip_backend is not None:
+            if self.chip_backend.chip_name == 'Haituo':
+                qc.adjust_index(132)
+                print(f'Tip: When setting Haituo chip as backend, the quibit index starts at 132.')
         return qc 
     
     def _sabre_routing_once(self,dag):
         
         physical_qubit_list = self.initial_mapping.copy()
         
-        front_layer = list(nx.topological_generations(dag))[0]
+        front_layer = list(nx.topological_generations(dag))
+        if front_layer != []:
+            front_layer = front_layer[0]
         
         coupling_graph = self.coupling_graph
         
@@ -397,7 +410,12 @@ class Transpiler:
         qc = QuantumCircuit(self.largest_qubits_index,self.ncbits_used)
         qc.gates = self.gates
         qc.qubits = self.initial_mapping
+        qc.params_value = self.params_value
         qc.physical_qubits_espression = True
+        if self.chip_backend is not None:
+            if self.chip_backend.chip_name == 'Haituo':
+                qc.adjust_index(132)
+                print(f'Tip: When setting Haituo chip as backend, the quibit index starts at 132.')
         return qc
 
     def _basic_gates(self) -> 'Transpiler':
@@ -455,6 +473,10 @@ class Transpiler:
         qc.gates = self.gates
         qc.qubits = self.initial_mapping
         qc.physical_qubits_espression = True
+        if self.chip_backend is not None:
+            if self.chip_backend.chip_name == 'Haituo':
+                qc.adjust_index(132)
+                print(f'Tip: When setting Haituo chip as backend, the quibit index starts at 132.')
         return qc
 
     def _gate_optimize(self) -> 'Transpiler':
@@ -557,9 +579,13 @@ class Transpiler:
         qc.gates = self.gates
         qc.qubits = self.initial_mapping
         qc.physical_qubits_espression = True
+        if self.chip_backend is not None:
+            if self.chip_backend.chip_name == 'Haituo':
+                qc.adjust_index(132)
+                print(f'Tip: When setting Haituo chip as backend, the quibit index starts at 132.')
         return qc
             
-    def run(self, use_priority: bool = True, initial_mapping: list|dict = {'key':'fidelity_var','topology':'linear1'}, coupling_map: list[tuple]|None = None, optimize_level: 0|1 = 1) -> 'QuantumCircuit':
+    def run(self, compile:bool = True, use_priority: bool = True, initial_mapping: list|dict = {'key':'fidelity_var','topology':'linear1'}, optimize_level: 0|1 = 1) -> 'QuantumCircuit':
         r"""Run the transpile program.
 
         Args:
@@ -568,9 +594,27 @@ class Transpiler:
         Returns:
             QuantumCircuit: Transpiled quantum circuit.
         """
-        if optimize_level == 0:
-            return self._select_layout(use_priority=use_priority, initial_mapping=initial_mapping, coupling_map=coupling_map)._basic_routing()._basic_gates().run_gate_optimize()
-        elif optimize_level == 1:
-            return self._select_layout(use_priority=use_priority, initial_mapping=initial_mapping, coupling_map=coupling_map)._sabre_routing()._basic_gates().run_gate_optimize()
+        if compile is False:
+            print('Checking whether the physical qubits the user selected are legal.')
+            subgraph = self.chip_backend.graph.subgraph(self.initial_mapping)
+            is_connected = nx.is_connected(subgraph)
+            for edge, fidelity in nx.get_edge_attributes(subgraph,'fidelity').items():
+                if fidelity == 0.:
+                    is_connected = False
+                    
+            if is_connected:
+                qc =  QuantumCircuit(self.largest_qubits_index, self.ncbits_used)
+                qc.gates = self.gates
+                qc.qubits = self.initial_mapping
+                qc.physical_qubits_espression = True             
+                return qc
+            else:
+                raise(ValueError('The Physical qubits user selected are invalid'))  
+
         else:
-            raise(ValueError('More optimize level is not support now!'))
+            if optimize_level == 0:
+                return self._select_layout(use_priority=use_priority, initial_mapping=initial_mapping)._basic_routing()._basic_gates().run_gate_optimize()
+            elif optimize_level == 1:
+                return self._select_layout(use_priority=use_priority, initial_mapping=initial_mapping)._sabre_routing()._basic_gates().run_gate_optimize()
+            else:
+                raise(ValueError('More optimize level is not support now!'))
