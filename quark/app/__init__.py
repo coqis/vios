@@ -186,6 +186,7 @@ def get_data_by_tid(tid: int, signal: str = '', **kwds) -> dict:
         task.meta = info['meta']
         task.data = {signal: data[signal]}
         task.index = len(data[signal]) + 1
+        task.column = kwds.get('column', 4)
         plot(task, backend=kwds.get('backend', 'studio'))
 
     return {'data': data, 'meta': info['meta']}
