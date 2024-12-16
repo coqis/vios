@@ -161,6 +161,12 @@ def rollback(tid: int):
         logger.error(f'Failed to rollback: {e}')
 
 
+def get_data_by_rid(rid: int, signal: str = '', **kwds):
+    from ._data import get_record_by_rid
+    tid = get_record_by_rid(rid)[1]
+    return get_data_by_tid(tid, signal, **kwds)
+
+
 def get_data_by_tid(tid: int, signal: str = '', **kwds) -> dict:
     """load data with given **task id(tid)** and **signal**
 

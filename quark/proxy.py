@@ -220,6 +220,14 @@ class Task(object):
     def ctx(self):
         return self.step(-9, 'ctx')
 
+    @cached_property
+    def rid(self):
+        from .app._data import get_record_by_tid
+        return get_record_by_tid(self.tid)[0]
+
+    def __repr__(self):
+        return f'{self.name}(rid={self.rid}, tid={self.tid})'
+
     def run(self):
         """submit the task to the `QuarkServer`
         """
