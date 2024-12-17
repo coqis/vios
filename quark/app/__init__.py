@@ -162,55 +162,43 @@ def rollback(tid: int):
 
 
 def lookup(start: str = '', stop: str = '', fmt: str = '%Y-%m-%d-%H-%M-%S'):
+    import ipywidgets as widgets
+    import pandas as pd
+    from IPython.display import display
+
+    from ._data import get_record_list_by_name
+
     days = time.time()-14*24*60*60
     start = time.strftime(fmt, time.localtime(days)) if not start else start
     stop = time.strftime(fmt) if not stop else stop
 
-    from ._data import get_record_list_by_name
     rs = get_record_list_by_name('', start, stop)
-
-    import pandas as pd
-    import ipywidgets as widgets
-    from IPython.display import display
 
     df = pd.DataFrame(rs)[[0, 1, 2, 6]]
     df.columns = ['rid', 'tid', 'name', 'status']
 
-    # 每页显示的行数
     items_per_page = 10
     total_pages = (len(df) + items_per_page - 1) // items_per_page
-
     setting = {'current': 1}
 
-    # 创建输出区域
     output = widgets.Output()
-
-    # 创建翻页按钮
     prev_button = widgets.Button(description="Previous")
     next_button = widgets.Button(description="Next")
-
-    # 创建页码显示, 当前页码（从 1 开始）
     page_label = widgets.Label(value=f"Page 1 of {total_pages}")
 
-    # 定义翻页函数
     def display_table(page):
-        """根据页码显示 DataFrame 的一部分"""
         setting['current'] = page
         current_page = setting['current']
 
-        # 计算索引范围
         start_idx = (current_page - 1) * items_per_page
         end_idx = start_idx + items_per_page
 
-        # 清空输出并显示当前页的数据
         with output:
             output.clear_output()
             display(df.iloc[start_idx:end_idx])
 
-        # 更新页码显示
         page_label.value = f"Page {current_page} of {total_pages}"
 
-    # 按钮回调函数
     def on_prev_clicked(b):
         current_page = setting['current']
         if current_page > 1:
@@ -224,10 +212,8 @@ def lookup(start: str = '', stop: str = '', fmt: str = '%Y-%m-%d-%H-%M-%S'):
     prev_button.on_click(on_prev_clicked)
     next_button.on_click(on_next_clicked)
 
-    # 初始化显示第一页
     display_table(setting['current'])
 
-    # 显示组件
     display(widgets.HBox([prev_button, next_button, page_label]))
     display(output)
 
