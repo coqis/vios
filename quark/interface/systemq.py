@@ -156,9 +156,15 @@ class Workflow(object):
         try:
             signal = _form_signal(kwds.get('signal'))
         except Exception as e:
-            if isinstance(circuit, list) and isinstance(circuit[0], tuple) and circuit[0][0][0] == 'Measure':
-                cmd = f'{circuit[0][-1]}.{circuit[0][0][-1]}'
-                return {'read': [('READ', cmd, 'reader', 'au')]}, {'arch': 'undefined'}
+            if not isinstance(circuit, list):
+                raise TypeError(f'wrong type circuit: {circuit}')
+
+            # [(('Set','Frequency'), 'MW.CH1'), (('Measure','S'), 'NA.CH1')]
+            cmds = []
+            for op in circuit:
+                if isinstance(op[0], tuple) and op[0][0] == 'GET':
+                    cmds.append(('READ', f'{op[-1]}.{op[0][-1]}', '', 'au'))
+            return {'read': cmds}, {'arch': 'undefined'}
 
         ctx: Context = kwds.pop('ctx')
         ctx._getGateConfig.cache_clear()
