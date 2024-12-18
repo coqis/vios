@@ -193,6 +193,9 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
 
             # get sample rate from device
             if ctype != 'WAIT':
+                if _target.count('.') != 2:
+                    logger.critical(f'wrong target: {_target}')
+                    continue
                 dev = _target.split('.', 1)[0]
                 kwds['srate'] = query(f'dev.{dev}.srate')
                 if not isinstance(kwds['srate'], (float, int)):  # None, str
