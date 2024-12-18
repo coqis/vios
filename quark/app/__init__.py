@@ -161,7 +161,7 @@ def rollback(tid: int):
         logger.error(f'Failed to rollback: {e}')
 
 
-def lookup(start: str = '', stop: str = '', fmt: str = '%Y-%m-%d-%H-%M-%S'):
+def lookup(start: str = '', stop: str = '', name: str = '', fmt: str = '%Y-%m-%d-%H-%M-%S'):
     import ipywidgets as widgets
     import pandas as pd
     from IPython.display import display
@@ -172,7 +172,7 @@ def lookup(start: str = '', stop: str = '', fmt: str = '%Y-%m-%d-%H-%M-%S'):
     start = time.strftime(fmt, time.localtime(days)) if not start else start
     stop = time.strftime(fmt) if not stop else stop
 
-    rs = get_record_list_by_name('', start, stop)
+    rs = get_record_list_by_name(name, start, stop)[::-1]
 
     df = pd.DataFrame(rs)[[0, 1, 2, 6]]
     df.columns = ['rid', 'tid', 'name', 'status']
