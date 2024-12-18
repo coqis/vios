@@ -153,6 +153,13 @@ class Workflow(object):
     @classmethod
     def qcompile(cls, circuit: list, **kwds):
 
+        try:
+            signal = _form_signal(kwds.get('signal'))
+        except Exception as e:
+            if isinstance(circuit, list) and isinstance(circuit[0], tuple) and circuit[0][0][0] == 'Measure':
+                cmd = f'{circuit[0][-1]}.{circuit[0][0][-1]}'
+                return {'read': [('READ', cmd, 'reader', 'au')]}, {'arch': 'undefined'}
+
         ctx: Context = kwds.pop('ctx')
         ctx._getGateConfig.cache_clear()
         ctx.snapshot().cache = kwds.pop('cache', {})
@@ -168,7 +175,7 @@ class Workflow(object):
         _, (cmds, dmap) = qcompile(circuit,
                                    lib=kwds.get('lib', stdlib),
                                    cfg=kwds.get('ctx', ctx),
-                                   signal=_form_signal(kwds.get('signal')),
+                                   signal=signal,
                                    shots=kwds.get('shots', 1024),
                                    context=kwds.get('context', {}),
                                    arch=kwds.get('arch', 'baqis'),

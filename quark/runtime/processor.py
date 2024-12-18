@@ -22,6 +22,7 @@
 
 import numpy as np
 from loguru import logger
+from zee import flatten_dict
 
 from quark.interface import Workflow
 
@@ -73,15 +74,19 @@ def process(raw_data, **kwds):
 
         if 'arch' in dataMap and dataMap['arch'] == 'general':
             return raw_data['READ']['AD']
-        elif list(dataMap.keys()) == ['arch']:  # for NA
-            if 'READ' in raw_data:
-                print(raw_data)
-                nadata = result['data'] = raw_data['READ']['NA']
-                if 'CH1.Trace' in nadata:
-                    result['data'] = raw_data['READ']['NA'].pop('CH1.Trace')
-                elif 'CH1.S' in nadata:
-                    result['data'] = raw_data['READ']['NA'].pop('CH1.S')
-            result['extra'] = raw_data
+        elif 'arch' in dataMap and dataMap['arch'] == 'undefined':
+            data = flatten_dict(raw_data)
+            for k, v in data.items():
+                if kwds['signal'] in k:
+                    result[kwds['signal']] = v
+            # if 'READ' in raw_data:
+            #     print(raw_data)
+            #     nadata = result['data'] = raw_data['READ']['NA']
+            #     if 'CH1.Trace' in nadata:
+            #         result['data'] = raw_data['READ']['NA'].pop('CH1.Trace')
+            #     elif 'CH1.S' in nadata:
+            #         result['data'] = raw_data['READ']['NA'].pop('CH1.S')
+            # result['extra'] = raw_data
         else:
             result = Workflow.analyze(raw_data, dataMap)
 
