@@ -107,7 +107,8 @@ def _form_signal(sig):
         if sig == 'raw':
             sig = 'iq'
         try:
-            # return sig_tab[sig]
+            if '|' not in sig:
+                return sig_tab[sig]
             _sig = None
             for s in sig.split('|'):
                 _s = getattr(Signal, s)
