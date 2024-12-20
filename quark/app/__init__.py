@@ -39,6 +39,7 @@ from quark.proxy import Task
 
 # get_record_by_rid, get_record_by_tid, sql
 from ._data import get_config_by_tid
+from ._recipe import Recipe
 
 _sp = {}  # defaultdict(lambda: connect('QuarkServer', host, port))
 
