@@ -107,7 +107,12 @@ def _form_signal(sig):
         if sig == 'raw':
             sig = 'iq'
         try:
-            return sig_tab[sig]
+            # return sig_tab[sig]
+            _sig = None
+            for s in sig.split('|'):
+                _s = getattr(Signal, s)
+                _sig = _s if not _sig else _sig | _s
+            return _sig
         except KeyError:
             pass
     elif isinstance(sig, Signal):
