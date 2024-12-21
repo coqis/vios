@@ -20,12 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-
 import time
 
 import numpy as np
 
-from waveforms import Waveform, WaveVStack, wave_eval
+from waveforms import Waveform, wave_eval
 from waveforms.math.signal import getFTMatrix, shift
 
 from .common import BaseDriver, Quantity
@@ -81,23 +80,6 @@ def get_coef(coef_info, sampleRate):
 #         self.default = dict(value=value, ch=ch, unit=unit)
 
 
-def tolist(wv: WaveVStack) -> list:
-    ret = [wv.start, wv.stop, wv.sample_rate, len(wv.wlist)]
-    for w in wv.wlist:
-        ret.extend(w.tolist())
-    return ret
-
-
-def fromlist(wl: list) -> WaveVStack:
-    wv, wpos = WaveVStack([]), 4
-    wv.start, wv.stop, wv.sample_rate, n = wl[:wpos]
-    for _ in range(n):
-        wav, pos = Waveform.fromlist(wl[wpos:], True)
-        wv.wlist.append(wav)
-        wpos += pos
-    return wv
-
-
 class Driver(BaseDriver):
     """driver template
 
@@ -130,8 +112,8 @@ class Driver(BaseDriver):
         Quantity('IQ', value=np.array([]), ch=1),  # np.array
         Quantity('Coefficient', value=np.array([]), ch=1),  # np.array
         Quantity('StartCapture', value=1, ch=1,),  # int
-        
-        Quantity('CaptureMode', value='raw', ch=1), # raw->TraceIQ, alg-> IQ
+
+        Quantity('CaptureMode', value='raw', ch=1),  # raw->TraceIQ, alg-> IQ
 
         # test
         Quantity('Classify', value=0, ch=1),
@@ -168,7 +150,7 @@ class Driver(BaseDriver):
         elif name == 'Waveform':
             if isinstance(value, list):
                 t0 = time.time()
-                wf = fromlist(value)
+                wf = Waveform.fromlist(value)
                 t1 = time.time()
                 wf.sample()
             if isinstance(value, Waveform):

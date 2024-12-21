@@ -53,7 +53,7 @@ try:
 except Exception as e:
     # logger.error(str(e))
     os.remove(QUARK/'startup.json')
-    logger.critical('Restart QuarkServer Now!!!')
+    logger.critical('Restart QuarkServer Again!!!')
     raise KeyboardInterrupt
     startup = {}
 
@@ -222,7 +222,7 @@ class Task(object):
 
     @cached_property
     def rid(self):
-        from .app._data import get_record_by_tid
+        from .app._db import get_record_by_tid
         return get_record_by_tid(self.tid)[0]
 
     def __repr__(self):

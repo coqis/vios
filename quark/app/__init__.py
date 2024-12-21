@@ -38,7 +38,7 @@ from quark import connect
 from quark.proxy import Task
 
 # get_record_by_rid, get_record_by_tid, sql
-from ._data import get_config_by_tid
+from ._db import get_config_by_tid
 from ._recipe import Recipe
 
 _sp = {}  # defaultdict(lambda: connect('QuarkServer', host, port))
@@ -167,7 +167,7 @@ def lookup(start: str = '', stop: str = '', name: str = '', fmt: str = '%Y-%m-%d
     import pandas as pd
     from IPython.display import display
 
-    from ._data import get_record_list_by_name
+    from ._db import get_record_list_by_name
 
     days = time.time()-14*24*60*60
     start = time.strftime(fmt, time.localtime(days)) if not start else start
@@ -220,7 +220,7 @@ def lookup(start: str = '', stop: str = '', name: str = '', fmt: str = '%Y-%m-%d
 
 
 def get_data_by_rid(rid: int, signal: str = '', **kwds):
-    from ._data import get_record_by_rid
+    from ._db import get_record_by_rid
     tid = get_record_by_rid(rid)[1]
     return get_data_by_tid(tid, signal, **kwds)
 
@@ -238,7 +238,7 @@ def get_data_by_tid(tid: int, signal: str = '', **kwds) -> dict:
     Returns:
         dict: data、metainfo
     """
-    from ._data import get_dataset_by_tid
+    from ._db import get_dataset_by_tid
     from ._view import plot
 
     info, data = get_dataset_by_tid(tid, signal)

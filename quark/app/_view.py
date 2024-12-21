@@ -189,7 +189,7 @@ def plot(task: Task, append: bool = False, backend: str = 'viewer'):
         logger.error(f'Failed to update viewer: {e}')
 
 
-def network():
+def graph():
     nodes = {}
     for i in range(5):
         for j in range(6):
@@ -203,7 +203,7 @@ def network():
 
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-def plotdemo():
+def demo():
     """demo for plot
 
     Example: iq scatter

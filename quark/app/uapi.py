@@ -32,7 +32,7 @@ import numpy as np
 
 from quark import loads
 
-from ._data import get_record_list_by_name, get_record_set_by_name
+from ._db import get_record_list_by_name, get_record_set_by_name
 
 
 def query(app: str = None,  start: datetime = None, stop: datetime = None, page: int = 1) -> tuple:
