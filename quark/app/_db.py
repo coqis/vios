@@ -26,7 +26,7 @@ from pathlib import Path
 import h5py
 import numpy as np
 from loguru import logger
-from quark import loads
+from srpc import loads
 
 from quark.proxy import QUARK
 

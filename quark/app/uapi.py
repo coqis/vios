@@ -29,8 +29,7 @@ import h5py
 import matplotlib.image as mim
 import matplotlib.pyplot as plt
 import numpy as np
-
-from quark import loads
+from srpc import loads
 
 from ._db import get_record_list_by_name, get_record_set_by_name
 

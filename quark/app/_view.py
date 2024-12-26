@@ -29,8 +29,8 @@ import time
 
 import numpy as np
 from loguru import logger
+from srpc import connect
 
-from quark import connect
 from quark.proxy import Task
 
 _vs = {'viewer': connect('QuarkViewer', port=2086),

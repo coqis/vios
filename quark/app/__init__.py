@@ -28,13 +28,15 @@ Abstract: about app
 import sys
 import time
 from collections import defaultdict
+from functools import wraps
 from pathlib import Path
 from threading import current_thread
+from typing import Callable
 
 import numpy as np
 from loguru import logger
+from srpc import connect
 
-from quark import connect
 from quark.proxy import Task
 
 # get_record_by_rid, get_record_by_tid, sql
@@ -337,3 +339,25 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
     # plt.axis('off')
     # plt.legend(tuple(wf))
     return wf
+
+
+def profile(functions: list[Callable] = []):
+    # pycallgraph
+    try:
+        from line_profiler import LineProfiler
+    except ImportError as e:
+        return print(e)
+    lp = LineProfiler()
+    [lp.add_function(f) for f in functions]
+
+    def wrapper(func):
+        @wraps(func)
+        def wrapped(*args, **kwargs):
+            print(f'{func.__name__} started ...')
+            lpf = lp(func=func)
+            result = lpf(*args, **kwargs)
+            lp.print_stats()
+            print(f'{func.__name__} finished !!!')
+            return result
+        return wrapped
+    return wrapper
