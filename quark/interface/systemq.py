@@ -27,7 +27,6 @@
 from copy import deepcopy
 
 import numpy as np
-
 from loguru import logger
 
 try:
@@ -45,7 +44,18 @@ except Exception as e:
 from qlispc import Signal, get_arch, register_arch
 from qlispc.arch.baqis import baqisArchitecture
 from qlispc.arch.baqis.config import QuarkLocalConfig
-from qlispc.kernel_utils import get_all_channels, qcompile, sample_waveform
+from qlispc.kernel_utils import qcompile, sample_waveform
+
+try:
+    from systemq.lib.arch.baqis_config import get_all_channels
+
+    def set_all_channels(ctx: 'Context'):
+        return [('WRITE', *cmd) for cmd in get_all_channels(ctx.export())]
+except ImportError as e:
+    from qlispc.kernel_utils import get_all_channels
+
+    def set_all_channels(ctx: 'Context'):
+        return [('WRITE', target, 'zero()', '') for target in get_all_channels(ctx)]
 
 
 # waveform==1.7.7
@@ -82,7 +92,10 @@ class Context(QuarkLocalConfig):
         return self._QuarkLocalConfig__driver
 
     def export(self):
-        return self.snapshot().todict()
+        try:
+            return self.snapshot().todict()
+        except Exception as e:
+            return self.snapshot().dct
 
 
 def _form_signal(sig):
@@ -165,7 +178,7 @@ class Workflow(object):
             if not isinstance(circuit, list):
                 raise TypeError(f'wrong type circuit: {circuit}')
 
-            # [(('Set','Frequency'), 'MW.CH1'), (('Measure','S'), 'NA.CH1')]
+            # [(('SET','Frequency'), 'MW.CH1'), (('GET','S'), 'NA.CH1')]
             cmds = []
             for op in circuit:
                 if isinstance(op[0], tuple) and op[0][0] == 'GET':
@@ -176,11 +189,8 @@ class Workflow(object):
         ctx._getGateConfig.cache_clear()
         ctx.snapshot().cache = kwds.pop('cache', {})
 
-        # align_right = kwds.pop('align_right', True)
-        # waveform_length = kwds.pop('waveform_length', 98e-6)
         if kwds.get('fillzero', False):  # whether to initialize all channels to zero()
-            compiled = {'main': [('WRITE', target, 'zero()', '')
-                                 for target in get_all_channels(ctx)]}
+            compiled = {'main': set_all_channels(ctx)}
         else:
             compiled = {}
 
@@ -227,8 +237,10 @@ class Workflow(object):
 
             try:
                 ch = kwds['target'].split('.')[-1]
-                delay = kwds['calibration'][ch].get('delay', 0)
-                pulse = sample_waveform(func, kwds['calibration'][ch],
+                cali = {} if kwds['sid'] < 0 else kwds['calibration'][ch]
+                delay = cali.get('delay', 0)
+                pulse = sample_waveform(func,
+                                        cali,
                                         sample_rate=kwds['srate'],
                                         start=kwds.get('start', 0), stop=kwds.get('LEN', 98e-6),
                                         support_waveform_object=support_waveform_object)
