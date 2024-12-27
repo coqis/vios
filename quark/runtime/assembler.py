@@ -185,11 +185,13 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                 except (ValueError, KeyError) as e:
                     continue
 
-                # save initial value to restore
-                if sid == 0 and not kw.get('hold', False):
-                    init = query(target.removesuffix(
-                        '.I').removesuffix('.Q'))
-                    ctx.initial['restore'].append((ctype, target, init, unit))
+            # save initial value to restore
+            if sid == 0 and not kw.get('hold', False):
+                # init = query(target.removesuffix(
+                #     '.I').removesuffix('.Q'))
+                if 'waveform' in _target.lower():
+                    init = (ctype, _target, 'zero()', unit)
+                    ctx.initial['restore'].append(init)
 
             # get sample rate from device
             if ctype != 'WAIT':

@@ -164,7 +164,7 @@ class Recipe(object):
                          'other': {'shots': self.shots,
                                    'signal': self.signal,
                                    'align_right': self.align_right,
-                                   'fillzero': self.fillzero,  # 编译开始前初始化所有通道波形为zero()
+                                   'fillzero': self.fillzero,  # 编译开始前初始化所有通道
                                    'waveform_length': self.waveform_length,
                                    'shape': [len(v[0][1]) for v in self.loops.values()]
                                    } | {k: v for k, v in self.__dict.items() if not isinstance(v, (list, np.ndarray))}
