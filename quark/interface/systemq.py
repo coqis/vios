@@ -46,6 +46,12 @@ from qlispc.arch.baqis import baqisArchitecture
 from qlispc.arch.baqis.config import QuarkLocalConfig
 from qlispc.kernel_utils import qcompile, sample_waveform
 
+# waveform==1.7.7
+# from qlisp import Signal,get_arch,register_arch
+# from lib.arch.baqis import baqisArchitecture
+# from lib.arch.baqis_config import QuarkLocalConfig
+# from qlisp.kernel_utils import qcompile,sample_waveform
+
 try:
     from systemq.lib.arch.baqis_config import get_all_channels
 
@@ -54,15 +60,10 @@ try:
 except ImportError as e:
     from qlispc.kernel_utils import get_all_channels
 
+    # from qlisp.kernel_utils import get_all_channels
+
     def set_all_channels(ctx: 'Context'):
         return [('WRITE', target, 'zero()', '') for target in get_all_channels(ctx)]
-
-
-# waveform==1.7.7
-# from qlisp import Signal,get_arch,register_arch
-# from lib.arch.baqis import baqisArchitecture
-# from lib.arch.baqis_config import QuarkLocalConfig
-# from qlisp.kernel_utils import get_all_channels,qcompile,sample_waveform
 
 
 # waveforms.math: waveforms or waveform-math

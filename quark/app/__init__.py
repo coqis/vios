@@ -79,16 +79,16 @@ def login(user: str = 'baqis', host: str = '127.0.0.1', verbose: bool = True):
     return s
 
 
-def submit(task: dict, block: bool = False, preview: list = [], **kwds):
+def submit(task: dict, block: bool = False, **kwds):
     """submit a task to a backend
 
     Args:
         task (dict): description of a task
         block (bool, optional): block until the task is done if True
-        preview (list, optional): real time display of the waveform
 
     Keyword Arguments: Kwds
-        plot (bool): plot the result in the QuarkStudio if True(1D or 2D), defaults to False.
+        preview (list): real time display of the waveform
+        plot (bool): plot the result if True(1D or 2D), defaults to False.
         backend (connection): connection to a backend, defaults to local machine.
 
     Raises:
@@ -133,16 +133,21 @@ def submit(task: dict, block: bool = False, preview: list = [], **kwds):
         trig = []
     else:
         ss = login(verbose=False)
-        trig = [(t, 0, 'au') for t in ss.query('station.triggercmds')]
 
-    # if preview:
-    ss.update('etc.canvas.filter', preview)  # waveforms to be previewed
+        trigger = ss.query('station.triggercmds')
+        trig = [(t, 0, 'au') for t in trigger]
+        task['body']['loop']['trig'] = trig
 
-    task['body']['loop']['trig'] = trig
-    t = Task(task)
+        shots = task['meta']['other']['shots']
+        [ss.write(f'{t.rsplit('.', 1)[0]}.Shot', shots) for t in trigger]
+
+        # waveforms to be previewed
+        ss.update('etc.canvas.filter', kwds.get('preview', []))
+
+    t = Task(task,
+             timeout=1e9 if block else None,
+             plot=plot if kwds.get('plot', False) else False)
     t.server = ss
-    t.plot = plot if kwds.get('plot', False) else False
-    t.timeout = 1e9 if block else None
     t.run()
     return t
 
