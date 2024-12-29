@@ -130,13 +130,11 @@ def submit(task: dict, block: bool = False, **kwds):
 
     if 'backend' in kwds:  # from master
         ss = kwds['backend']
-        trig = []
     else:
         ss = login(verbose=False)
 
-        trigger = ss.query('station.triggercmds')
-        trig = [(t, 0, 'au') for t in trigger]
-        task['body']['loop']['trig'] = trig
+        trigger: list[str] = ss.query('station.triggercmds')
+        task['body']['loop']['trig'] = [(t, 0, 'au') for t in trigger]
 
         shots = task['meta']['other']['shots']
         [ss.write(f'{t.rsplit('.', 1)[0]}.Shot', shots) for t in trigger]
