@@ -32,8 +32,8 @@ class Recipe(object):
 
         self.filename: str = 'baqis'  # 数据存储文件名, 位于桌面/home/dat文件夹下
         self.priority: int = 0  # 任务排队用, 越小优先级越高
-        self.rules: list[str] = []  # 变量依赖关系列表, 详见assign方法
-        self.loops: dict[str, list] = {}  # 自定义变量列表, 详见define方法
+        self.rules: list[str] = []  # 变量依赖关系列表
+        self.loops: dict[str, list] = {}  # 变量列表
 
         self.__ckey = ''
         self.__dict = {}
@@ -64,7 +64,7 @@ class Recipe(object):
         if isinstance(value, (list, np.ndarray)):
             if '.' in key:
                 # cfg表中参数，如'gate.Measure.Q0.params.frequency'
-                value = np.asarray(value)
+                # value = np.asarray(value)
                 if self.__ckey:
                     self.define(self.__ckey, f'${key}', value)
                     self.__ckey = ''
@@ -82,6 +82,9 @@ class Recipe(object):
 
     def assign(self, path: str, value):
         """变量依赖关系列表
+        ### NOTE: '⟨' is not '<', '⟩' is not '>'
+        - On Windows, press Windows + . (period) to open the emoji and symbol picker.
+        - On Mac, press Control + Command + Space to open the Character Viewer.
 
         Args:
             path (str): 变量在cfg表中的完整路径, 如gate.R.Q1.params.amp
@@ -94,18 +97,15 @@ class Recipe(object):
         Examples: `self.rules`
             >>> self.assign('gate.R.Q0.params.frequency', value='freq.Q0')
             >>> self.assign('gate.R.Q1.params.amp', value=0.1)
-            ['<gate.R.Q0.params.frequency>=<freq.Q0>', '<gate.R.Q1.params.amp>=0.1']
+            ['⟨gate.R.Q0.params.frequency⟩=⟨freq.Q0⟩', '⟨gate.R.Q1.params.amp⟩=0.1']
         """
-        if isinstance(value, str) and '.' in value:
-            if value.split('.')[0] in self.loops:
-                dep = f'<{path}>=<{value}>'
+        if isinstance(value, str):
+            if '.' in value and value.split('.')[0] in self.loops:
+                dep = f'⟨{path}⟩=⟨{value}⟩'
             else:
-                raise ValueError('variable not not defined')
+                dep = f'⟨{path}⟩="{value}"'
         else:
-            dep = f'<{path}>="{value}"' if isinstance(
-                value, str) else f'<{path}>={value}'
-        # else:
-        #     raise ValueError('illegal assignment!')
+            dep = f'⟨{path}⟩={value}'
 
         if dep not in self.rules:
             self.rules.append(dep)

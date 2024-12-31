@@ -137,7 +137,7 @@ def submit(task: dict, block: bool = False, **kwds):
         task['body']['loop']['trig'] = [(t, 0, 'au') for t in trigger]
 
         shots = task['meta']['other']['shots']
-        [ss.write(f'{t.rsplit('.', 1)[0]}.Shot', shots) for t in trigger]
+        [ss.write(f'{t.rsplit(".", 1)[0]}.Shot', shots) for t in trigger]
 
         # waveforms to be previewed
         ss.update('etc.canvas.filter', kwds.get('preview', []))
