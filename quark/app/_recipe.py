@@ -1,12 +1,30 @@
-from pathlib import Path
+# MIT License
 
-import dill
+# Copyright (c) 2024 YL Feng
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
 import numpy as np
-from tqdm import tqdm
 
 
 class Recipe(object):
-    """**Recipe仅用于生成任务，没有编译或执行逻辑！**
+    """**Recipe仅用于生成任务，没有编译/执行/数据处理等任何逻辑！**
     """
 
     def __init__(self, name: str, shots: int = 1024, signal: str = 'iq_avg',
@@ -26,9 +44,9 @@ class Recipe(object):
         self.align_right = align_right
         self.waveform_length = waveform_length
 
-        self.fillzero = True
-        self.reset = []
-        self._circuit: list[list] = []  # qlisp线路
+        self.fillzero = True  # 编译开始前初始化所有通道
+        self.reset = []  # [('AWG.CH1.Waveform', 'zero()', 'au')]
+        self.__circuit: list[list] = []  # qlisp线路
 
         self.filename: str = 'baqis'  # 数据存储文件名, 位于桌面/home/dat文件夹下
         self.priority: int = 0  # 任务排队用, 越小优先级越高
@@ -40,14 +58,16 @@ class Recipe(object):
 
     @property
     def circuit(self):
-        return self._circuit
+        return self.__circuit
 
     @circuit.setter
     def circuit(self, cirq):
         if isinstance(cirq, list):
-            self._circuit = cirq
+            self.__circuit = cirq
         elif callable(cirq):
-            self._circuit = {'module': cirq.__module__, 'name': cirq.__name__}
+            self.__circuit = {'module': cirq.__module__, 'name': cirq.__name__}
+        else:
+            raise TypeError(f'wrong type of circuit: list or function needed!')
 
     def __getitem__(self, key: str):
         try:
@@ -110,13 +130,13 @@ class Recipe(object):
         if dep not in self.rules:
             self.rules.append(dep)
 
-    def define(self, group: str, target: str, value: np.ndarray):
+    def define(self, group: str, target: str, value: list | np.ndarray):
         """增加变量target到组group中
 
         Args:
             group (str): 变量组, 如对多个比特同时变频率扫描. 每个group对应一层循环, 多个group对应多层嵌套循环.
             target (str): 变量对应的标识符号, 任意即可.
-            value (np.array): 变量对应的取值范围.
+            value (list | np.array): 变量对应的取值范围.
 
         Examples: `self.loops`
             >>> self.define('freq', 'Q0', array([2e6, 1e6,  0. ,  1e6,  2e6]))
@@ -133,38 +153,13 @@ class Recipe(object):
         if var not in self.loops[group]:
             self.loops[group].append(var)
 
-    def dumps(self, filepath: Path, localhost: bool = True):
-        """将线路写入文件
-
-        Args:
-            filepath (Path): 线路待写入的文件路径
-
-        Returns:
-            list: 线路中的比特列表
-        """
-        qubits = []
-        circuits = []
-        with open(filepath, 'w', encoding='utf-8') as f:
-            for i, cc in enumerate(tqdm(self.circuits(), desc='CircuitExpansion')):
-                if localhost:
-                    f.writelines(str(dill.dumps(cc))+'\n')
-                else:
-                    circuits.append(cc)
-
-                if i == 0:
-                    # 获取线路中读取比特列表
-                    for ops in cc:
-                        if isinstance(ops[0], tuple) and ops[0][0] == 'Measure':
-                            qubits.append((ops[0][1], ops[1]))
-        return qubits, circuits
-
     def export(self):
         return {'meta': {'name': f'{self.filename}:/{self.name}',
                          'priority': self.priority,
                          'other': {'shots': self.shots,
                                    'signal': self.signal,
                                    'align_right': self.align_right,
-                                   'fillzero': self.fillzero,  # 编译开始前初始化所有通道
+                                   'fillzero': self.fillzero,
                                    'waveform_length': self.waveform_length,
                                    'shape': [len(v[0][1]) for v in self.loops.values()]
                                    } | {k: v for k, v in self.__dict.items() if not isinstance(v, (list, np.ndarray))}
