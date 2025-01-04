@@ -25,6 +25,7 @@
 
 
 from copy import deepcopy
+from itertools import permutations
 
 import numpy as np
 from loguru import logger
@@ -82,6 +83,8 @@ class Context(QuarkLocalConfig):
         self.bypass = {}
         self._keys = []
 
+        self.__skip = ['Barrier', 'Delay', 'setBias', 'Pulse']
+
     def reset(self, snapshot):
         self._getGateConfig.cache_clear()
         if isinstance(snapshot, dict):
@@ -97,6 +100,37 @@ class Context(QuarkLocalConfig):
             return self.snapshot().todict()
         except Exception as e:
             return self.snapshot().dct
+
+    def getGate(self, name, *qubits):
+        # ------------------------- added -------------------------
+        if name in self.__skip:
+            raise Exception(f"gate {name} of {qubits} not calibrated.")
+
+        if len(qubits) > 1:
+            order_senstive = self.query(f"gate.{name}.__order_senstive__")
+        else:
+            order_senstive = False
+        # ------------------------- added -------------------------
+
+        if order_senstive is None:
+            order_senstive = True
+        if len(qubits) == 1 or order_senstive:
+            ret = self.query(f"gate.{name}.{'_'.join(qubits)}")
+            if isinstance(ret, dict):
+                ret['qubits'] = tuple(qubits)
+                return ret
+            else:
+                raise Exception(f"gate {name} of {qubits} not calibrated.")
+        else:
+            for qlist in permutations(qubits):
+                try:
+                    ret = self.query(f"gate.{name}.{'_'.join(qlist)}")
+                    if isinstance(ret, dict):
+                        ret['qubits'] = tuple(qlist)
+                        return ret
+                except:
+                    break
+            raise Exception(f"gate {name} of {qubits} not calibrated.")
 
 
 def _form_signal(sig):
