@@ -104,83 +104,75 @@ def plot(task: Task, append: bool = False, backend: str = 'viewer'):
             task.counter[uname] += 1
         viewer.info(task.task)
 
-    col = task.column if hasattr(task, 'column') else 4
-    div, mod = divmod(raw.shape[-1], col)
-    row = div if mod == 0 else div+1
     time.sleep(0.1)  # reduce the frame rate per second for better performance
     try:
-        data = []  # outter list
-        for r in range(row):
-            rd = []  # inner list
-            for c in range(col):
-                idx = r*col+c
+        data = []
+        for idx in range(raw.shape[-1]):
 
+            try:
+                _name = task.app.name.split('.')[-1]
+                rid = task.app.record_id
+                _title = f'{_name}_{rid}_{task.title[idx][1]}'
+            except Exception as e:
+                _title = f'{idx}'
+
+            # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+            cell = {}  # one of the subplot
+            line = {}
+
+            if signal == 'iq':  # scatter plot
                 try:
-                    _name = task.app.name.split('.')[-1]
-                    rid = task.app.record_id
-                    _title = f'{_name}_{rid}_{task.title[idx][1]}'
+                    for i, iq in enumerate(raw[..., idx]):
+                        si = i + task.last
+                        cell[si] = {'xdata': iq.real.squeeze(),
+                                    'ydata': iq.imag.squeeze(),
+                                    'xlabel': xlabel,
+                                    'ylabel': ylabel,
+                                    'title': _title,
+                                    'linestyle': 'none',
+                                    'marker': 'o',
+                                    'markersize': 5,
+                                    'markercolor': state[si]}
                 except Exception as e:
-                    _title = f'{r}_{c}'
+                    continue
 
-                # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-                cell = {}  # one of the subplot
-                line = {}
-
-                if signal == 'iq':  # scatter plot
+            if len(label) == 1:  # 1D curve
+                try:
                     try:
-                        for i, iq in enumerate(raw[..., idx]):
-                            si = i + task.last
-                            cell[si] = {'xdata': iq.real.squeeze(),
-                                        'ydata': iq.imag.squeeze(),
-                                        'xlabel': xlabel,
-                                        'ylabel': ylabel,
-                                        'title': _title,
-                                        'linestyle': 'none',
-                                        'marker': 'o',
-                                        'markersize': 5,
-                                        'markercolor': state[si]}
+                        line['xdata'] = xdata[..., idx].squeeze()
                     except Exception as e:
-                        continue
+                        line['xdata'] = xdata[..., 0].squeeze()
+                    line['ydata'] = ydata[..., idx].squeeze()
+                    if task.last == 0:
+                        line['linecolor'] = 'r'  # line color
+                        line['linewidth'] = 2  # line width
+                        line['fadecolor'] = (  # RGB color, hex to decimal
+                            int('5b', 16), int('b5', 16), int('f7', 16))
+                except Exception as e:
+                    continue
 
-                if len(label) == 1:  # 1D curve
-                    try:
+            if len(label) == 2:  # 2D image
+                try:
+                    if task.last == 0:
                         try:
                             line['xdata'] = xdata[..., idx].squeeze()
+                            line['ydata'] = ydata[..., idx]
                         except Exception as e:
                             line['xdata'] = xdata[..., 0].squeeze()
-                        line['ydata'] = ydata[..., idx].squeeze()
-                        if task.last == 0:
-                            line['linecolor'] = 'r'  # line color
-                            line['linewidth'] = 2  # line width
-                            line['fadecolor'] = (  # RGB color, hex to decimal
-                                int('5b', 16), int('b5', 16), int('f7', 16))
-                    except Exception as e:
-                        continue
+                            line['ydata'] = ydata[..., 0]
+                        # colormap of the image, see matplotlib
+                        line['colormap'] = 'RdBu'
+                    line['zdata'] = zdata[..., idx]
+                except Exception as e:
+                    continue
 
-                if len(label) == 2:  # 2D image
-                    try:
-                        if task.last == 0:
-                            try:
-                                line['xdata'] = xdata[..., idx].squeeze()
-                                line['ydata'] = ydata[..., idx]
-                            except Exception as e:
-                                line['xdata'] = xdata[..., 0].squeeze()
-                                line['ydata'] = ydata[..., 0]
-                            # colormap of the image, see matplotlib
-                            line['colormap'] = 'RdBu'
-                        line['zdata'] = zdata[..., idx]
-                    except Exception as e:
-                        continue
-
-                if task.last == 0:
-                    line['title'] = _title
-                    line['xlabel'] = xlabel
-                    line['ylabel'] = ylabel
-                cell[f'{uname}{task.counter[uname]}'] = line
-                # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-                rd.append(cell)
-            data.append(rd)
+            if task.last == 0:
+                line['title'] = _title
+                line['xlabel'] = xlabel
+                line['ylabel'] = ylabel
+            cell[f'{uname}{task.counter[uname]}'] = line
+            # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            data.append(cell)
         if not append:
             viewer.plot(data)  # create a new canvas
         else:
@@ -210,12 +202,12 @@ def demo():
         ``` {.py3 linenums="1"}
         _vs.clear()
         iq = np.random.randn(1024)+np.random.randn(1024)*1j
-        _vs.plot([[
+        _vs.plot([
                 {'i':{'xdata':iq.real-3,'ydata':iq.imag,'linestyle':'none','marker':'o','markersize':15,'markercolor':'b'},
                 'q':{'xdata':iq.real+3,'ydata':iq.imag,'linestyle':'none','marker':'o','markersize':5,'markercolor':'r'},
                 'hist':{'xdata':np.linspace(-3,3,1024),'ydata':iq.imag,"fillvalue":0, 'fillcolor':'r'}
                 }
-                ]]
+                ]
                 )
         ```
 
@@ -225,44 +217,40 @@ def demo():
         vals = np.hstack([np.random.normal(size=500), np.random.normal(size=260, loc=4)])
         # compute standard histogram, len(y)+1 = len(x)
         y,x = np.histogram(vals, bins=np.linspace(-3, 8, 40))
-        data = [[{'hist':{'xdata':x,'ydata':y,'step':'center','fillvalue':0,'fillcolor':'g','linewidth':0}}]]
+        data = [{'hist':{'xdata':x,'ydata':y,'step':'center','fillvalue':0,'fillcolor':'g','linewidth':0}}]
         _vs.plot(data)
         ```
     """
     viewer = _vs['studio']
 
-    row = 3  # row number
-    col = 3  # column number
+    n = 3  # number of subplots
     # _vs.clear() # clear canvas
     for i in range(10):  # step number
         time.sleep(.2)
         try:
             data = []
-            for r in range(row):
-                rd = []
-                for c in range(col):
-                    cell = {}
-                    for j in range(1):
-                        line = {}
-                        line['xdata'] = np.arange(i, i+1)*1e8
-                        line['ydata'] = np.random.random(1)*1e8
+            for r in range(n):
+                cell = {}
+                for j in range(1):
+                    line = {}
+                    line['xdata'] = np.arange(i, i+1)*1e8
+                    line['ydata'] = np.random.random(1)*1e8
 
-                        # line['xdata'] = np.arange(-9,9)*1e-6
-                        # line['ydata'] = np.arange(-10,10)*1e-8
-                        # line['zdata'] = np.random.random((18,20))
+                    # line['xdata'] = np.arange(-9,9)*1e-6
+                    # line['ydata'] = np.arange(-10,10)*1e-8
+                    # line['zdata'] = np.random.random((18,20))
 
-                        line['linewidth'] = 2
-                        line['marker'] = 'o'
-                        line['fadecolor'] = (255, 0, 255)
-                        line['title'] = f'aabb{r}_{c}'
-                        line['legend'] = 'test'
-                        line['xlabel'] = f'add'
-                        line['ylabel'] = f'yddd'
-                        # random.choice(['r', 'g', 'b', 'k', 'c', 'm', 'y', (31, 119, 180)])
-                        line['linecolor'] = (31, 119, 180)
-                        cell[f'test{j}2'] = line
-                    rd.append(cell)
-                data.append(rd)
+                    line['linewidth'] = 2
+                    line['marker'] = 'o'
+                    line['fadecolor'] = (255, 0, 255)
+                    line['title'] = f'aabb{r}'
+                    line['legend'] = 'test'
+                    line['xlabel'] = f'add'
+                    line['ylabel'] = f'yddd'
+                    # random.choice(['r', 'g', 'b', 'k', 'c', 'm', 'y', (31, 119, 180)])
+                    line['linecolor'] = (31, 119, 180)
+                    cell[f'test{j}2'] = line
+                data.append(cell)
             if i == 0:
                 viewer.plot(data)
             else:
