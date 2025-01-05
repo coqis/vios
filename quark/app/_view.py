@@ -71,7 +71,7 @@ def plot(task: Task, append: bool = False, backend: str = 'viewer'):
         xlabel, ylabel = 'real', 'imag'
         append = False
     else:
-        raw = np.abs(raw)
+        # raw = np.abs(raw)
 
         axis = task.meta['axis']
         label = tuple(axis)
