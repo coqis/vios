@@ -417,6 +417,9 @@ class QuarkProxy(object):
         self.server = login()
         setlog()
 
+        from .dag import Scheduler
+        self.scheduler = Scheduler()
+
     def submit(self, task: dict, block: bool = False):
         from .app import submit
 
