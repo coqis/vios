@@ -20,41 +20,40 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-import random
-import string
-import time
-from datetime import datetime
 from queue import Empty, Queue
 from threading import Thread
 
+from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.schedulers.background import BackgroundScheduler
 from loguru import logger
 
 from .graph import TaskManager
 
 bs = BackgroundScheduler()
+bs.add_executor(ThreadPoolExecutor(max_workers=1,
+                                   pool_kwargs={'thread_name_prefix': 'QDAG Checking'}))
 
 
-def newid():
-    time.sleep(0.01)
-    return datetime.now().strftime('%y%m%d%H%M%S%f')+random.choice(string.digits)
-
-
-nodetask = [('S21', 'Spectrum'), ('Spectrum', 'PowerRabi'), ('Spectrum', 'TimeRabi'),
-            ('PowerRabi', 'Ramsey'), ('TimeRabi', 'Ramsey'), ('Ramsey', 'Spectrum')]
+dag = {'edges': [('S21', 'Spectrum'), ('Spectrum', 'PowerRabi'), ('Spectrum', 'TimeRabi'),
+                 ('PowerRabi', 'Ramsey'), ('TimeRabi', 'Ramsey')],
+       'check': {'period': 60, 'method': 'Ramsey'},
+       'group': {'0': ['Q0', 'Q1'], '1': ['Q5', 'Q8']}}
 
 
 class Scheduler(object):
-    def __init__(self) -> None:
-        self.graph = TaskManager(nodetask)
+    def __init__(self, dag: dict = dag) -> None:
+        self.graph = TaskManager(dag['edges'])
         self.registry = {}
         self.queue = Queue()
         self.current: dict = {}
 
-        Thread(target=self.run, name='Scheduler', daemon=True).start()
+        Thread(target=self.run, name='QDAG Calibration', daemon=True).start()
 
-        bs.add_job(self.check, 'interval', seconds=20)
+        bs.add_job(lambda: self.check(dag['check']['method'], dag['group']),
+                   'interval', seconds=dag['check']['period'])
         bs.start()
+
+        self.check()
 
     def check(self, method: str = 'Ramsey', group: dict = {'0': ['Q0', 'Q1'], '1': ['Q5', 'Q8']}):
         logger.info('start to check')
@@ -66,7 +65,6 @@ class Scheduler(object):
         logger.info('checked')
 
     def run(self):
-        self.check()
         while True:
             try:
                 self.current: dict = self.queue.get()
