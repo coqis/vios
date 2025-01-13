@@ -70,11 +70,17 @@ def get_dataset_by_tid(tid: int, signal: str = ''):
 
 
 def get_config_by_tid(tid: int = 0):
+    # git config --global --add safe.directory path/to/cfg
     try:
         import git
 
-        ckpt = get_record_by_tid(tid)[5]
-        file = (Path.home()/f'Desktop/home/cfg/{ckpt}').with_suffix('.json')
+        ckpt, _, filename = get_record_by_tid(tid)[5:8]
+        if 'Desktop' not in filename:
+            home = Path(filename.split('dat')[0])
+        else:
+            home = Path.home()/'Desktop/home'
+
+        file = (home/f'cfg/{ckpt}').with_suffix('.json')
 
         repo = git.Repo(file.resolve().parent)
         if not tid:
