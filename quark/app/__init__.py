@@ -224,6 +224,12 @@ def lookup(start: str = '', stop: str = '', name: str = '', fmt: str = '%Y-%m-%d
     display(output)
 
 
+def get_config_by_rid(rid: int):
+    from ._db import get_record_by_rid
+    tid = get_record_by_rid(rid)[1]
+    return get_config_by_tid(tid)
+
+
 def get_data_by_rid(rid: int, signal: str = '', **kwds):
     from ._db import get_record_by_rid
     tid = get_record_by_rid(rid)[1]
