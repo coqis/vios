@@ -17,7 +17,7 @@ Welcome to the Quafu quantum cloud computing cluster([https://quafu.baqis.ac.cn/
 
 <iframe
     width=100% 
-    src="http://quark.baqis.ac.cn:81"  
+    src="https://quafu-sqc.baqis.ac.cn"  
     frameborder=0  
     allowfullscreen>
 </iframe>
