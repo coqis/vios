@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vios"
-version = "2.8.0"
+version = "2.8.1"
 authors = [
   { name="YL Feng", email="fengyl@baqis.ac.cn" },
 ]
@@ -13,15 +13,10 @@ readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.10"
 dependencies = [
-    "anyon",
-    "dill",
-    "tqdm",
     "rich",
-    "loguru",
-    "networkx",
-    "gitpython",
+    "pyvisa",
+    "anyon",
     "waveforms",
-    "pyvisa"
 ]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
@@ -36,6 +31,9 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Topic :: Scientific/Engineering :: Physics",
 ]
+
+[project.optional-dependencies]
+server = ["dill","gitpython","loguru","networkx","tqdm"]
 
 [project.urls]
 "homepage" = "https://quarkstudio.readthedocs.io/en/latest"
