@@ -25,4 +25,8 @@ def execute(method: str = 'ramsey', target: list[str] | tuple[str] = ['Q0', 'Q1'
         import home.demo.run as drun
         return drun.execute(method, target)
     except Exception as e:
-        return {('Q1', 'Q3', 'Q5'): method}
+        fitted = {'Q0.params.frequency': 4.4e9,
+                  'Q5.params.frequency': 4.8e9}
+        status = {('Q0', 'Q5'): 'Passed',
+                  ('Q1', 'Q8'): 'Failed'}
+        return fitted, status

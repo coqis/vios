@@ -24,40 +24,25 @@ import time
 from queue import Empty, Queue
 from threading import Thread
 
+import numpy as np
 from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.schedulers.background import BackgroundScheduler
 from loguru import logger
+from copy import deepcopy
 
-from .graph import ChipManger, TaskManager
 from .executor import execute
+from .graph import ChipManger, TaskManager
 
 bs = BackgroundScheduler()
 bs.add_executor(ThreadPoolExecutor(max_workers=1,
                                    pool_kwargs={'thread_name_prefix': 'QDAG Checking'}))
 
 
-dag = {'task': {'edges': [('S21', 'Spectrum'), ('Spectrum', 'PowerRabi'), ('Spectrum', 'TimeRabi'),
-                          ('PowerRabi', 'Ramsey'), ('TimeRabi', 'Ramsey')],
+dag = {'task': {'edges': [('S21', 'Spectrum'), ('Spectrum', 'PowerRabi'), ('PowerRabi', 'Ramsey')],
                 'check': {'period': 60, 'method': 'Ramsey'}
                 },
 
-       'chip': {'group': {'0': ['Q0', 'Q1'], '1': ['Q5', 'Q8']},
-                'Q0': {'frequency': {'status': 'OK',
-                                     'lifetime': 200,
-                                     'tolerance': 0.01,
-                                     'history': {},
-                                     'last_updated': time.time()}},
-                'Q1': {'frequency': {'status': 'OK',
-                                     'lifetime': 200,
-                                     'tolerance': 0.01,
-                                     'history': {},
-                                     'last_updated': time.time()}},
-                'C1': {'fidelity': {'status': 'OK',
-                                    'lifetime': 200,
-                                    'tolerance': 0.01,
-                                    'history': {},
-                                    'last_updated': time.time()}}
-                }
+       'chip': {'group': {'0': ['Q0', 'Q1'], '1': ['Q5', 'Q8']}}
        }
 
 
@@ -65,6 +50,10 @@ class Scheduler(object):
     def __init__(self, dag: dict = dag) -> None:
         self.cmgr = ChipManger(dag['chip'])
         self.tmgr = TaskManager(dag['task'])
+
+        for n1 in np.array(list(self.cmgr['group'].values())).reshape(-1):
+            for n2 in self.tmgr.nodes:
+                self.cmgr.update(f'{n1}.{n2}', deepcopy(self.cmgr.VT))
 
         self.start()
 
@@ -82,12 +71,29 @@ class Scheduler(object):
 
     def check(self, method: str = 'Ramsey', group: dict = {'0': ['Q0', 'Q1'], '1': ['Q5', 'Q8']}):
         logger.info('start to check')
-        broken = {}
-        for idx, target in group.items():
-            params = execute(method, target)
-            broken.update(params)
+        tasks = {tuple(v): method for v in group.values()}
+        broken = self.execute(tasks)
         self.queue.put(broken)
         logger.info('checked')
+
+    def execute(self, tasks: dict):
+        failed = {}
+        for target, method in tasks.items():
+            fitted, status = execute(method, target)
+            for k, v in fitted.items():
+                t = k.split('.')[0]
+                hh: list = self.cmgr.query(f'{t}.{method}.history')
+                if len(hh) > 10:
+                    hh.pop(0)
+                hh.append({time.strftime('%Y-%m-%d %H:%M:%S'): v})
+
+            for k, v in status.items():
+                if v == 'Failed':
+                    failed.update({k: method})
+                for t in k:
+                    self.cmgr.update(f'{t}.{method}.status', v)
+        self.cmgr.checkpoint()
+        return failed
 
     def run(self):
         while True:
@@ -97,13 +103,11 @@ class Scheduler(object):
 
                 retry = 0
                 while True:
-                    failed = {}
-                    for target, method in self.current.items():
-                        params = execute(method, target)
-                        failed.update(params)
+                    failed = self.execute(self.current)
                     if not failed:
                         break
                     else:
+                        method = list(failed.values())[0]
                         pmethod = self.tmgr.parents(method)
                         if not pmethod:
                             break
