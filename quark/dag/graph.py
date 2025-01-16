@@ -20,22 +20,70 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+import json
+import time
+from pathlib import Path
+
 import networkx as nx
 from loguru import logger
 
-from .executor import execute
+
+class ChipManger(object):
+    """ >>>
+    {'group': {'0': ['Q0', 'Q1'], '1': ['Q5', 'Q8']},
+     'Q0': {'frequency': {'status': 'OK',
+                          'lifetime': 200,
+                          'tolerance': 0.01,
+                          'history': {},
+                          'last_updated': time.time()}},
+     'Q1': {'frequency': {'status': 'OK',
+                          'lifetime': 200,
+                          'tolerance': 0.01,
+                          'history': {},
+                          'last_updated': time.time()}},
+     'C1': {'fidelity': {'status': 'OK',
+                         'lifetime': 200,
+                         'tolerance': 0.01,
+                         'history': {},
+                         'last_updated': time.time()}}
+     }
+    """
+
+    def __init__(self, info: dict = {}):
+        super().__init__()
+        self.nodes = {}
+
+        for node, value in info.items():
+            self.add_node(node, value)
+
+    def add_node(self, node: str, value):
+        self.nodes[node] = value
+
+    def history(self, target: list[str] = ['Q0', 'Q1']):
+        return {t: self[t] for t in target}
+
+    def checkpoint(self):
+        root = Path.home()/'Desktop/home/cfg/dag.json'
+        root.parent.mkdir(parents=True, exist_ok=True)
+        with open(root, 'w') as f:
+            f.write(json.dumps(self.nodes, indent=4))
+
+    def __getitem__(self, key: str):
+        return self.nodes[key]
 
 
 class TaskManager(nx.DiGraph):
-    def __init__(self, edges: list[tuple]) -> None:
+    """ >>>
+    {'edges': [('S21', 'Spectrum'), ('Spectrum', 'PowerRabi'), ('Spectrum', 'TimeRabi'),
+               ('PowerRabi', 'Ramsey'), ('TimeRabi', 'Ramsey')],
+     'check': {'period': 60, 'method': 'Ramsey'}
+     }
+     """
+
+    def __init__(self, task: dict) -> None:
         super().__init__()
-        self.add_edges_from(edges)
-
-    def check(self, method: str = 'Ramsey', target: list[str] | tuple[str] = ['Q0', 'Q1']):
-        return execute(method, target)
-
-    def calibrate(self, method: str = 'Ramsey', target: list[str] | tuple[str] = ['Q0', 'Q1']):
-        return execute(method, target)
+        self.checkin = task['check']
+        self.add_edges_from(task['edges'])
 
     def __getitem__(self, key: str):
         return self.nodes[key]  # ['task']

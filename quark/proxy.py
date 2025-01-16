@@ -417,8 +417,12 @@ class QuarkProxy(object):
         self.server = login()
         setlog()
 
-        from .dag import Scheduler
-        self.scheduler = Scheduler()
+        try:
+            from home.demo.run import dag
+            from .dag import Scheduler
+            self.scheduler = Scheduler(dag)
+        except Exception as e:
+            logger.error(f'Failed to start Scheduler: {e}')
 
     def submit(self, task: dict, block: bool = False):
         from .app import submit

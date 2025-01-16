@@ -20,3 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 from .scheduler import Scheduler
+
+
+def draw(dag: dict = {}):
+    from .graph import TaskManager
+    TaskManager(dag['edges']).draw()

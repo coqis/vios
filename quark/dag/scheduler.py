@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+import time
 from queue import Empty, Queue
 from threading import Thread
 
@@ -27,39 +28,63 @@ from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.schedulers.background import BackgroundScheduler
 from loguru import logger
 
-from .graph import TaskManager
+from .graph import ChipManger, TaskManager
+from .executor import execute
 
 bs = BackgroundScheduler()
 bs.add_executor(ThreadPoolExecutor(max_workers=1,
                                    pool_kwargs={'thread_name_prefix': 'QDAG Checking'}))
 
 
-dag = {'edges': [('S21', 'Spectrum'), ('Spectrum', 'PowerRabi'), ('Spectrum', 'TimeRabi'),
-                 ('PowerRabi', 'Ramsey'), ('TimeRabi', 'Ramsey')],
-       'check': {'period': 60, 'method': 'Ramsey'},
-       'group': {'0': ['Q0', 'Q1'], '1': ['Q5', 'Q8']}}
+dag = {'task': {'edges': [('S21', 'Spectrum'), ('Spectrum', 'PowerRabi'), ('Spectrum', 'TimeRabi'),
+                          ('PowerRabi', 'Ramsey'), ('TimeRabi', 'Ramsey')],
+                'check': {'period': 60, 'method': 'Ramsey'}
+                },
+
+       'chip': {'group': {'0': ['Q0', 'Q1'], '1': ['Q5', 'Q8']},
+                'Q0': {'frequency': {'status': 'OK',
+                                     'lifetime': 200,
+                                     'tolerance': 0.01,
+                                     'history': {},
+                                     'last_updated': time.time()}},
+                'Q1': {'frequency': {'status': 'OK',
+                                     'lifetime': 200,
+                                     'tolerance': 0.01,
+                                     'history': {},
+                                     'last_updated': time.time()}},
+                'C1': {'fidelity': {'status': 'OK',
+                                    'lifetime': 200,
+                                    'tolerance': 0.01,
+                                    'history': {},
+                                    'last_updated': time.time()}}
+                }
+       }
 
 
 class Scheduler(object):
     def __init__(self, dag: dict = dag) -> None:
-        self.graph = TaskManager(dag['edges'])
-        self.registry = {}
+        self.cmgr = ChipManger(dag['chip'])
+        self.tmgr = TaskManager(dag['task'])
+
+        self.start()
+
+    def start(self):
         self.queue = Queue()
         self.current: dict = {}
 
         Thread(target=self.run, name='QDAG Calibration', daemon=True).start()
 
-        bs.add_job(lambda: self.check(dag['check']['method'], dag['group']),
-                   'interval', seconds=dag['check']['period'])
+        bs.add_job(lambda: self.check(self.tmgr.checkin['method'], self.cmgr['group']),
+                   'interval', seconds=self.tmgr.checkin['period'])
         bs.start()
 
-        self.check()
+        self.check(self.tmgr.checkin['method'], self.cmgr['group'])
 
     def check(self, method: str = 'Ramsey', group: dict = {'0': ['Q0', 'Q1'], '1': ['Q5', 'Q8']}):
         logger.info('start to check')
         broken = {}
         for idx, target in group.items():
-            params = self.graph.check(method, target)
+            params = execute(method, target)
             broken.update(params)
         self.queue.put(broken)
         logger.info('checked')
@@ -74,12 +99,12 @@ class Scheduler(object):
                 while True:
                     failed = {}
                     for target, method in self.current.items():
-                        params = self.graph.calibrate(method, target)
+                        params = execute(method, target)
                         failed.update(params)
                     if not failed:
                         break
                     else:
-                        pmethod = self.graph.parents(method)
+                        pmethod = self.tmgr.parents(method)
                         if not pmethod:
                             break
                         logger.info(
