@@ -20,11 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-"""
-Abstract: about app
-    usefull functions for users to interact with `QuarkServer` and database
-"""
-
 import time
 
 import numpy as np

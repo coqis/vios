@@ -35,17 +35,17 @@ class ChipManger(object):
      'Q0': {'Spectrum': {'status': 'OK',
                          'lifetime': 200,
                          'tolerance': 0.01,
-                         'history': {},
+                         'history': [],
                          'last_updated': time.time()},
             'Ramsey': {'status': 'OK',
                        'lifetime': 200,
                        'tolerance': 0.01,
-                       'history': {},
+                       'history': [],
                        'last_updated': time.time()}},
      'C1': {'fidelity': {'status': 'OK',
                          'lifetime': 200,
                          'tolerance': 0.01,
-                         'history': {},
+                         'history': [],
                          'last_updated': time.time()}}
      }
     """

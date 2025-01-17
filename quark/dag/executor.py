@@ -20,10 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-def execute(method: str = 'ramsey', target: list[str] | tuple[str] = ['Q0', 'Q1']):
+def execute(method: str = 'ramsey', target: list[str] | tuple[str] = ['Q0', 'Q1'], level: str = 'check'):
     try:
         import home.demo.run as drun
-        return drun.execute(method, target)
+        return drun.execute(method, target, level)
     except Exception as e:
         fitted = {'Q0.params.frequency': 4.4e9,
                   'Q5.params.frequency': 4.8e9}

@@ -72,8 +72,8 @@ class Scheduler(object):
     def check(self, method: str = 'Ramsey', group: dict = {'0': ['Q0', 'Q1'], '1': ['Q5', 'Q8']}):
         logger.info('start to check')
         tasks = {tuple(v): method for v in group.values()}
-        broken = self.execute(tasks)
-        self.queue.put(broken)
+        failed = self.execute(tasks)
+        self.queue.put(failed)
         logger.info('checked')
 
     def execute(self, tasks: dict):
@@ -85,7 +85,7 @@ class Scheduler(object):
                 hh: list = self.cmgr.query(f'{t}.{method}.history')
                 if len(hh) > 10:
                     hh.pop(0)
-                hh.append({time.strftime('%Y-%m-%d %H:%M:%S'): v})
+                hh.append((time.strftime('%Y-%m-%d %H:%M:%S'), v))
 
             for k, v in status.items():
                 if v == 'Failed':

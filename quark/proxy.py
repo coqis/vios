@@ -419,6 +419,7 @@ class QuarkProxy(object):
 
         try:
             from home.demo.run import dag
+
             from .dag import Scheduler
             self.scheduler = Scheduler(dag)
         except Exception as e:
@@ -432,8 +433,8 @@ class QuarkProxy(object):
         logger.warning(f'\n\n\n{"#"*80} task start to run ...\n')
 
         try:
-            from home.ylfeng.cloud import get_bias_of_coupler
-            bias = get_bias_of_coupler()
+            from home.demo.run import get_bias_of_coupler
+            bias = get_bias_of_coupler() 
         except Exception as e:
             bias = []
             logger.error(f'Failed to get bias of coupler, {e}!')
