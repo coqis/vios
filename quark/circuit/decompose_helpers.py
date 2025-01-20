@@ -34,6 +34,17 @@ def h2u(qubit: int) -> tuple:
     """
     return ('u', np.pi/2, 0.0, np.pi, qubit)
 
+def sdg2u(qubit:int) -> tuple:
+    """Convert sdg gate to U3 gate tuple.
+
+    Args:
+        qubit (int): The qubit to apply the gate to.
+
+    Returns:
+        tuple: u3 gate information.
+    """
+    return ('u', 0.0, -0.7853981633974483, -0.7853981633974483, qubit)
+
 def s2u(qubit: int) -> tuple:
     """Convert S gate to U3 gate tuple.
 
@@ -44,6 +55,39 @@ def s2u(qubit: int) -> tuple:
         tuple: u3 gate information.
     """
     return ('u', 0.0, 0.7853981633974483, 0.7853981633974483, qubit)
+
+def rx2u(theta:float,qubit:int) -> tuple:
+    """Convert RX gate to U3 gate tuple.
+
+    Args:
+        qubit (int): The qubit to apply the gate to.
+
+    Returns:
+        tuple: u3 gate information.
+    """
+    return ('u',theta,-np.pi/2,np.pi/2,qubit)
+
+def ry2u(theta:float,qubit:int) -> tuple:
+    """Convert RY gate to U3 gate tuple.
+
+    Args:
+        qubit (int): The qubit to apply the gate to.
+
+    Returns:
+        tuple: u3 gate information.
+    """
+    return ('u',theta,0,0,qubit)
+
+def rz2u(theta:float,qubit:int) -> tuple:
+    """Convert RZ gate to U3 gate tuple.
+
+    Args:
+        qubit (int): The qubit to apply the gate to.
+
+    Returns:
+        tuple: u3 gate information.
+    """
+    return ('u',0,0,theta,qubit)
 
 def cx_decompose(control_qubit: int, target_qubit: int) -> list:
     """ Decompose CX gate to U3 gates and CZ gates.
@@ -72,11 +116,9 @@ def cy_decompose(control_qubit: int, target_qubit: int) -> list:
         list: A list of U3 gates and CZ gates.
     """
     gates = []
-    gates.append(('u',np.pi/2,-np.pi/2,np.pi/2,control_qubit))
-    gates.append(('u',0.0,-np.pi,-np.pi,target_qubit))
-    gates.append(('cz',control_qubit,target_qubit))
-    gates.append(('u',0.0,-np.pi,-np.pi,target_qubit))
-    gates.append(('u',np.pi/2,np.pi/2,-np.pi/2,control_qubit))
+    gates.append(sdg2u(target_qubit))
+    gates += cx_decompose(control_qubit,target_qubit)
+    gates.append(s2u(target_qubit))
     return gates
 
 def swap_decompose(qubit1: int, qubit2: int) -> list:
@@ -122,6 +164,66 @@ def iswap_decompose(qubit1: int, qubit2: int) -> list:
     gates.append(('u',np.pi/2,0.0,-np.pi,qubit2))  
     
     return gates
+
+def rxx_decompose(theta:float,qubit1:int,qubit2:int) -> list:
+    """Decompose RXX gate to U3 gates and CZ gates.
+
+    Args:
+        theta (float): The rotation angle of the gate.
+        qubit1 (int): The first qubit to apply the gate to.
+        qubit2 (int): The second qubit to apply the gate to.
+
+    Returns:
+        list: A list of U3 gates and CZ gates.
+    """
+    gates = []
+    gates.append(h2u(qubit1))
+    gates.append(h2u(qubit2))
+    gates += cx_decompose(qubit1,qubit2)
+    gates.append(rz2u(theta,qubit2))
+    gates += cx_decompose(qubit1,qubit2)
+    gates.append(h2u(qubit1))
+    gates.append(h2u(qubit2))
+    return gates
+
+def ryy_decompose(theta:float,qubit1:int,qubit2:int) -> list:
+    """Decompose RYY gate to U3 gates and CZ gates.
+
+    Args:
+        theta (float): The rotation angle of the gate.
+        qubit1 (int): The first qubit to apply the gate to.
+        qubit2 (int): The second qubit to apply the gate to.
+
+    Returns:
+        list: A list of U3 gates and CZ gates.
+    """
+    gates = []
+    gates.append(rx2u(np.pi/2,qubit1))
+    gates.append(rx2u(np.pi/2,qubit2))
+    gates += cx_decompose(qubit1,qubit2)
+    gates.append(rz2u(theta,qubit2))
+    gates += cx_decompose(qubit1,qubit2)
+    gates.append(rx2u(-np.pi/2,qubit1))
+    gates.append(rx2u(-np.pi/2,qubit2))
+    return gates
+
+def rzz_decompose(theta:float,qubit1:int,qubit2:int) -> list:
+    """Decompose RZZ gate to U3 gates and CZ gates.
+
+    Args:
+        theta (float): The rotation angle of the gate.
+        qubit1 (int): The first qubit to apply the gate to.
+        qubit2 (int): The second qubit to apply the gate to.
+
+    Returns:
+        list: A list of U3 gates and CZ gates.
+    """
+    gates = []
+    gates += cx_decompose(qubit1,qubit2)
+    gates.append(rz2u(theta,qubit2))
+    gates += cx_decompose(qubit1,qubit2)
+    return gates
+
 
 def u_dot_u(u_info1: tuple, u_info2: tuple) -> tuple:
     """Carry out u @ u and return a new u information

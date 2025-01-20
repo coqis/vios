@@ -20,27 +20,28 @@
 r"""This module contains the Transpiler class, which is designed to convert quantum circuits 
 into formats that are more suitable for execution on hardware backends"""
 
+import copy
 import numpy as np
 import networkx as nx
-from typing import Literal
-from .quantumcircuit import (QuantumCircuit,
-                      one_qubit_gates_avaliable,
-                      two_qubit_gates_avaliable,
-                      one_qubit_parameter_gates_avaliable,
-                      functional_gates_avaliable)
+from .quantumcircuit import QuantumCircuit
+from .quantumcircuit_helpers import (
+                      one_qubit_gates_available,
+                      two_qubit_gates_available,
+                      one_qubit_parameter_gates_available,
+                      two_qubit_parameter_gates_available,
+                      functional_gates_available)
 from .matrix import gate_matrix_dict, u_mat, id_mat
-from .dag import qc2dag
-from .routing_helpers import (distance_matrix_element,
-                              mapping_node_to_gate_info,
-                              is_correlation_on_front_layer,
-                              heuristic_function,
-                              update_initial_mapping,
-                              update_coupling_graph,
-                              update_decay_parameter)
+from .routing_helpers import (map_gates_to_physical_qubits_layout,
+                              basic_routing_gates,
+                              gates_sabre_routing,
+                              )
 from .decompose_helpers import (cx_decompose,
                                 cy_decompose,
                                 swap_decompose,
                                 iswap_decompose,
+                                rxx_decompose,
+                                ryy_decompose,
+                                rzz_decompose,
                                 u_dot_u)
 from .utils import u3_decompose
 from .backend import Backend
@@ -66,7 +67,7 @@ class Transpiler:
         """
 
         if isinstance(qc, QuantumCircuit):
-            self.gates = qc.gates
+            self.gates = copy.deepcopy(qc.gates)
             self.nqubits_used = len(qc.qubits) #qc.nqubits
             self.ncbits_used = qc.ncbits
             self.params_value = qc.params_value
@@ -89,11 +90,11 @@ class Transpiler:
         else:
             raise TypeError("Expected a Quark QuantumCircuit or OpenQASM 2.0 or qlisp, but got a {}.".format(type(qc)))
         
-        self.source_gates = self.gates.copy()
+        self.source_gates = copy.deepcopy(self.gates)
 
         self.chip_backend = chip_backend
-
-        self.initial_mapping = qc.qubits
+        self.source_qubits = copy.deepcopy(qc.qubits)
+        self.initial_mapping = copy.deepcopy(qc.qubits)
         self.coupling_map = [(self.initial_mapping[i],self.initial_mapping[i+1]) for i in range(len(self.initial_mapping)-1)]
         self.largest_qubits_index = max(self.initial_mapping) + 1
 
@@ -101,50 +102,18 @@ class Transpiler:
         # select layout from the Backend! update initial_mapping, coupling_map, largest_qubits_index
         if self.chip_backend is None:
             raise(TypeError('Please specify a Backend, otherwise a layout cannot be selected!'))
-        self.initial_mapping,self.coupling_map = Layout(self.nqubits_used,self.chip_backend).selected_layout(use_priority=use_priority,
-                                                                                                   initial_mapping=initial_mapping)
-        self.largest_qubits_index = max(self.initial_mapping) + 1
-
-        subgraph = self.chip_backend.graph.subgraph(self.initial_mapping)
-        subgraph_fidelity = np.array([data['fidelity'] for _, _, data in subgraph.edges(data=True)])
-        fidelity_mean = np.mean(subgraph_fidelity)
-        fidelity_var  = np.var(subgraph_fidelity)  
-        print('The average fidelity of the coupler(s) between the selected qubits is {}, and the variance of the fidelity is {}'.format(fidelity_mean,fidelity_var))
+        if len(self.source_qubits) >1:
+            self.initial_mapping,self.coupling_map = Layout(self.nqubits_used,self.chip_backend).selected_layout(
+                use_priority=use_priority,
+                initial_mapping=initial_mapping,
+                )
+            self.largest_qubits_index = max(self.initial_mapping) + 1
+            subgraph = self.chip_backend.graph.subgraph(self.initial_mapping)
+            subgraph_fidelity = np.array([data['fidelity'] for _, _, data in subgraph.edges(data=True)])
+            fidelity_mean = np.mean(subgraph_fidelity)
+            fidelity_var  = np.var(subgraph_fidelity)  
+            print('The average fidelity of the coupler(s) between the selected qubits is {}, and the variance of the fidelity is {}'.format(fidelity_mean,fidelity_var))
         return self 
-    
-    def _mapping_to_physical_qubits_layout(self):
-        """Map the virtual quantum circuit to physical qubits directly.
-
-        Returns:
-            None: Update self information if necessary.
-        """
-        new = []
-        for gate_info in self.source_gates:
-            gate = gate_info[0]
-            if gate in one_qubit_gates_avaliable.keys():
-                qubit0 = self.initial_mapping[gate_info[1]]
-                new.append((gate,qubit0))
-            elif gate in two_qubit_gates_avaliable.keys():
-                qubit1 = self.initial_mapping[gate_info[1]]
-                qubit2 = self.initial_mapping[gate_info[2]]
-                new.append((gate,qubit1,qubit2))
-            elif gate in one_qubit_parameter_gates_avaliable.keys():
-                qubit0 = self.initial_mapping[gate_info[-1]]
-                params = gate_info[1:-1]
-                new.append((gate,*params,qubit0))
-            elif gate in functional_gates_avaliable.keys():
-                if gate == 'measure':
-                    qubitlst = [self.initial_mapping[q] for q in gate_info[1]]
-                    cbitlst = gate_info[2]
-                    new.append((gate,qubitlst,cbitlst))
-                elif gate == 'barrier':
-                    qubitlst = [self.initial_mapping[q] for q in gate_info[1]]
-                    new.append((gate,tuple(qubitlst)))
-                elif gate == 'reset':
-                    qubit0 = self.initial_mapping[gate_info[1]]
-                    new.append((gate,qubit0))
-        self.gates = new
-        return None
     
     def run_select_layout(self, use_priority: bool = True, initial_mapping: list|dict = {'key':'fidelity_var','topology':'linear1'}):
         """
@@ -165,23 +134,21 @@ class Transpiler:
             QuantumCircuit: A quantum circuit with the selected layout and transpiled gates.
         """
         self._select_layout(use_priority = use_priority, initial_mapping = initial_mapping)
-        self._mapping_to_physical_qubits_layout()
+        initial_mapping_dic = dict(zip(self.source_qubits,self.initial_mapping))
+        self.gates = map_gates_to_physical_qubits_layout(self.source_gates,initial_mapping_dic)
         qc = QuantumCircuit(self.largest_qubits_index,self.ncbits_used)
         qc.gates = self.gates
         qc.qubits = self.initial_mapping
         qc.params_value = self.params_value
         qc.physical_qubits_espression = True
-        if self.chip_backend is not None:
-            if self.chip_backend.chip_name == 'Haituo':
-                qc.adjust_index(132)
-                print(f'Tip: When setting Haituo chip as backend, the quibit index starts at 132.')
+        #if self.chip_backend is not None:
+        #    if self.chip_backend.chip_name == 'Haituo':
+        #        qc.adjust_index(132)
+        #        print(f'Tip: When setting Haituo chip as backend, the quibit index starts at 132.')
+        #    elif self.chip_backend.chip_name == 'Dongling1':
+        #        qc.adjust_index(106)
+        #        print(f'Tip: When setting Dongling chip as backend, the quibit index starts at 106.')
         return qc
-    
-    @property
-    def coupling_graph(self):
-        coupling_graph = nx.Graph()
-        coupling_graph.add_edges_from(self.coupling_map)
-        return coupling_graph
         
     def _basic_routing(self):
         """Routing based on the initial mapping.
@@ -189,84 +156,7 @@ class Transpiler:
         Returns:
             Transpiler: Update self information.
         """
-        self._mapping_to_physical_qubits_layout()
-        coupling_graph = self.coupling_graph.copy()
-        physical_qubit_list = self.initial_mapping.copy()
-        initial_map = self.initial_mapping.copy()
-
-        new = []
-        for gate_info in self.gates:
-            gate = gate_info[0]
-            
-            if gate in one_qubit_gates_avaliable.keys():
-                q0 = gate_info[1]
-                idx0 = self.initial_mapping.index(q0)
-                new.append((gate,physical_qubit_list[idx0]))
-                
-            elif gate in two_qubit_gates_avaliable.keys():
-                q1 = gate_info[1]
-                q2 = gate_info[2]
-                dis = distance_matrix_element(q1,q2,coupling_graph)
-                if dis == 1:
-                    idx1 = self.initial_mapping.index(q1)
-                    idx2 = self.initial_mapping.index(q2)
-                    new.append((gate,physical_qubit_list[idx1],physical_qubit_list[idx2]))
-                else:
-                    shortest_path = nx.shortest_path(coupling_graph, source = q1, target = q2)
-                    shortest_path_edges = list(nx.utils.pairwise(shortest_path))
-                    for swap_pos in shortest_path_edges[:-1]:
-                        idx1 = self.initial_mapping.index(swap_pos[0])
-                        idx2 = self.initial_mapping.index(swap_pos[1])
-                        new.append(('swap',physical_qubit_list[idx1],physical_qubit_list[idx2]))
-                        
-                    idx1 = self.initial_mapping.index(shortest_path_edges[-1][0])
-                    idx2 = self.initial_mapping.index(shortest_path_edges[-1][1])                
-                    new.append((gate,physical_qubit_list[idx1],physical_qubit_list[idx2]))
-                    
-                    # upate index and coupling graph
-                    for swap_pos in shortest_path_edges[:-1]:
-                        idx1 = self.initial_mapping.index(swap_pos[0])
-                        idx2 = self.initial_mapping.index(swap_pos[1])
-                        self.initial_mapping[idx1] = swap_pos[1]
-                        self.initial_mapping[idx2] = swap_pos[0]
-                        
-                        swap_gate_info = ('swap',swap_pos[0],swap_pos[1])
-                        coupling_graph = update_coupling_graph(swap_gate_info,coupling_graph)
-                        
-            elif gate in one_qubit_parameter_gates_avaliable.keys():
-                q0 = gate_info[-1]
-                idx0 = self.initial_mapping.index(q0)
-                if gate == 'u':
-                    new.append((gate,gate_info[1],gate_info[2],gate_info[3],physical_qubit_list[idx0]))
-                else:
-                    new.append((gate,gate_info[1],physical_qubit_list[idx0]))
-                    
-            elif gate in ['reset']:
-                q0 = gate_info[-1]
-                idx0 = self.initial_mapping.index(q0)        
-                new.append((gate,physical_qubit_list[idx0]))
-            
-            elif gate in ['measure']:
-                q_pos = []
-                for qi in gate_info[1]:
-                    idx = self.initial_mapping.index(qi)
-                    q_pos.append(physical_qubit_list[idx])
-                new.append((gate,q_pos,gate_info[2]))
-            
-            elif gate in ['barrier']:
-                barrier_pos = []
-                for qi in gate_info[1]:
-                    idx = self.initial_mapping.index(qi)
-                    barrier_pos.append(physical_qubit_list[idx])
-                new.append((gate,tuple(barrier_pos)))
-                
-        self.gates = new
-
-        final_map = self.initial_mapping.copy()
-        print('basic routing results:')
-        print('virtual qubit --> initial mapping --> after routing')
-        for idx,qi in enumerate(initial_map):
-            print('{:^10} --> {:^10} --> {:^10}'.format(idx,qi,final_map[idx]))
+        self.gates = basic_routing_gates(self.source_gates,self.source_qubits,self.initial_mapping,self.coupling_map)
         return self
 
     def run_basic_routing(self):
@@ -276,95 +166,20 @@ class Transpiler:
             QuantumCircuit: The updated quantum circuit with swap gates applied.
         """
         self._basic_routing()
+        print('check',self.initial_mapping,self.coupling_map)
         qc = QuantumCircuit(self.largest_qubits_index,self.ncbits_used)
         qc.gates = self.gates
         qc.qubits = self.initial_mapping
         qc.params_value = self.params_value
         qc.physical_qubits_espression = True
-        if self.chip_backend is not None:
-            if self.chip_backend.chip_name == 'Haituo':
-                qc.adjust_index(132)
-                print(f'Tip: When setting Haituo chip as backend, the quibit index starts at 132.')
+        #if self.chip_backend is not None:
+        #    if self.chip_backend.chip_name == 'Haituo':
+        #        qc.adjust_index(132)
+        #        print(f'Tip: When setting Haituo chip as backend, the quibit index starts at 132.')
+        #    elif self.chip_backend.chip_name == 'Dongling':
+        #        qc.adjust_index(106)
+        #        print(f'Tip: When setting Dongling chip as backend, the quibit index starts at 106.')
         return qc 
-    
-    def _sabre_routing_once(self,dag):
-        
-        physical_qubit_list = self.initial_mapping.copy()
-        
-        front_layer = list(nx.topological_generations(dag))
-        if front_layer != []:
-            front_layer = front_layer[0]
-        
-        coupling_graph = self.coupling_graph
-        
-        new = []
-        decay_parameter = [0.001] * (self.largest_qubits_index) #len(self.initial_mapping)
-        ncycle = 0 
-        while len(front_layer) != 0:
-            ncycle += 1
-            #print('='*50,ncycle)
-            #print(front_layer,self.initial_mapping)
-            execute_node_list = []
-            for node in front_layer:
-                gate = node.split('_')[0]
-                if gate not in two_qubit_gates_avaliable.keys():
-                    execute_node_list.append(node)
-                    #decay_parameter = [0.001] * (self.largest_qubits_index) 
-                else:
-                    q1, q2 = dag.nodes[node]['qubits']
-                    dis = distance_matrix_element(q1,q2,coupling_graph)
-                    if dis == 1:
-                        execute_node_list.append(node)
-                        decay_parameter = [0.001] * (self.largest_qubits_index) 
-                        
-            if len(execute_node_list) > 0:
-                for execute_node in execute_node_list:
-                    front_layer.remove(execute_node)
-                    gate_info = mapping_node_to_gate_info(execute_node,dag,physical_qubit_list,self.initial_mapping)
-                    new.append(gate_info)
-                    
-                    for successor_node in dag.successors(execute_node):
-                        if is_correlation_on_front_layer(successor_node,front_layer,dag) is False:
-                            front_layer.append(successor_node)
-            else:
-                for hard_node in front_layer:
-                    # 这一环节会更改coupling map/graph, initial_mapping
-                    heuristic_score = dict()
-                    swap_candidate_list = []
-                    control_qubit, target_qubit = dag.nodes[hard_node]['qubits']
-                    control_neighbours = coupling_graph.neighbors(control_qubit)
-                    target_neighbours = coupling_graph.neighbors(target_qubit)
-                    for fake_target in control_neighbours:
-                        swap_candidate_list.append(('swap',control_qubit,fake_target))
-                    for fake_control in target_neighbours:
-                        swap_candidate_list.append(('swap',fake_control,target_qubit))
-                    for swap_gate in swap_candidate_list:
-                        temp_coupling_graph = update_coupling_graph(swap_gate,coupling_graph)
-                        swap_gate_score = heuristic_function(front_layer,dag,temp_coupling_graph,\
-                                                             swap_gate,decay_parameter)
-                        heuristic_score.update({swap_gate:swap_gate_score})
-                        #print(swap_gate,decay_parameter)
-                        
-                    #print('heuristic_score',heuristic_score)
-                    all_scores = list(heuristic_score.values())
-                    min_score = min(all_scores)
-                    min_score_swap_gate_info = swap_candidate_list[all_scores.index(min_score)]
-                    #print('min_score_swap_gate_info',min_score_swap_gate_info)
-                    q1 = min_score_swap_gate_info[1]
-                    q2 = min_score_swap_gate_info[2]
-                    idx1 = self.initial_mapping.index(q1)
-                    idx2 = self.initial_mapping.index(q2)
-                    
-                    new.append(('swap',physical_qubit_list[idx1],physical_qubit_list[idx2]))
-                    
-                    # update couping graph
-                    coupling_graph = update_coupling_graph(min_score_swap_gate_info,coupling_graph)
-                    # updade initial mapping
-                    self.initial_mapping = update_initial_mapping(min_score_swap_gate_info,self.initial_mapping)
-                    # update decay parameter
-                    decay_parameter = update_decay_parameter(min_score_swap_gate_info,decay_parameter)
-        self.gates = new
-        return None
     
     def _sabre_routing(self, iterations: int = 5):
         """Routing based on the Sabre algorithm.
@@ -374,25 +189,14 @@ class Transpiler:
         Returns:
             Transpiler: Update self information.
         """
-        for idx in range(iterations):
-            initial_map = self.initial_mapping.copy()
-            if idx == 0:
-                self.gates = self.source_gates.copy()
-            else:
-                self.source_gates.reverse()
-                self.gates = self.source_gates.copy()
-            #print('check',idx,initial_map)
-            self._mapping_to_physical_qubits_layout()
-            qc = QuantumCircuit(self.largest_qubits_index,self.ncbits_used)
-            qc.gates = self.gates
-            dag = qc2dag(qc)
-            self._sabre_routing_once(dag)
-            final_map = self.initial_mapping.copy()
-
-        print(f'sabre routing results, after {iterations} iteration(s)')
-        print('virtual qubit --> initial mapping --> after routing')
-        for idx,qi in enumerate(initial_map):
-            print('{:^10} --> {:^10} --> {:^10}'.format(idx,qi,final_map[idx]))
+        self.gates,self.initial_mapping = gates_sabre_routing(self.source_gates,
+                                                              self.source_qubits,
+                                                              self.initial_mapping,
+                                                              self.coupling_map,
+                                                              self.largest_qubits_index,
+                                                              self.ncbits_used,
+                                                              iterations=iterations,
+                                                              )
 
         return self
 
@@ -412,10 +216,13 @@ class Transpiler:
         qc.qubits = self.initial_mapping
         qc.params_value = self.params_value
         qc.physical_qubits_espression = True
-        if self.chip_backend is not None:
-            if self.chip_backend.chip_name == 'Haituo':
-                qc.adjust_index(132)
-                print(f'Tip: When setting Haituo chip as backend, the quibit index starts at 132.')
+        #if self.chip_backend is not None:
+        #    if self.chip_backend.chip_name == 'Haituo':
+        #        qc.adjust_index(132)
+        #        print(f'Tip: When setting Haituo chip as backend, the quibit index starts at 132.')
+        #    elif self.chip_backend.chip_name == 'Dongling1':
+        #        qc.adjust_index(106)
+        #        print(f'Tip: When setting Dongling chip as backend, the quibit index starts at 106.')
         return qc
 
     def _basic_gates(self) -> 'Transpiler':
@@ -427,18 +234,21 @@ class Transpiler:
         new = []
         for gate_info in self.gates:
             gate = gate_info[0]
-            if gate in one_qubit_gates_avaliable.keys():
+            if gate in one_qubit_gates_available.keys():
                 gate_matrix = gate_matrix_dict[gate]
                 theta,phi,lamda,_ = u3_decompose(gate_matrix)
                 new.append(('u',theta,phi,lamda,gate_info[-1]))
-            elif gate in one_qubit_parameter_gates_avaliable.keys():
+            elif gate in one_qubit_parameter_gates_available.keys():
                 if gate == 'u':
                     new.append(gate_info)
+                elif gate == 'r':
+                    theta,phi,qubit = gate_info[1:]
+                    new.append(('u',theta,phi-np.pi/2,np.pi/2-phi,qubit))
                 else:
                     gate_matrix = gate_matrix_dict[gate](*gate_info[1:-1])
                     theta,phi,lamda,_ = u3_decompose(gate_matrix)
                     new.append(('u',theta,phi,lamda,gate_info[-1]))
-            elif gate in two_qubit_gates_avaliable.keys():
+            elif gate in two_qubit_gates_available.keys():
                 if gate in ['cz']:
                     new.append(gate_info)
                 elif gate in ['cx', 'cnot']:
@@ -455,8 +265,17 @@ class Transpiler:
                     new += _cy
                 else:
                     raise(TypeError(f'Input {gate} gate is not support now. Try kak please'))       
-            elif gate in functional_gates_avaliable.keys():
+            elif gate in two_qubit_parameter_gates_available.keys():
+                if gate == 'rxx':
+                    new += rxx_decompose(*gate_info[1:])
+                elif gate == 'ryy':
+                    new += ryy_decompose(*gate_info[1:])
+                elif gate == 'rzz':
+                    new += rzz_decompose(*gate_info[1:])
+            elif gate in functional_gates_available.keys():
                 new.append(gate_info)
+            else:
+                raise(TypeError(f'Input {gate} gate is not support to basic gates now.'))
         self.gates = new
         print('Mapping to basic gates done !')
         return self
@@ -473,10 +292,13 @@ class Transpiler:
         qc.gates = self.gates
         qc.qubits = self.initial_mapping
         qc.physical_qubits_espression = True
-        if self.chip_backend is not None:
-            if self.chip_backend.chip_name == 'Haituo':
-                qc.adjust_index(132)
-                print(f'Tip: When setting Haituo chip as backend, the quibit index starts at 132.')
+        #if self.chip_backend is not None:
+        #    if self.chip_backend.chip_name == 'Haituo':
+        #        qc.adjust_index(132)
+        #        print(f'Tip: When setting Haituo chip as backend, the quibit index starts at 132.')
+        #    elif self.chip_backend.chip_name == 'Dongling1':
+        #        qc.adjust_index(106)
+        #        print(f'Tip: When setting Dongling chip as backend, the quibit index starts at 106.')
         return qc
 
     def _gate_optimize(self) -> 'Transpiler':
@@ -579,13 +401,16 @@ class Transpiler:
         qc.gates = self.gates
         qc.qubits = self.initial_mapping
         qc.physical_qubits_espression = True
-        if self.chip_backend is not None:
-            if self.chip_backend.chip_name == 'Haituo':
-                qc.adjust_index(132)
-                print(f'Tip: When setting Haituo chip as backend, the quibit index starts at 132.')
+        #if self.chip_backend is not None:
+        #    if self.chip_backend.chip_name == 'Haituo':
+        #        qc.adjust_index(132)
+        #        print(f'Tip: When setting Haituo chip as backend, the quibit index starts at 132.')
+        #    elif self.chip_backend.chip_name == 'Dongling1':
+        #        qc.adjust_index(106)
+        #        print(f'Tip: When setting Dongling chip as backend, the quibit index starts at 106.')
         return qc
             
-    def run(self, compile:bool = True, use_priority: bool = True, initial_mapping: list|dict = {'key':'fidelity_var','topology':'linear1'}, optimize_level: 0|1 = 1) -> 'QuantumCircuit':
+    def run(self, use_priority: bool = True, initial_mapping: list|dict = {'key':'fidelity_var','topology':'linear1'}, optimize_level: 0|1 = 1) -> 'QuantumCircuit':
         r"""Run the transpile program.
 
         Args:
@@ -594,27 +419,9 @@ class Transpiler:
         Returns:
             QuantumCircuit: Transpiled quantum circuit.
         """
-        if compile is False:
-            print('Checking whether the physical qubits the user selected are legal.')
-            subgraph = self.chip_backend.graph.subgraph(self.initial_mapping)
-            is_connected = nx.is_connected(subgraph)
-            for edge, fidelity in nx.get_edge_attributes(subgraph,'fidelity').items():
-                if fidelity == 0.:
-                    is_connected = False
-                    
-            if is_connected:
-                qc =  QuantumCircuit(self.largest_qubits_index, self.ncbits_used)
-                qc.gates = self.gates
-                qc.qubits = self.initial_mapping
-                qc.physical_qubits_espression = True             
-                return qc
-            else:
-                raise(ValueError('The Physical qubits user selected are invalid'))  
-
+        if optimize_level == 0:
+            return self._select_layout(use_priority=use_priority, initial_mapping=initial_mapping)._basic_routing()._basic_gates().run_gate_optimize()
+        elif optimize_level == 1:
+            return self._select_layout(use_priority=use_priority, initial_mapping=initial_mapping)._sabre_routing()._basic_gates().run_gate_optimize()
         else:
-            if optimize_level == 0:
-                return self._select_layout(use_priority=use_priority, initial_mapping=initial_mapping)._basic_routing()._basic_gates().run_gate_optimize()
-            elif optimize_level == 1:
-                return self._select_layout(use_priority=use_priority, initial_mapping=initial_mapping)._sabre_routing()._basic_gates().run_gate_optimize()
-            else:
-                raise(ValueError('More optimize level is not support now!'))
+            raise(ValueError('More optimize level is not support now!'))

@@ -104,12 +104,22 @@ xc_mat = np.array(
 
 cy_mat = np.array(
     [
+        [1.0, 0.0, 0.0,  0.0],
+        [0.0, 0.0, 0.0, -1.0j],
+        [0.0, 0.0, 1.0,  0.0],
+        [0.0, 1.0j, 0.0, 0.0],
+    ],dtype=complex,
+)
+
+yc_mat = np.array(
+    [
         [1.0, 0.0, 0.0, 0.0],
         [0.0, 1.0, 0.0, 0.0],
         [0.0, 0.0, 0.0, -1.0j],
         [0.0, 0.0, 1.0j, 0.0],
     ],dtype=complex,
 )
+
 cz_mat = np.array(
     [
         [1.0, 0.0, 0.0, 0.0],
@@ -118,6 +128,15 @@ cz_mat = np.array(
         [0.0, 0.0, 0.0, -1.0],
     ],dtype=complex,
 )
+
+def r_mat(theta,phi):
+    return np.array(
+        [
+            [np.cos(theta/2), -1j*np.exp(-1j*phi)*np.sin(theta/2)],
+            [-1j*np.exp(1j*phi)*np.sin(theta/2), np.cos(theta/2)]
+        ],
+        dtype=complex,
+    )
 
 def rx_mat(theta: float) -> np.ndarray:
 #    r"""Generate the rotation matrix for the Rx gate.
@@ -202,12 +221,42 @@ def u_mat(theta: float, phi: float, lamda: float) -> np.ndarray:
         ], dtype=complex
     )
 
+def rxx_mat(theta: float) -> np.ndarray:
+    return np.array(
+        [
+            [np.cos(theta/2), 0, 0, -1j*np.sin(theta/2)],
+            [0, np.cos(theta/2), -1j*np.sin(theta/2), 0],
+            [0, -1j*np.sin(theta/2), np.cos(theta/2), 0],
+            [-1j*np.sin(theta/2), 0, 0, np.cos(theta/2)]
+        ], dtype=complex
+    )
+
+def ryy_mat(theta: float) -> np.ndarray:
+    return np.array(
+        [
+            [np.cos(theta/2), 0, 0, 1j*np.sin(theta/2)],
+            [0, np.cos(theta/2), -1j*np.sin(theta/2), 0],
+            [0, -1j*np.sin(theta/2), np.cos(theta/2), 0],
+            [1j*np.sin(theta/2), 0, 0, np.cos(theta/2)]
+        ], dtype=complex
+    )
+
+def rzz_mat(theta: float) -> np.ndarray:
+    return np.array(
+        [
+            [np.exp(-1j*theta/2), 0, 0, 0],
+            [0, np.exp(1j*theta/2), 0, 0],
+            [0, 0, np.exp(1j*theta/2), 0],
+            [0, 0, 0, np.exp(-1j*theta/2)]
+        ], dtype=complex
+    )
 
 gate_matrix_dict = {
     'id':id_mat, 'x':x_mat, 'y':y_mat, 'z':z_mat, 'h':h_mat,
     's':s_mat, 'sdg':sdg_mat, 't':t_mat, 'tdg':tdg_mat, 'sx':sx_mat, 'sxdg':sxdg_mat,
     'swap':swap_mat, 'iswap':iswap_mat,
-    'cx':cx_mat, 'cnot':cx_mat, 'cy':cy_mat, 'cz':cz_mat,
+    'cx':cx_mat, 'cnot':cx_mat, 'cy':cy_mat, 'yc':yc_mat,'cz':cz_mat,
     'rx':rx_mat, 'ry':ry_mat, 'rz':rz_mat,
-    'p':p_mat, 'u':u_mat,
+    'p':p_mat, 'u':u_mat,'r':r_mat,
+    'rxx':rxx_mat,'ryy':ryy_mat,'rzz':rzz_mat,
     }

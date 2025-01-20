@@ -28,7 +28,7 @@ def load_chip_basic_info(chip_name):
     import requests
     import json
     session = requests.Session()
-    URL = 'http://quark.baqis.ac.cn:81'
+    URL = 'https://quafu-sqc.baqis.ac.cn'
     info0 = session.get(f'{URL}/task/backendtest/{chip_name}1') 
     chip_info = json.loads(info0.content.decode())
 
@@ -51,12 +51,11 @@ class Backend:
         if isinstance(chip,dict):
             self.chip_name = ' '
             self.chip_info = chip
-            print('The last calibration time was',self.chip_info['calibration_time'])
             self.size = self.chip_info['size']
             self.priority_qubits = self.chip_info['priority_qubits']
             self.qubits_with_attributes = self._collect_qubits_with_attributes()
             self.couplers_with_attributes = self._collect_couplers_with_attributes()
-        elif chip in ['Baihua','Haituo']:
+        elif chip in ['Baihua','Haituo1','Dongling1','Dongling2','Yunmeng1']:
             self.chip_name = chip
             self.chip_info = load_chip_basic_info(chip)
             print('The last calibration time was',self.chip_info['calibration_time'])
@@ -67,7 +66,6 @@ class Backend:
             
         elif chip == 'Custom':
             self.chip_name = chip
-            print("Please set 'edges_with_attributes' as a list of tuples and 'nodes_with_attributes' as a dictionary.")
             self.chip_info = dict()
             self.size = (0,0)
             self.qubits_with_attributes = list()
@@ -112,7 +110,8 @@ class Backend:
         G.add_edges_from(self.couplers_with_attributes)
         return G
         
-    def draw(self,show_couplers_fidelity:bool = False, show_quibts_attributes:Literal['T1','T2','fidelity','frequancy','']='',highlight_nodes:list = [],save_svg_fname: str|None = None):
+    def draw(self,show_couplers_fidelity:bool = False, show_quibts_attributes:Literal['T1','T2','fidelity','frequency','']='', highlight_nodes:list = [],
+             save_svg_fname: str|None = None,show_qubits_label:bool=False):
         """Draw the chip layout.
     
         Args:
@@ -168,7 +167,16 @@ class Backend:
             node_cmap = LinearSegmentedColormap.from_list('truncated_blues', plt.get_cmap('Blues')(np.linspace(0.31, 1.0, 1000))) #plt.get_cmap('Blues') 
 
             node_colors = [ScalarMappable(norm = node_norm, cmap = node_cmap).to_rgba(attribute) for attribute in node_attributes.values()]
-            node_labels =  {node: np.round(attr, 2) for node, attr in node_attributes.items()}  # 将 'T1' 属性作为标签   
+            if show_quibts_attributes == 'fidelity':
+                if show_qubits_label:
+                    node_labels = {node:node for node in self.graph.nodes()} 
+                else:
+                    node_labels =  {node: np.round(attr, 3) for node, attr in node_attributes.items()} # 保留三位有效数字
+            else:
+                if show_qubits_label:
+                    node_labels = {node:node for node in self.graph.nodes()} 
+                else:    
+                    node_labels =  {node: np.round(attr, 2) for node, attr in node_attributes.items()}  # 保留两位有效数字
             node_font_size = 8 
             if show_couplers_fidelity:
                 figsize = (15, 15)

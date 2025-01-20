@@ -21,15 +21,16 @@ r"""
 The quark.circuit module provides tools for constructing, visualizing, and transpiling quantum circuits.
 """
 
-from .quantumcircuit_wapper import QuantumCircuitWrapper
 from .quantumcircuit import (
     QuantumCircuit,
     generate_ghz_state,
-    generate_random_circuit,
-    one_qubit_gates_avaliable,
-    two_qubit_gates_avaliable,
-    one_qubit_parameter_gates_avaliable,
-    functional_gates_avaliable,
+    )
+from .quantumcircuit_helpers import (
+    one_qubit_gates_available,
+    two_qubit_gates_available,
+    one_qubit_parameter_gates_available,
+    two_qubit_parameter_gates_available,
+    functional_gates_available,
     )
 from .utils import (zyz_decompose,
                     u3_decompose,
@@ -44,4 +45,4 @@ from .transpiler import Transpiler
 from .dag import dag2qc,qc2dag,draw_dag
 from .backend import Backend
 from .layout_helpers import Layout
-from .test_transpiler import call_quarkcircuit_transpiler
+from .test_transpiler import call_quark_transpiler

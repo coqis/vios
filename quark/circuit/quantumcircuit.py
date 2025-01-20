@@ -22,11 +22,20 @@ This module contains the QuantumCircuit class, which offers an intuitive interfa
 and converting quantum circuits in various formats such as OpenQASM 2.0 and qlisp.
 """
 
-import re, copy
-
+import copy
 from IPython.display import display, HTML
 import numpy as np
-
+from .quantumcircuit_helpers import (
+    one_qubit_gates_available,
+    two_qubit_gates_available,
+    one_qubit_parameter_gates_available,
+    two_qubit_parameter_gates_available,
+    functional_gates_available,
+    convert_gate_info_to_dag_info,
+    parse_openqasm2_to_gates,
+    parse_qlisp_to_gates,
+    add_gates_to_lines,
+    )
 from .utils import u3_decompose, zyz_decompose, kak_decompose
 from .matrix import h_mat
 
@@ -45,92 +54,6 @@ def generate_ghz_state(nqubits: int) -> 'QuantumCircuit':
     for i in range(1,nqubits):
         cir.cx(0,i)
     return cir
-
-def generate_random_circuit(nqubits: int, ncycle: int, seed: int = 2024, function_gates: bool = True) -> 'QuantumCircuit':
-    r"""
-    Generate random quantum circuits, mainly for testing.
-
-    Args:
-        nqubits (int): The number of qubits.
-        ncycle (int): The number of quantum circuit layers.
-        seed (int, optional): Random seed. Defaults to 2024.
-        function_gates (bool, optional): Whether it contains functional gates. Defaults to True.
-
-    Returns:
-        QuantumCircuit: A random quantum circuit.
-    """
-    rng = np.random.default_rng(seed)
-    qc = QuantumCircuit(nqubits)
-    # print('ncycle: {}, nqubit: {}'.format(ncycle, nqubits))
-    two_qubit_gates_avaliable_qiskit = copy.deepcopy(two_qubit_gates_avaliable)
-    two_qubit_gates_avaliable_qiskit.pop('iswap')
-    for _ in range(ncycle):
-        for qubit in range(nqubits):
-            if function_gates:
-                gate_type = rng.choice(['single', 'parametric', 'two','barrier','measure','reset'])
-            else:
-                gate_type = rng.choice(['single', 'parametric', 'two'])
-            if gate_type == 'single':
-                gate = rng.choice(list(one_qubit_gates_avaliable.keys()))
-                getattr(qc, gate)(qubit)
-            elif gate_type == 'two' and nqubits > 1:
-                gate = rng.choice(list(two_qubit_gates_avaliable_qiskit.keys()))
-                target_qubit = rng.choice([q for q in range(nqubits) if q != qubit])
-                getattr(qc, gate)(qubit, target_qubit)
-            elif gate_type == 'parametric':
-                gate = rng.choice(list(one_qubit_parameter_gates_avaliable.keys()))
-                if gate == 'u':
-                    theta = rng.uniform(-1,1)*np.pi 
-                    phi = rng.uniform(-1,1)*np.pi 
-                    lamda = rng.uniform(-1,1)*np.pi 
-                    getattr(qc, gate)(theta,phi,lamda,qubit)
-                else:
-                    theta = rng.uniform(-1,1)*np.pi  
-                    getattr(qc, gate)(theta, qubit)
-            elif gate_type == 'barrier':
-                for idx in range(qubit+1):
-                    getattr(qc, 'barrier')(idx)
-            elif gate_type == 'measure':
-                getattr(qc, 'measure')(qubit,qubit)
-            elif gate_type == 'reset':
-                getattr(qc, 'reset')(qubit)
-    return qc
-
-def is_multiple_of_pi(n, tolerance: float = 1e-9) -> str:
-    r"""
-    Determines if a given number is approximately a multiple of π (pi) within a given tolerance.
-
-    Args:
-        n (float): The number to be checked.
-        tolerance (float, optional): The allowable difference between the number and a multiple of π. Defaults to 1e-9.
-
-    Returns:
-        str: A string representation of the result. If the number is close to a multiple of π, 
-             it returns a string in the form of "kπ" where k is a rounded multiplier (e.g., "2π" for 2 x π).
-             If n is approximately 0, it returns "0.0".
-             Otherwise, it returns a string representation of the number rounded to three decimal places.
-    """
-    result = n / np.pi
-    aprox = round(result,2)
-    if abs(result - aprox) < tolerance:
-        if np.allclose(aprox, 0.0):
-            return str(0.0)
-        else:
-            expression = f'{aprox}π'
-            return expression
-    else:
-        return str(round(n,3))
-
-one_qubit_gates_avaliable = {
-    'id':'I', 'x':'X', 'y':'Y', 'z':'Z',
-    's':'S', 'sdg':'Sdg','t':'T', 'tdg':'Tdg',
-    'h':'H', 'sx':'√X','sxdg':'√Xdg',
-    }
-two_qubit_gates_avaliable = {
-    'cx':'●X', 'cnot':'●X', 'cy':'●Y', 'cz':'●●', 'swap':'XX', 'iswap':'⨂+',
-    }
-one_qubit_parameter_gates_avaliable = {'rx':'Rx', 'ry':'Ry', 'rz':'Rz', 'p':'P', 'u':'U'}
-functional_gates_avaliable = {'barrier':'░', 'measure':'M', 'reset':'|0>','delay':'Delay'}
 
 class QuantumCircuit:
     r"""
@@ -175,26 +98,23 @@ class QuantumCircuit:
             self.qubits = [i for i in range(self.nqubits)]
         else:
             raise ValueError("Support only QuantumCircuit(), QuantumCircuit(nqubits) or QuantumCircuit(nqubits,ncbits).")
-        
-        self.from_openqasm2_str = None
 
         self.gates = []
         self.physical_qubits_espression = False
-
         self.params_value = {}
 
     def adjust_index(self,thres:int):
         gates = []
         for gate_info in self.gates:
             gate = gate_info[0]
-            if gate in one_qubit_gates_avaliable.keys():
+            if gate in one_qubit_gates_available.keys():
                 qubit = gate_info[-1] + thres
                 gates.append((gate,qubit))
-            elif gate in two_qubit_gates_avaliable.keys():
+            elif gate in two_qubit_gates_available.keys():
                 qubit1 = gate_info[1] + thres
                 qubit2 = gate_info[2] + thres
                 gates.append((gate,qubit1,qubit2))
-            elif gate in one_qubit_parameter_gates_avaliable.keys():
+            elif gate in one_qubit_parameter_gates_available.keys():
                 qubit = gate_info[-1] + thres
                 gates.append((gate,*gate_info[1:-1],qubit))
             elif gate in ['reset']:
@@ -218,15 +138,11 @@ class QuantumCircuit:
             openqasm2_str (str): A string representing a quantum circuit in OpenQASM 2.0 format.
         """
         assert('OPENQASM 2.0' in openqasm2_str)
-        self.from_openqasm2_str = openqasm2_str
-        self.nqubits = int(re.findall(r"\d+\.?\d*", openqasm2_str.split('qreg')[1].split(';')[0])[0])
-        if 'creg' in openqasm2_str:
-            self.ncbits = int(re.findall(r"\d+\.?\d*", openqasm2_str.split('creg')[1].split(';')[0])[0])
-        else:
-            self.ncbits = self.nqubits
-        # update self.gates
-        self.qubits = [i for i in range(self.nqubits)]
-        self._openqasm2_to_gates()
+        new_gates,qubit_used,cbit_used = parse_openqasm2_to_gates(openqasm2_str)
+        self.nqubits = max(qubit_used, default=0) + 1 
+        self.ncbits = max(cbit_used, default=0) + 1
+        self.qubits = list(qubit_used) #[i for i in range(self.nqubits)]
+        self.gates = new_gates
         return self
     
     def from_qlisp(self, qlisp: list|str) -> None:
@@ -239,7 +155,7 @@ class QuantumCircuit:
         if isinstance(qlisp, str):
             import ast
             qlisp = ast.literal_eval(qlisp)
-        new_gates, qubit_used,cbit_used = self._qlisp_to_gates(qlisp)
+        new_gates, qubit_used,cbit_used = parse_qlisp_to_gates(qlisp)
         self.nqubits = max(qubit_used, default=0) + 1 
         self.ncbits = max(cbit_used, default=0) + 1
         self.qubits = list(qubit_used) #[i for i in range(self.nqubits)]
@@ -523,7 +439,34 @@ class QuantumCircuit:
                 self.params_value[theta] = theta
         else:
             raise ValueError("Qubit index out of range")
+        
+    def r(self, theta: float, phi:float, qubit: int) -> None:
+        r"""
+        Add a R gate.
 
+        $$
+        R(\theta,\phi) = e^{-i\frac{\theta}{2}(\cos{\phi x}+\sin{\phi y})} = \begin{bmatrix}
+         \cos(\frac{\theta}{2})             & -i e^{-i\phi}\sin(\frac{\theta}{2}) \\
+         -i e^{i\phi}\sin(\frac{\theta}{2}) & \cos(\frac{\theta}{2})      
+        \end{bmatrix}
+        $$
+
+        Args:
+            theta (float): The rotation angle of the gate.
+            qubit (int): The qubit to apply the gate to.
+
+        Raises:
+            ValueError: If qubit out of circuit range.
+        """
+        if qubit < self.nqubits:
+            self.gates.append(('r', theta, phi, qubit))
+            if isinstance(theta,str):
+                self.params_value[theta] = theta
+            if isinstance(phi,str):
+                self.params_value[phi] = phi
+        else:
+            raise ValueError("Qubit index out of range")
+        
     def u(self, theta: float, phi: float, lamda: float, qubit: int) -> None:
         r"""
         Add a U3 gate.
@@ -611,6 +554,93 @@ class QuantumCircuit:
         else:
             raise ValueError("Qubit index out of range")
         
+    def rxx(self, theta: float, qubit1: int, qubit2:int) -> None:
+        r"""
+        Add a RXX gate.
+
+        $$
+        Rxx(\theta) = e^{-i\frac{\theta}{2}X\otimes X} = 
+        \begin{bmatrix}
+         \cos(\frac{\theta}{2})  & 0 & 0 & -i\sin(\frac{\theta}{2}) \\
+         0 & \cos(\frac{\theta}{2}) & -i\sin(\frac{\theta}{2}) & 0 \\
+         0 & -i\sin(\frac{\theta}{2}) & \cos(\frac{\theta}{2}) & 0 \\
+         -i\sin(\frac{\theta}{2}) & 0 & 0 & \cos(\frac{\theta}{2})
+        \end{bmatrix}.
+        $$
+
+        Args:
+            theta (float): The rotation angle of the gate.
+            qubit1 (int): The qubit to apply the gate to.
+            qubit2 (int): The qubit to apply the gate to.
+
+        Raises:
+            ValueError: If qubit out of circuit range.
+        """
+        if max(qubit1, qubit2) < self.nqubits:
+            self.gates.append(('rxx', theta, qubit1, qubit2))
+            if isinstance(theta,str):
+                self.params_value[theta] = theta
+        else:
+            raise ValueError("Qubit index out of range")
+        
+    def ryy(self, theta: float, qubit1: int, qubit2:int) -> None:
+        r"""
+        Add a RYY gate.
+
+        $$
+        Ryy(\theta) = e^{-i\frac{\theta}{2}Y\otimes Y} = 
+        \begin{bmatrix}
+         \cos(\frac{\theta}{2})  & 0 & 0 & i\sin(\frac{\theta}{2}) \\
+         0 & \cos(\frac{\theta}{2}) & -i\sin(\frac{\theta}{2}) & 0 \\
+         0 & -i\sin(\frac{\theta}{2}) & \cos(\frac{\theta}{2}) & 0 \\
+         i\sin(\frac{\theta}{2}) & 0 & 0 & \cos(\frac{\theta}{2})
+        \end{bmatrix}.
+        $$
+
+        Args:
+            theta (float): The rotation angle of the gate.
+            qubit1 (int): The qubit to apply the gate to.
+            qubit2 (int): The qubit to apply the gate to.
+
+        Raises:
+            ValueError: If qubit out of circuit range.
+        """
+        if max(qubit1, qubit2) < self.nqubits:
+            self.gates.append(('ryy', theta, qubit1, qubit2))
+            if isinstance(theta,str):
+                self.params_value[theta] = theta
+        else:
+            raise ValueError("Qubit index out of range")
+        
+    def rzz(self, theta: float, qubit1: int, qubit2:int) -> None:
+        r"""
+        Add a RZZ gate.
+
+        $$
+        Rzz(\theta) = e^{-i\frac{\theta}{2}Z\otimes Z} = 
+        \begin{bmatrix}
+         e^{-i\frac{\theta}{2}}  & 0 & 0 & 0 \\
+         0 & e^{i\frac{\theta}{2}} & 0 & 0 \\
+         0 & 0 & e^{i\frac{\theta}{2}} & 0 \\
+         0 & 0 & 0 & e^{-i\frac{\theta}{2}}
+        \end{bmatrix}.
+        $$
+
+        Args:
+            theta (float): The rotation angle of the gate.
+            qubit1 (int): The qubit to apply the gate to.
+            qubit2 (int): The qubit to apply the gate to.
+
+        Raises:
+            ValueError: If qubit out of circuit range.
+        """
+        if max(qubit1, qubit2) < self.nqubits:
+            self.gates.append(('rzz', theta, qubit1, qubit2))
+            if isinstance(theta,str):
+                self.params_value[theta] = theta
+        else:
+            raise ValueError("Qubit index out of range")
+        
     def shallow_apply_value(self,params_dic):
         for k,v in self.params_value.items():
             self.params_value[k] = k
@@ -624,7 +654,7 @@ class QuantumCircuit:
         gates = []
         for gate_info in self.gates:
             gate = gate_info[0]
-            if gate in one_qubit_parameter_gates_avaliable.keys():
+            if gate in one_qubit_parameter_gates_available.keys():
                 param = gate_info[1]
                 qubit = gate_info[-1]
                 if param in params_dic.keys():
@@ -786,15 +816,29 @@ class QuantumCircuit:
         """
         qasm_str = "OPENQASM 2.0;\n"
         qasm_str += "include \"qelib1.inc\";\n"
+        gates0 = [gate[0] for gate in self.gates]
+        if 'delay' in gates0:
+            qasm_str += "opaque delay(param0) q0;\n"
+        if 'r' in gates0:
+            qasm_str += "gate r(param0,param1) q0 { u3(param0,param1 - pi/2,pi/2 - param1) q0; }\n"
         qasm_str += f"qreg q[{self.nqubits}];\n"
         qasm_str += f"creg c[{self.ncbits}];\n"
-
         for gate in self.gates:
-            if gate[0] in one_qubit_gates_avaliable.keys(): # single qubit gate 
+            if gate[0] in one_qubit_gates_available.keys(): # single qubit gate 
                 qasm_str += f"{gate[0]} q[{gate[1]}];\n"
-            elif gate[0] in two_qubit_gates_avaliable.keys(): # two qubit gate 
+            elif gate[0] in two_qubit_gates_available.keys(): # two qubit gate 
                 qasm_str += f"{gate[0]} q[{gate[1]}],q[{gate[2]}];\n"
-            elif gate[0] in one_qubit_parameter_gates_avaliable.keys():
+            elif gate[0] in two_qubit_parameter_gates_available.keys():
+                if isinstance(gate[1],float):
+                    theta = gate[1]
+                elif isinstance(gate[1],str):
+                    param = self.params_value[gate[1]]
+                    if isinstance(param,float):
+                        theta = param
+                    else:
+                        raise(ValueError(f'please apply value for parameter {param}')) 
+                qasm_str += f"{gate[0]}({theta}) q[{gate[2]}],q[{gate[3]}];\n"                        
+            elif gate[0] in one_qubit_parameter_gates_available.keys():
                 if gate[0] == 'u':
                     if isinstance(gate[1],float):
                         theta = gate[1]
@@ -824,7 +868,27 @@ class QuantumCircuit:
                             raise(ValueError(f'please apply value for parameter {param}')) 
                         
                     qasm_str += f"{gate[0]}({theta},{phi},{lamda}) q[{gate[-1]}];\n"
-                    #qasm_str += f"{gate[0]}({gate[1]},{gate[2]},{gate[3]}) q[{gate[-1]}];\n"
+                elif gate[0] == 'r':
+                    if isinstance(gate[1],float):
+                        theta = gate[1]
+                    elif isinstance(gate[1],str):
+                        param = self.params_value[gate[1]]
+                        if isinstance(param,float):
+                            theta = param
+                        else:
+                            raise(ValueError(f'please apply value for parameter {param}')) 
+                        
+                    if isinstance(gate[2],float):
+                        phi = gate[2]
+                    elif isinstance(gate[2],str):
+                        param = self.params_value[gate[2]]
+                        if isinstance(param,float):
+                            phi = param
+                        else:
+                            raise(ValueError(f'please apply value for parameter {param}')) 
+                        
+                    qasm_str += f"{gate[0]}({theta},{phi}) q[{gate[-1]}];\n"
+
                 else:
                     if isinstance(gate[1],float):
                         qasm_str += f"{gate[0]}({gate[1]}) q[{gate[2]}];\n"
@@ -847,37 +911,9 @@ class QuantumCircuit:
             elif gate[0] in ['measure']:
                 for idx in range(len(gate[1])):
                     qasm_str += f"{gate[0]} q[{gate[1][idx]}] -> c[{gate[2][idx]}];\n"
+            else:
+                raise(ValueError(f"Sorry, Quark could not find the corresponding OpenQASM 2.0 syntax for now. Please contact the developer for assistance.{gate[0]}"))
         return qasm_str.rstrip('\n')
-    
-    def _openqasm2_to_gates(self) -> None:
-        r"""
-        Parse gate information from an input OpenQASM 2.0 string, and update self.gates
-        """
-        #print('check',self.from_openqasm2_str)
-        for line in self.from_openqasm2_str.splitlines():
-            #print('check',line)
-            if line == '':
-                continue
-            gate = line.split()[0].split('(')[0]
-            position = [int(num) for num in re.findall(r'\d+', line)]
-            if gate in one_qubit_gates_avaliable.keys():
-                self.gates.append((gate,position[0]))
-            elif gate in two_qubit_gates_avaliable.keys():
-                self.gates.append((gate,position[0],position[1]))
-            elif gate in one_qubit_parameter_gates_avaliable.keys():
-                if gate == 'u':
-                    params_str = re.search(r'\(([^)]+)\)', line).group(1).split(',')
-                    params = [float(i) for i in params_str]
-                    self.gates.append((gate, params[0], params[1], params[2], position[-1]))
-                else:
-                    param = float(re.search(r'\(([^)]+)\)', line).group(1))
-                    self.gates.append((gate, param, position[-1]))
-            elif gate in ['reset']:
-                self.gates.append((gate,position[0]))
-            elif gate in ['barrier']:
-                self.gates.append((gate, tuple(position)))
-            elif gate in ['measure']:
-                self.gates.append((gate, [position[0]], [position[1]])) 
     
     @property
     def to_qlisp(self) -> list:
@@ -896,9 +932,9 @@ class QuantumCircuit:
             elif gate in ['sdg','tdg']:
                 qlisp.append(('-' + gate[0].upper(), 'Q'+str(gate_info[1])))
             elif gate in ['sx']:
-                qlisp.append((gate, 'Q'+str(gate_info[1])))
+                qlisp.append(('X/2', 'Q'+str(gate_info[1])))
             elif gate in ['sxdg']:
-                qlisp.append(('-' + gate[:2], 'Q'+str(gate_info[1])))
+                qlisp.append(('-X/2', 'Q'+str(gate_info[1])))
             elif gate in ['u']:
                 if isinstance(gate_info[1],float):
                     theta = gate_info[1]
@@ -926,12 +962,35 @@ class QuantumCircuit:
                         lamda = param
                     else:
                         raise(ValueError(f'please apply value for parameter {param}'))                    
-                qlisp.append((('u3', theta, phi, lamda),'Q'+str(gate_info[4])))
-
-            elif gate in ['cx','cnot']:
-                qlisp.append(('Cnot', tuple('Q'+str(i) for i in gate_info[1:])))
-            elif gate in ['cy', 'cz', 'swap']:
-                qlisp.append((gate.upper(), tuple('Q'+str(i) for i in gate_info[1:])))
+                qlisp.append((('U', theta, phi, lamda),'Q'+str(gate_info[4])))
+            elif gate in ['r']:
+                if isinstance(gate_info[1],float):
+                    theta = gate_info[1]
+                elif isinstance(gate_info[1],str):
+                    param = self.params_value[gate_info[1]]
+                    if isinstance(param,float):
+                        theta = param
+                    else:
+                        raise(ValueError(f'please apply value for parameter {param}')) 
+                    
+                if isinstance(gate_info[2],float):
+                    phi = gate_info[2]
+                elif isinstance(gate_info[2],str):
+                    param = self.params_value[gate_info[2]]
+                    if isinstance(param,float):
+                        phi = param
+                    else:
+                        raise(ValueError(f'please apply value for parameter {param}')) 
+                if abs(theta-np.pi/2) < 1e-9:
+                    qlisp.append((('R', phi),'Q'+str(gate_info[3])))
+                else:
+                    qlisp.append((('U', theta, phi-np.pi/2, np.pi/2-phi),'Q'+str(gate_info[3])))
+                    #qlisp.append((('rfUnitary', theta, phi),'Q'+str(gate_info[3])))
+            elif gate in ['cx','cy', 'cz', 'swap']:
+                if gate == 'cx':
+                    qlisp.append(('Cnot', tuple('Q'+str(i) for i in gate_info[1:])))
+                else:
+                    qlisp.append((gate.upper(), tuple('Q'+str(i) for i in gate_info[1:])))
             elif gate in ['iswap']:
                 qlisp.append(('iSWAP', tuple('Q'+str(i) for i in gate_info[1:])))
 
@@ -944,7 +1003,7 @@ class QuantumCircuit:
                         qlisp.append(((gate.capitalize(),param), 'Q'+str(gate_info[2])))
                     else:
                         raise(ValueError(f'please apply value for parameter {param}')) 
-            elif gate in ['delay']:
+            elif gate in ['delay']:#qlisp unit in s
                 for qubit in gate_info[-1]:
                     qlisp.append(((gate.capitalize(),gate_info[1]),'Q'+str(qubit)))
             elif gate in ['reset']:
@@ -954,240 +1013,10 @@ class QuantumCircuit:
             elif gate in ['measure']:
                 for idx,cbit in enumerate(gate_info[2]):
                     qlisp.append(((gate.capitalize(), cbit), 'Q'+str(gate_info[1][idx])))
-                #qlisp.append(((gate.capitalize(), gate_info[2][0]), 'Q'+str(gate_info[1][0])))
-        return qlisp
-    
-    def _qlisp_to_gates(self, qlisp: list) -> tuple[list, list, list]:
-        r"""
-        Parse gate information from an input qlisp list.
-
-        Args:
-            qlisp (list): qlisp
-
-        Returns:
-            tuple[list, list, list]: A tuple containing:
-                An gate information list.
-                An qubit information list.
-                An cbit information list.
-        """
-        new = []
-        qubit_used = []
-        cbit_used = []
-        for gate_info in qlisp:
-            gate = gate_info[0]
-            if gate in ['X', 'Y', 'Z', 'S', 'T', 'H']:
-                qubit0 = int(gate_info[1].split('Q')[1])
-                new.append((gate.lower(), qubit0))
-            elif gate in ['I']:
-                qubit0 = int(gate_info[1].split('Q')[1])
-                new.append(('id', qubit0))
-            elif gate in ['-S','-T']:
-                qubit0 = int(gate_info[1].split('Q')[1])
-                new.append((gate[1].lower() + 'dg', qubit0))
-            elif gate in ['sx']:
-                qubit0 = int(gate_info[1].split('Q')[1])
-                new.append((gate, qubit0))
-            elif gate in ['-sx']:
-                qubit0 = int(gate_info[1].split('Q')[1])
-                new.append(('sxdg', qubit0))
-            elif gate[0] in ['u3']:
-                qubit0 = int(gate_info[1].split('Q')[1])
-                new.append(('u', gate[1], gate[2], gate[3], qubit0))
-        
-            elif gate in ['Cnot']:
-                qubit1 = int(gate_info[1][0].split('Q')[1])
-                qubit2 = int(gate_info[1][1].split('Q')[1])
-                new.append(('cx', qubit1, qubit2))
-            elif gate in ['CY', 'CZ', 'SWAP']:
-                qubit1 = int(gate_info[1][0].split('Q')[1])
-                qubit2 = int(gate_info[1][1].split('Q')[1])
-                new.append((gate.lower(), qubit1, qubit2))
-            elif gate in ['iSWAP']:
-                qubit1 = int(gate_info[1][0].split('Q')[1])
-                qubit2 = int(gate_info[1][1].split('Q')[1])
-                new.append(('iswap', qubit1, qubit2))
-        
-            elif gate[0] in ['Rx', 'Ry', 'Rz', 'P']:
-                qubit0 = int(gate_info[1].split('Q')[1])
-                new.append((gate[0].lower(), gate[1], qubit0))
-            elif gate in ['Reset']:
-                qubit0 = int(gate_info[1].split('Q')[1])
-                new.append((gate.lower(), qubit0))
-            elif gate in ['Barrier']:
-                qubitn = [int(istr.split('Q')[1]) for istr in gate_info[1]]
-                new.append((gate.lower(), tuple(qubitn)))
-            elif gate[0] in ['Measure']:
-                qubit0 = int(gate_info[1].split('Q')[1])
-                cbit0 = gate[1]
-                new.append((gate[0].lower(), [qubit0] ,[cbit0]))
-
-            for var in ['qubit0','qubit1','qubit2']:
-                try:
-                    qubit_used.append(eval(var))
-                except:
-                    pass
-            try:
-                qubit_used += qubitn
-            except:
-                pass
-            try:
-                cbit_used.append(cbit0)
-            except:
-                pass
-        
-        return new, set(qubit_used), set(cbit_used)
-        
-    def _initialize_gates(self) -> tuple[list, list]:
-        r"""
-        Initialize a blank circuit.
-
-        Returns:
-            tuple[list,list]: A tuple containing:
-                - A list of fake gates element.
-                - A list of fake gates element list.
-        """
-        nlines = 2 * self.nqubits + 1 + len(str(self.ncbits))
-        gates_element = list('— ' * self.nqubits) + ['═'] + [' '] * len(str(self.ncbits))
-        gates_initial = copy.deepcopy(gates_element)
-        if self.physical_qubits_espression:
-            qubits_expression = 'Q'
-        else:
-            qubits_expression = 'q'
-        for i in range(nlines):
-            if i in range(0, 2 * self.nqubits, 2):
-                qi = i // 2
-                if len(str(qi)) == 1:
-                    qn = qubits_expression + f'[{qi:<1}]  '
-                elif len(str(qi)) == 2:
-                    qn = qubits_expression + f'[{qi:<2}] '
-                elif len(str(qi)) == 3:
-                    qn = qubits_expression + f'[{qi:<3}]'
-                gates_initial[i] = qn
-            elif i in [2 * self.nqubits]:
-                if len(str(self.ncbits)) == 1:
-                    c = f'c:  {self.ncbits}/'
-                elif len(str(self.ncbits)) == 2:
-                    c = f'c: {self.ncbits}/'
-                elif len(str(self.ncbits)) == 3:
-                    c = f'c:{self.ncbits}/'
-                gates_initial[i] = c
             else:
-                gates_initial[i] = ' ' * 6   
-        n = len(self.gates) + self.nqubits ## 
-        gates_layerd = [gates_initial] + [copy.deepcopy(gates_element) for _ in range(n)]
-        return gates_element,gates_layerd
+                raise(ValueError(f'Sorry, quarkcircuit could not find the corresponding qlisp syntax for now. Please contact the developer for assistance. {gate}'))
+        return qlisp
 
-    def _generate_gates_layerd_dense(self) -> list:
-        r"""Assign gates to their respective layers.
-
-        Returns:
-            list: A list of dense gates element list.
-        """
-        # for count circuit depth
-        # ignore barrier
-        gates_element,gates_layerd = self._initialize_gates()
-        for gate_info in self.gates:
-            gate = gate_info[0]
-            if gate in one_qubit_gates_avaliable.keys():
-                pos0 = gate_info[1]
-                for idx in range(len(gates_layerd)-1,-1,-1):
-                    if (gates_layerd[idx][2*pos0] != '—' and gates_layerd[idx][2*pos0] != '│'):
-                        gates_layerd[idx+1][2*pos0] = one_qubit_gates_avaliable[gate]
-                        break
-            elif gate in two_qubit_gates_avaliable.keys():
-                pos0 = min(gate_info[1],gate_info[2])
-                pos1 = max(gate_info[1],gate_info[2])
-                for idx in range(len(gates_layerd)-1,-1,-1):
-                    if (gates_layerd[idx][2*pos0] not in ['—','│'] or
-                       gates_layerd[idx][2*pos1] not in ['—','│']):
-                        if pos0 == gate_info[1]: # control qubit
-                            gates_layerd[idx+1][2*pos0] = two_qubit_gates_avaliable[gate][0]
-                            gates_layerd[idx+1][2*pos1] = two_qubit_gates_avaliable[gate][-1]
-                        elif pos0 == gate_info[2]:
-                            gates_layerd[idx+1][2*pos0] = two_qubit_gates_avaliable[gate][-1]
-                            gates_layerd[idx+1][2*pos1] = two_qubit_gates_avaliable[gate][0]
-                        break
-            elif gate in one_qubit_parameter_gates_avaliable.keys():
-                if gate == 'u':
-                    if isinstance(gate_info[1],float):
-                        theta0_str = is_multiple_of_pi(gate_info[1])
-                    elif isinstance(gate_info[1],str):
-                        param = self.params_value[gate_info[1]]
-                        if isinstance(param,float):
-                            theta0_str = is_multiple_of_pi(param)
-                        elif isinstance(param,str):
-                            theta0_str = param
-                    if isinstance(gate_info[2],float):
-                        phi0_str = is_multiple_of_pi(gate_info[2])
-                    elif isinstance(gate_info[2],str):
-                        param = self.params_value[gate_info[2]]
-                        if isinstance(param,float):
-                            phi0_str = is_multiple_of_pi(param)
-                        elif isinstance(param,str):
-                            phi0_str = param
-                    if isinstance(gate_info[3],float):
-                        lamda0_str = is_multiple_of_pi(gate_info[3])
-                    elif isinstance(gate_info[3],str):
-                        param = self.params_value[gate_info[3]]
-                        if isinstance(param,float):
-                            lamda0_str = is_multiple_of_pi(param)
-                        elif isinstance(param,str):
-                            lamda0_str = param
-                    pos0 = gate_info[-1]
-                    for idx in range(len(gates_layerd)-1,-1,-1):
-                        if (gates_layerd[idx][2*pos0] != '—' and gates_layerd[idx][2*pos0] != '│'):
-                            params_str = '(' + theta0_str + ',' + phi0_str + ',' + lamda0_str + ')'
-                            gates_layerd[idx+1][2*pos0] = one_qubit_parameter_gates_avaliable[gate] + params_str
-                            break                    
-                else:
-                    if isinstance(gate_info[1],float):
-                        theta0_str = is_multiple_of_pi(gate_info[1])
-                    elif isinstance(gate_info[1],str):
-                        param = self.params_value[gate_info[1]]
-                        if isinstance(param,float):
-                            theta0_str = is_multiple_of_pi(param)
-                        elif isinstance(param,str):
-                            theta0_str = param
-                    pos0 = gate_info[2]
-                    for idx in range(len(gates_layerd)-1,-1,-1):
-                        if (gates_layerd[idx][2*pos0] != '—' and gates_layerd[idx][2*pos0] != '│'):
-                            gates_layerd[idx+1][2*pos0] = one_qubit_parameter_gates_avaliable[gate]+'('+theta0_str+')'
-                            break
-            elif gate in ['reset']:
-                pos0 = gate_info[1]
-                for idx in range(len(gates_layerd)-1,-1,-1):
-                    if (gates_layerd[idx][2*pos0] != '—' and gates_layerd[idx][2*pos0] != '│'):
-                        gates_layerd[idx+1][2*pos0] = functional_gates_avaliable[gate]
-                        break
-            elif gate in ['delay']:
-                poslst0 = gate_info[-1]
-                poslst = []
-                for j in poslst0:
-                    if j + 1 in poslst0:
-                        poslst.append(2*j)
-                    else:
-                        poslst.append(2*j)
-                for idx in range(len(gates_layerd)-1,-1,-1):
-                    e_ = [gates_layerd[idx][2*i] for i in poslst0]
-                    if all(e == '—' for e in e_) is False:
-                        for i in poslst:
-                            gates_layerd[idx+1][i] = functional_gates_avaliable[gate]+f'({gate_info[1]:.1e}ns)'
-                        break
-            elif gate in ['measure']:
-                for j in range(len(gate_info[1])):
-                    pos0 = gate_info[1][j]
-                    pos1 = gate_info[2][j]
-                    for idx in range(len(gates_layerd)-1,-1,-1):
-                        if (gates_layerd[idx][2*pos0] != '—' and gates_layerd[idx][2*pos0] != '│'):
-                            gates_layerd[idx+1][2*pos0] = functional_gates_avaliable[gate]
-                            break
-        
-        for idx in range(len(gates_layerd)-1,-1,-1):
-            if gates_layerd[idx] != gates_element:
-                cut = idx + 1
-                break
-        return gates_layerd[:cut]
-    
     @property
     def depth(self) -> int:
         r"""Count QuantumCircuit depth.
@@ -1195,218 +1024,39 @@ class QuantumCircuit:
         Returns:
             int: QuantumCircuit depth.
         """
-        dense_gates = self._generate_gates_layerd_dense()
-        return len(dense_gates)-1
-    
-    def _generate_gates_layerd(self) -> list:
-        r"""Assign gates to their respective layers loosely.
+        import networkx as nx
 
-        Returns:
-            list: A list of gates element list.
-        """
-        self.lines_use = []
-        # according plot layer distributed gates
-        gates_element,gates_layerd = self._initialize_gates()
+        new = []
         for gate_info in self.gates:
-            gate = gate_info[0]
-            if gate in one_qubit_gates_avaliable.keys():
-                pos0 = gate_info[1]
-                for idx in range(len(gates_layerd)-1,-1,-1):
-                    if gates_layerd[idx][2*pos0] != '—':
-                        gates_layerd[idx+1][2*pos0] = one_qubit_gates_avaliable[gate]
-                        self.lines_use.append(2 * pos0)
-                        self.lines_use.append(2 * pos0 + 1)
-                        break
-            elif gate in two_qubit_gates_avaliable.keys():
-                pos0 = min(gate_info[1],gate_info[2])
-                pos1 = max(gate_info[1],gate_info[2])
-                for idx in range(len(gates_layerd)-1,-1,-1):
-                    if gates_layerd[idx][2*pos0:2*pos1+1] != list('— ')*(pos1-pos0)+['—']:
-                        if pos0 == gate_info[1]: # control qubit
-                            gates_layerd[idx+1][2*pos0] = two_qubit_gates_avaliable[gate][0]
-                            gates_layerd[idx+1][2*pos1] = two_qubit_gates_avaliable[gate][-1]
-                            self.lines_use.append(2*pos0)
-                            self.lines_use.append(2*pos0 + 1)
-                            self.lines_use.append(2*pos1)
-                            self.lines_use.append(2*pos1 + 1)
-                        elif pos0 == gate_info[2]:
-                            gates_layerd[idx+1][2*pos0] = two_qubit_gates_avaliable[gate][-1]
-                            gates_layerd[idx+1][2*pos1] = two_qubit_gates_avaliable[gate][0]
-                            self.lines_use.append(2*pos0)
-                            self.lines_use.append(2*pos0 + 1)
-                            self.lines_use.append(2*pos1)
-                            self.lines_use.append(2*pos1 + 1)
-                        for i in range(2*pos0+1,2*pos1):
-                            gates_layerd[idx+1][i] = '│'
-                        break
-            elif gate in one_qubit_parameter_gates_avaliable.keys():
-                if gate == 'u':
-                    if isinstance(gate_info[1],float):
-                        theta0_str = is_multiple_of_pi(gate_info[1])
-                    elif isinstance(gate_info[1],str):
-                        param = self.params_value[gate_info[1]]
-                        if isinstance(param,float):
-                            theta0_str = is_multiple_of_pi(param)
-                        elif isinstance(param,str):
-                            theta0_str = param
-                    if isinstance(gate_info[2],float):
-                        phi0_str = is_multiple_of_pi(gate_info[2])
-                    elif isinstance(gate_info[2],str):
-                        param = self.params_value[gate_info[2]]
-                        if isinstance(param,float):
-                            phi0_str = is_multiple_of_pi(param)
-                        elif isinstance(param,str):
-                            phi0_str = param
-                    if isinstance(gate_info[3],float):
-                        lamda0_str = is_multiple_of_pi(gate_info[3])
-                    elif isinstance(gate_info[3],str):
-                        param = self.params_value[gate_info[3]]
-                        if isinstance(param,float):
-                            lamda0_str = is_multiple_of_pi(param)
-                        elif isinstance(param,str):
-                            lamda0_str = param
+            gate  = gate_info[0]
+            if gate != 'barrier':
+                new.append(gate_info) 
 
-                    pos0 = gate_info[-1]
-                    for idx in range(len(gates_layerd)-1,-1,-1):
-                        if gates_layerd[idx][2*pos0] != '—':
-                            params_str = '(' + theta0_str + ',' + phi0_str + ',' + lamda0_str + ')'
-                            gates_layerd[idx+1][2*pos0] = one_qubit_parameter_gates_avaliable[gate] + params_str
-                            self.lines_use.append(2*pos0)
-                            self.lines_use.append(2*pos0 + 1)
-                            break                    
-                else:
-                    if isinstance(gate_info[1],float):
-                        theta0_str = is_multiple_of_pi(gate_info[1])
-                    elif isinstance(gate_info[1],str):
-                        param = self.params_value[gate_info[1]]
-                        if isinstance(param,float):
-                            theta0_str = is_multiple_of_pi(param)
-                        elif isinstance(param,str):
-                            theta0_str = param
-                    #theta0_str = is_multiple_of_pi(gate_info[1])
-                    pos0 = gate_info[2]
-                    for idx in range(len(gates_layerd)-1,-1,-1):
-                        if gates_layerd[idx][2*pos0] != '—':
-                            gates_layerd[idx+1][2*pos0] = one_qubit_parameter_gates_avaliable[gate]+'('+theta0_str+')'
-                            self.lines_use.append(2*pos0)
-                            self.lines_use.append(2*pos0 + 1)
-                            break
-                        
-            elif gate in ['reset']:
-                pos0 = gate_info[1]
-                for idx in range(len(gates_layerd)-1,-1,-1):
-                    if gates_layerd[idx][2*pos0] != '—':
-                        gates_layerd[idx+1][2*pos0] = functional_gates_avaliable[gate]
-                        self.lines_use.append(2 * pos0)
-                        self.lines_use.append(2 * pos0 + 1)
-                        break
-            elif gate in ['barrier']:
-                poslst0 = gate_info[1]
-                poslst = []
-                for j in poslst0:
-                    if j + 1 in poslst0:
-                        poslst.append(2*j)
-                        poslst.append(2*j+1)
-                    else:
-                        poslst.append(2*j)
-                for idx in range(len(gates_layerd)-1,-1,-1):
-                    e_ = [gates_layerd[idx][2*i] for i in poslst0]
-                    if all(e == '—' for e in e_) is False:
-                        for i in poslst:
-                            gates_layerd[idx+1][i] = functional_gates_avaliable[gate]
-                        break
-            elif gate in ['delay']:
-                poslst0 = gate_info[-1]
-                poslst = []
-                for j in poslst0:
-                    if j + 1 in poslst0:
-                        poslst.append(2*j)
-                    else:
-                        poslst.append(2*j)
-                for idx in range(len(gates_layerd)-1,-1,-1):
-                    e_ = [gates_layerd[idx][2*i] for i in poslst0]
-                    if all(e == '—' for e in e_) is False:
-                        for i in poslst:
-                            gates_layerd[idx+1][i] = functional_gates_avaliable[gate]+f'({gate_info[1]:.1e}ns)'
-                        break
-            elif gate in ['measure']:
-                for j in range(len(gate_info[1])):
-                    pos0 = gate_info[1][j]
-                    pos1 = gate_info[2][j]
-                    for idx in range(len(gates_layerd)-1,-1,-1):
-                        if gates_layerd[idx][2*pos0:] != gates_element[2*pos0:]:
-                            gates_layerd[idx+1][2*pos0] = functional_gates_avaliable[gate]
-                            self.lines_use.append(2*pos0)
-                            self.lines_use.append(2*pos0 + 1)
-                            for i in range(2*pos0+1,2*self.nqubits,1):
-                                gates_layerd[idx+1][i] = '│'
-                            for i in range(2*self.nqubits+1, 2*self.nqubits+1+len(str(pos1))):
-                                gates_layerd[idx+1][i] = str(pos1)[i-2*self.nqubits-1]
-                            break
-        for idx in range(len(gates_layerd)-1,-1,-1):
-            if gates_layerd[idx] != gates_element:
-                cut = idx + 1
-                break
-        return gates_layerd[:cut]
-        
-    def _format_gates_layerd(self) -> list:
-        r"""Unify the width of each layer's gate strings
-
-        Returns:
-            list: A new list of gates element list.
-        """
-        gates_layerd = self._generate_gates_layerd()
-        gates_layerd_format = [gates_layerd[0]]
-        for lst in gates_layerd[1:]:
-            max_length = max(len(item) for item in lst)
-            if max_length == 1:
-                gates_layerd_format.append(lst)
-            else:
-                if max_length % 2 == 0:
-                    max_length += 1
-                dif0 = max_length // 2
-                for idx in range(len(lst)):
-                    if len(lst[idx]) == 1:
-                        if idx < 2 * self.nqubits:
-                            if idx % 2 == 0:
-                                lst[idx] = '—' * dif0 + lst[idx] + '—' * dif0
-                            else:
-                                lst[idx] = ' ' * dif0 + lst[idx] + ' ' * dif0
-                        elif idx == 2 * self.nqubits:
-                            lst[idx] = '═' * dif0 + lst[idx] + '═' * dif0
-                        else:
-                            lst[idx] = ' ' * dif0 + lst[idx] + ' ' * dif0
-                    else:
-                        dif1 = max_length - len(lst[idx])
-                        lst[idx] = lst[idx] + '—' * dif1
-                gates_layerd_format.append(lst)
-        return gates_layerd_format
+        node_list,edge_list = convert_gate_info_to_dag_info(self.nqubits,self.qubits,new,show_qubits=False)
+        dag = nx.DiGraph()
+        dag.add_nodes_from(node_list)
+        dag.add_edges_from(edge_list)
+        dag_nodes_layered = list(nx.topological_generations(dag))
+        return len(dag_nodes_layered)
     
-    def _add_gates_to_lines(self, width: int = 4) -> list:
-        r"""Add gates to lines.
-
-        Args:
-            width (int, optional): The width between gates. Defaults to 4.
+    @property
+    def ncz(self) -> int:
+        r"""Count all two-qubit gates in this QuantumCircuit.
 
         Returns:
-            list: A list of lines.
+            int: The number of two-qubit gates.
         """
-        gates_layerd_format = self._format_gates_layerd()
-        nl = len(gates_layerd_format[0])
-        lines1 = [str() for _ in range(nl)]
-        for i in range(nl):
-            for j in range(len(gates_layerd_format)):
-                if i < 2 * self.nqubits:
-                    if i % 2 == 0:
-                        lines1[i] += gates_layerd_format[j][i] + '—' * width
-                    else:
-                        lines1[i] += gates_layerd_format[j][i] + ' ' * width
-                elif i == 2 * self.nqubits:
-                    lines1[i] += gates_layerd_format[j][i] + '═' * width
-                elif i > 2 * self.nqubits:
-                    lines1[i] += gates_layerd_format[j][i] + ' ' * width
-        return lines1 
-        
+        ncz = 0
+        for gate_info in self.gates:
+            gate  = gate_info[0]
+            if gate in two_qubit_gates_available.keys():
+                ncz += 1
+            elif gate in two_qubit_parameter_gates_available.keys():
+                ncz += 1
+            else:
+                continue
+        return ncz
+    
     def draw(self, width: int = 4) -> None:
         r"""
         Draw the quantum circuit.
@@ -1414,7 +1064,7 @@ class QuantumCircuit:
         Args:
             width (int, optional): The width between gates. Defaults to 4.
         """
-        lines1 = self._add_gates_to_lines(width) 
+        lines1,lines_use = add_gates_to_lines(self.nqubits,self.ncbits,self.gates,self.physical_qubits_espression,self.params_value, width = width)
         fline = str()
         for line in lines1:
             fline += '\n'
@@ -1434,10 +1084,10 @@ class QuantumCircuit:
         Args:
             width (int, optional): The width between gates. Defaults to 4.
         """
-        lines1 = self._add_gates_to_lines(width)
+        lines1,lines_use = add_gates_to_lines(self.nqubits,self.ncbits,self.gates,self.physical_qubits_espression,self.params_value, width=width)
         fline = str()
         for idx in range(2 * self.nqubits):
-            if idx in self.lines_use:
+            if idx in lines_use:
                 fline += '\n'
                 fline += lines1[idx]
         for idx in range(2 * self.nqubits, len(lines1)):
@@ -1448,9 +1098,69 @@ class QuantumCircuit:
         html_content = f'<div style="overflow-x: auto; white-space: nowrap; font-family: consolas;">{formatted_string}</div>'
         display(HTML(html_content))
 
-    def plot_with_qiskit(self):
+    def to_qiskitQC(self):
         from qiskit import QuantumCircuit as qiskitQC
-        from qiskit.visualization import circuit_drawer
+        qc = qiskitQC(self.nqubits,self.ncbits)
+        one_qubit_gates_in_qiskit = {
+            'id':qc.id, 
+            'x':qc.x, 
+            'y':qc.y, 
+            'z':qc.z,
+            's':qc.s, 
+            'sdg':qc.sdg,
+            't':qc.t, 
+            'tdg':qc.tdg,
+            'h':qc.h, 
+            'sx':qc.sx,
+            'sxdg':qc.sxdg,
+            }
+        two_qubit_gates_in_qiskit = {
+            'cx':qc.cx, 
+            'cnot':qc.cx, 
+            'cy':qc.cy, 
+            'cz':qc.cz, 
+            'swap':qc.swap, 
+            'iswap':qc.iswap,
+            }
+        one_qubit_parameter_gates_in_qiskit = {
+            'rx':qc.rx, 
+            'ry':qc.ry, 
+            'rz':qc.rz, 
+            'p':qc.p, 
+            'u':qc.u,
+            'r':qc.r,
+            }
+        two_qubit_parameter_gates_in_qiskit = {
+            'rxx':qc.rxx, 
+            'ryy':qc.ryy, 
+            'rzz':qc.rzz, 
+            }
+        functional_gates_in_qiskit = {
+            'barrier':qc.barrier, 
+            'measure':qc.measure, 
+            'reset':qc.reset,
+            'delay':qc.delay,
+            }
+        for gate_info in self.gates:
+            gate = gate_info[0]
+            if gate in one_qubit_gates_in_qiskit.keys():
+                one_qubit_gates_in_qiskit[gate](*gate_info[1:])
+            elif gate in two_qubit_gates_in_qiskit.keys():
+                two_qubit_gates_in_qiskit[gate](*gate_info[1:])
+            elif gate in one_qubit_parameter_gates_in_qiskit.keys():
+                one_qubit_parameter_gates_in_qiskit[gate](*gate_info[1:])
+            elif gate in two_qubit_parameter_gates_in_qiskit.keys():
+                two_qubit_parameter_gates_in_qiskit[gate](*gate_info[1:])
+            elif gate in functional_gates_in_qiskit.keys():
+                if gate =='delay':
+                    functional_gates_in_qiskit[gate](*gate_info[1:],unit='ns')
+                else:
+                    functional_gates_in_qiskit[gate](*gate_info[1:])
+            else:
+                raise(ValueError(f'the gate name is wrong! {gate}'))
+        return qc
 
-        cir = qiskitQC.from_qasm_str(self.to_openqasm2)
-        return circuit_drawer(cir,output="mpl",idle_wires=False, style = {'backgroundcolor':'#EEEEEE','linecolor':'grey'})
+    def plot_with_qiskit(self):
+        from qiskit.visualization import circuit_drawer
+        qc = self.to_qiskitQC()
+        return circuit_drawer(qc,output="mpl",idle_wires=False, style = {'backgroundcolor':'#EEEEEE','linecolor':'grey'})

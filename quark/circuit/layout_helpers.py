@@ -376,8 +376,24 @@ class Layout:
                 
         print(f'No priority qubits with {self.nqubits} qubits found. it will check the initial mapping settings for search')
         if isinstance(initial_mapping,list):
-            assert(len(initial_mapping) == self.nqubits)
+            if len(initial_mapping) != self.nqubits:
+                raise(ValueError(f'The number of qubits {len(initial_mapping)} in initial_mapping does not match the number of qubits {self.nqubits} in the circuit.'))
             subgraph = self.graph.subgraph(initial_mapping)
+            # check qubits existance and fidelity 
+            for node in initial_mapping:
+                if subgraph.has_node(node):
+                    fidelity = nx.get_node_attributes(subgraph,'fidelity')[node]
+                    if fidelity == 0.:
+                        raise(ValueError(f'The physical qubit {node} selected by the user is died.')) 
+                else:
+                    raise(KeyError(f'Physical qubit {node} does not exit'))
+            # check edge fidelity
+            is_connected = nx.is_connected(subgraph)
+            for _, fidelity in nx.get_edge_attributes(subgraph,'fidelity').items():
+                if fidelity == 0.:
+                    is_connected = False
+                if is_connected is False:
+                    raise(ValueError(f'The physical qubit layout {initial_mapping} selected by the user is not connected.'))  
             coupling_map = list(subgraph.edges)
             print(f'Layout qubits {initial_mapping} are user-defined, with the corresponding coupling being {coupling_map}.')
         elif isinstance(initial_mapping, dict):
@@ -401,9 +417,10 @@ class Layout:
             select_initial_mapping = []
             for key in key_list:
                 for topology in topology_list:
-                    while select_initial_mapping == []:
+                    if select_initial_mapping == []:
                         select_initial_mapping = self.select_layout_from_backend(key=key,topology=topology)
-
+            if select_initial_mapping == []:
+                raise(ValueError(f'Unable to find a suitable layout. You might want to reach out to the developer for assistance.'))
             initial_mapping = list(select_initial_mapping)
             subgraph = self.graph.subgraph(initial_mapping)
             coupling_map = list(subgraph.edges)
