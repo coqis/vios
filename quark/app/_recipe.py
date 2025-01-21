@@ -44,12 +44,14 @@ class Recipe(object):
         self.align_right = align_right
         self.waveform_length = waveform_length
 
-        self.fillzero = True  # 编译开始前初始化所有通道
-        self.reset = []  # [('AWG.CH1.Waveform', 'zero()', 'au')]
+        self.fillzero = True  # 每一步编译开始前初始化所有通道
+        self.initcmd = []  # [('AWG.CH1.Waveform', 'zero()', 'au')]
+        self.postcmd = []  # [('AWG.CH1.Waveform', 'zero()', 'au')]
         self.__circuit: list[list] = []  # qlisp线路
 
         self.filename: str = 'baqis'  # 数据存储文件名, 位于桌面/home/dat文件夹下
         self.priority: int = 0  # 任务排队用, 越小优先级越高
+
         self.rules: list[str] = []  # 变量依赖关系列表
         self.loops: dict[str, list] = {}  # 变量列表
 
@@ -67,7 +69,7 @@ class Recipe(object):
         elif callable(cirq):
             self.__circuit = {'module': cirq.__module__, 'name': cirq.__name__}
         else:
-            raise TypeError(f'wrong type of circuit: list or function needed!')
+            raise TypeError(f'invalid circuit: list[list] or function needed!')
 
     def __getitem__(self, key: str):
         try:
@@ -154,6 +156,11 @@ class Recipe(object):
             self.loops[group].append(var)
 
     def export(self):
+        """导出任务
+
+        Returns:
+            _type_: 任务描述，详见**submit**
+        """
         return {'meta': {'name': f'{self.filename}:/{self.name}',
                          'priority': self.priority,
                          'other': {'shots': self.shots,
@@ -168,8 +175,8 @@ class Recipe(object):
                                   'trig': ['WRITE', 'trig'],
                                   'read': ['READ', 'read'],
                                   },
-                         'init': self.reset,  # 实验开始前执行
-                         'post': self.reset,  # 实验结束后执行
+                         'init': self.initcmd,
+                         'post': self.postcmd,
                          'cirq': self.circuit,
                          'rule': self.rules,
                          'loop': {} | self.loops

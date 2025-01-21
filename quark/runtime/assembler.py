@@ -139,7 +139,7 @@ def ccompile(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
     if sid == 0:
         kwds['restore'] = ctx.initial
         kwds['clear'] = True
-    logger.info(f'Step {sid} compiled >>>>>>>>>>>>>')
+    logger.info(f'>>>>>>>>>>>>>>>>>>>>>>>> Step {sid} is compiled!')
 
     return instruction, {'dataMap': datamap} | kwds
 

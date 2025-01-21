@@ -176,15 +176,20 @@ def plot(task: Task, append: bool = False, backend: str = 'viewer'):
         logger.error(f'Failed to update viewer: {e}')
 
 
-def graph():
+def network():
     nodes = {}
-    for i in range(5):
-        for j in range(6):
-            nodes[f'{i+1:02d}{j+1:02d}'] = {'index': (i*3, j*3),
-                                            'color': (0, 255, 255, 255),
-                                            'size': 2,
-                                            'value': np.random.random(1)[0]+5}
-    edges = {(i, i+1): (255, 0, 255, 180, 21) for i in range(24)}
+    edges = {}
+    for i in range(12):
+        r, c = divmod(i, 3)
+        nodes[i] = {'name': f'Q{i}',
+                    'index': (r*3, c*3),
+                    'color': (35, 155, 75, 255, 2),
+                    'value': {'a': np.random.random(1)[0]+5}}
+        if i > 10:
+            break
+        edges[(i, i+1)] = {'name': f'C{i}',
+                           'color': (55, 123, 255, 180, 21),
+                           'value': {'b': np.random.random(1)[0]+5, 'c': {'e': 134}, 'f': [(1, 2, 34)]}}
 
     _vs.graph(dict(nodes=nodes, edges=edges))
 

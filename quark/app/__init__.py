@@ -108,7 +108,7 @@ def submit(task: dict, block: bool = False, **kwds):
                      'init': [('Trigger.CHAB.TRIG', 0, 'any')],  # initialization of the task
                      'post': [('Trigger.CHAB.TRIG', 0, 'any')],  # reset of the task
                      'cirq': ['cc'],  # list of circuits in the type of qlisp
-                     'rule': ['<gate.Measure.Q1.params.frequency> = <Q0.setting.LO>+<Q2.setting.LO> +1250'],
+                     'rule': ['⟨gate.Measure.Q1.params.frequency⟩ = ⟨Q0.setting.LO⟩+⟨Q2.setting.LO⟩+1250'],
                      'loop': {'freq': [('Q0.setting.LO', np.linspace(0, 10, 2), 'Hz'),
                                        ('gate.Measure.Q1.index',  np.linspace(0, 1, 2), 'Hz')],
                               'offset': [('M0.setting.TRIGD', np.linspace(0, 10, 1), 'Hz'),
@@ -136,8 +136,8 @@ def submit(task: dict, block: bool = False, **kwds):
         trigger: list[str] = ss.query('station.triggercmds')
         task['body']['loop']['trig'] = [(t, 0, 'au') for t in trigger]
 
-        shots = task['meta']['other']['shots']
-        [ss.write(f'{t.rsplit(".", 1)[0]}.Shot', shots) for t in trigger]
+        # shots = task['meta']['other']['shots']
+        # [ss.write(f'{t.rsplit(".", 1)[0]}.Shot', shots) for t in trigger]
 
         # waveforms to be previewed
         ss.update('etc.canvas.filter', kwds.get('preview', []))
