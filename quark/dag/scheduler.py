@@ -72,14 +72,14 @@ class Scheduler(object):
     def check(self, method: str = 'Ramsey', group: dict = {'0': ['Q0', 'Q1'], '1': ['Q5', 'Q8']}):
         logger.info('start to check')
         tasks = {tuple(v): method for v in group.values()}
-        failed = self.execute(tasks)
+        failed = self.execute(tasks, 'check')
         self.queue.put(failed)
         logger.info('checked')
 
-    def execute(self, tasks: dict):
+    def execute(self, tasks: dict, level: str = ''):
         failed = {}
         for target, method in tasks.items():
-            fitted, status = execute(method, target)
+            fitted, status = execute(method, target, level)
             for k, v in fitted.items():
                 t = k.split('.')[0]
                 hh: list = self.cmgr.query(f'{t}.{method}.history')
@@ -103,7 +103,7 @@ class Scheduler(object):
 
                 retry = 0
                 while True:
-                    failed = self.execute(self.current)
+                    failed = self.execute(self.current, 'calibrate')
                     if not failed:
                         break
                     else:
