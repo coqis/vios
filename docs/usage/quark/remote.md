@@ -2,7 +2,7 @@
 ### **How to start**
 ???+ example "start"
     ```bash
-    # pip install quarkstudio[server] (if not installed)
+    # pip install quarkstudio[remote] (if not installed)
     quark remote remote.json
     ```
 
@@ -40,7 +40,7 @@ remote
 3. :material-text-box:requirements
     ```python title="requirements.txt"
     waveforms-math
-    quarkstudio[server]
+    quarkstudio[remote]
     ```
 4. :material-language-python: setup
     ```python title="setup.py"

@@ -21,6 +21,9 @@
 
 
 import time
+from copy import deepcopy
+from datetime import datetime
+from pathlib import Path
 from queue import Empty, Queue
 from threading import Thread
 
@@ -28,7 +31,8 @@ import numpy as np
 from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.schedulers.background import BackgroundScheduler
 from loguru import logger
-from copy import deepcopy
+
+from quark.proxy import startup
 
 from .executor import execute
 from .graph import ChipManger, TaskManager
@@ -44,6 +48,8 @@ dag = {'task': {'edges': [('S21', 'Spectrum'), ('Spectrum', 'PowerRabi'), ('Powe
 
        'chip': {'group': {'0': ['Q0', 'Q1'], '1': ['Q5', 'Q8']}}
        }
+home = Path(startup['quarkserver']['home'])/'cfg/dag.json'
+home.parent.mkdir(parents=True, exist_ok=True)
 
 
 class Scheduler(object):
@@ -51,9 +57,13 @@ class Scheduler(object):
         self.cmgr = ChipManger(dag['chip'])
         self.tmgr = TaskManager(dag['task'])
 
-        for n1 in np.array(list(self.cmgr['group'].values())).reshape(-1):
-            for n2 in self.tmgr.nodes:
-                self.cmgr.update(f'{n1}.{n2}', deepcopy(self.cmgr.VT))
+        try:
+            self.cmgr.load(home)
+        except Exception as e:
+            print('creating dag ...........', e)
+            for n1 in np.array(list(self.cmgr['group'].values())).reshape(-1):
+                for n2 in self.tmgr.nodes:
+                    self.cmgr.update(f'{n1}.{n2}', deepcopy(self.cmgr.VT))
 
         self.start()
 
@@ -71,10 +81,29 @@ class Scheduler(object):
 
     def check(self, method: str = 'Ramsey', group: dict = {'0': ['Q0', 'Q1'], '1': ['Q5', 'Q8']}):
         logger.info('start to check')
-        tasks = {tuple(v): method for v in group.values()}
-        failed = self.execute(tasks, 'check')
+        ts = {tuple(v): method for v in self.expired(method, group).values()}
+        failed = self.execute(ts, 'check')
         self.queue.put(failed)
         logger.info('checked')
+
+    def expired(self, method: str = 'Ramsey', group: dict = {}, fmt: str = '%Y-%m-%d %H:%M:%S'):
+        tx: dict[str, list] = {}
+        tc = time.strftime(fmt)
+        for g, v in group.items():
+            for e in v:
+                try:
+                    lt, lv = self.cmgr.query(f'{e}.{method}.history')[-1]
+                except IndexError as _e:
+                    tx.setdefault(g, []).append(e)
+                    continue
+
+                lifetime = self.cmgr.query(f'{e}.{method}.lifetime')
+                delta = datetime.strptime(lt, fmt) - datetime.strptime(tc, fmt)
+                if delta.total_seconds() >= lifetime:
+                    tx.setdefault(g, []).append(e)
+                else:
+                    pass
+        return tx
 
     def execute(self, tasks: dict, level: str = ''):
         failed = {}
@@ -92,7 +121,7 @@ class Scheduler(object):
                     failed.update({k: method})
                 for t in k:
                     self.cmgr.update(f'{t}.{method}.status', v)
-        self.cmgr.checkpoint()
+        self.cmgr.checkpoint(home.as_posix())
         return failed
 
     def run(self):

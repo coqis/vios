@@ -21,8 +21,6 @@
 
 
 import json
-import time
-from pathlib import Path
 
 import networkx as nx
 from loguru import logger
@@ -35,50 +33,50 @@ class ChipManger(object):
      'Q0': {'Spectrum': {'status': 'OK',
                          'lifetime': 200,
                          'tolerance': 0.01,
-                         'history': [],
-                         'last_updated': time.time()},
+                         'history': []},
             'Ramsey': {'status': 'OK',
                        'lifetime': 200,
                        'tolerance': 0.01,
-                       'history': [],
-                       'last_updated': time.time()}},
+                       'history': []}},
      'C1': {'fidelity': {'status': 'OK',
                          'lifetime': 200,
                          'tolerance': 0.01,
-                         'history': [],
-                         'last_updated': time.time()}}
+                         'history': []}}
      }
     """
     VT = {'status': 'Passed',
           'lifetime': 200,
           'tolerance': 0.01,
-          'history': [],
-          'last_updated': time.time()}
+          'history': []}
 
     def __init__(self, info: dict = {}):
         super().__init__()
-        self.nodes = info
+        self.info = info
 
     def add_node(self, node: str, value):
-        self.nodes[node] = value
+        self.info[node] = value
 
     def update(self, path: str, value):
-        update_dict_by_string(self.nodes, path, value)
+        update_dict_by_string(self.info, path, value)
 
     def query(self, path: str):
-        return query_dict_from_string(path, self.nodes)
+        return query_dict_from_string(path, self.info)
 
     def history(self, target: list[str] = ['Q0', 'Q1']):
         return {t: self[t] for t in target}
 
-    def checkpoint(self):
-        root = Path.home()/'Desktop/home/cfg/dag.json'
-        root.parent.mkdir(parents=True, exist_ok=True)
-        with open(root, 'w') as f:
-            f.write(json.dumps(self.nodes, indent=4))
+    def checkpoint(self, path: str = ''):
+        with open(path, 'w') as f:
+            f.write(json.dumps(self.info, indent=4))
+        logger.info(f'{path} saved!')
+
+    def load(self, path: str = ''):
+        with open(path, 'r') as f:
+            self.info = json.loads(f.read())
+        logger.info(f'{path} loaded!')
 
     def __getitem__(self, key: str):
-        return self.nodes[key]
+        return self.info[key]
 
 
 class TaskManager(nx.DiGraph):
