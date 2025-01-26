@@ -29,6 +29,7 @@ import sys
 import time
 from collections import defaultdict
 from functools import wraps
+from importlib import import_module, reload
 from pathlib import Path
 from threading import current_thread
 from typing import Callable
@@ -303,6 +304,14 @@ def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, tid: 
         tuple: context that contains cfg, translated result
     """
     from quark.runtime import ccompile, initialize
+
+    lib = kwds.get('lib', '')
+    if isinstance(lib, str) and lib:
+        try:
+            logger.warning(f'using lib: {lib}')
+            kwds['lib'] = reload(import_module(lib)).lib
+        except Exception as e:
+            logger.error(f'lib: {e}')
     ctx = initialize(cfg if cfg else get_config_by_tid(tid))
     return ctx, ccompile(0, {}, circuit, signal='iq', prep=True, **kwds)
 
