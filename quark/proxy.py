@@ -228,59 +228,14 @@ class Task(object):
     def __repr__(self):
         return f'{self.name}(rid={self.rid}, tid={self.tid})'
 
-    def run(self):
-        """submit the task to the `QuarkServer`
-        """
-        self.stime = time.time()  # start time
-        try:
-            circuit = self.task['body']['cirq']
-            if isinstance(circuit, list) and callable(circuit[0]):
-                circuit[0] = inspect.getsource(circuit[0])
-        except Exception as e:
-            logger.error(f'Failed to get circuit: {e}')
-        self.tid = self.server.submit(self.task)
-
     def cancel(self):
         """cancel the task
         """
         self.server.cancel(self.tid)
         # self.clear()
 
-    def result(self):
-        """result of the task
-        """
-        meta = True if not self.meta else False
-        res = self.server.fetch(self.tid, start=self.index, meta=meta)
-
-        if isinstance(res, str):
-            return self.data
-        elif isinstance(res, tuple):
-            if isinstance(res[0], str):
-                return self.data
-            data, self.meta = res
-        else:
-            data = res
-        self.last = self.index
-        self.index += len(data)
-        # data.clear()
-        self.process(data)
-
-        if callable(self.plot):
-            self.plot(self, not meta)
-            # self.plot(not meta)
-
-        return self.data
-
-    def status(self, key: str = 'runtime'):
-        if key == 'runtime':
-            return self.server.track(self.tid)
-        elif key == 'compile':
-            return self.server.apply('status', user='task')
-        else:
-            return 'supported arguments are: {rumtime, compile}'
-
-    def report(self):
-        return self.server.report(self.tid)
+    def circuit(self, sid: int = 0):
+        return self.step(0, 'cirq')[0][-1]
 
     def step(self, index: int, stage: str = 'raw') -> dict:
         """step details
@@ -314,6 +269,32 @@ class Task(object):
         except Exception as e:
             return r
 
+    def result(self):
+        return {'data': self.data} | {'meta': self.meta}
+
+    def run(self):
+        """submit the task to the `QuarkServer`
+        """
+        self.stime = time.time()  # start time
+        try:
+            circuit = self.task['body']['cirq']
+            if isinstance(circuit, list) and callable(circuit[0]):
+                circuit[0] = inspect.getsource(circuit[0])
+        except Exception as e:
+            logger.error(f'Failed to get circuit: {e}')
+        self.tid = self.server.submit(self.task)
+
+    def status(self, key: str = 'runtime'):
+        if key == 'runtime':
+            return self.server.track(self.tid)
+        elif key == 'compile':
+            return self.server.apply('status', user='task')
+        else:
+            return 'supported arguments are: {rumtime, compile}'
+
+    def report(self):
+        return self.server.report(self.tid)
+
     def process(self, data: list[dict]):
         for dat in data:
             for k, v in dat.items():
@@ -322,9 +303,34 @@ class Task(object):
                 else:
                     self.data[k] = [v]
 
+    def fetch(self):
+        """result of the task
+        """
+        meta = True if not self.meta else False
+        res = self.server.fetch(self.tid, start=self.index, meta=meta)
+
+        if isinstance(res, str):
+            return self.data
+        elif isinstance(res, tuple):
+            if isinstance(res[0], str):
+                return self.data
+            data, self.meta = res
+        else:
+            data = res
+        self.last = self.index
+        self.index += len(data)
+        # data.clear()
+        self.process(data)
+
+        if callable(self.plot):
+            self.plot(self, not meta)
+            # self.plot(not meta)
+
+        return self.data
+
     def update(self):
         try:
-            self.result()
+            self.fetch()
         except Exception as e:
             logger.error(f'Failed to fetch result: {e}')
 
@@ -341,7 +347,7 @@ class Task(object):
             if hasattr(self, 'app'):
                 self.app.save()
             self.stop(self.tid)
-            self.result()
+            self.fetch()
             return True
 
     def clear(self):
@@ -434,7 +440,7 @@ class QuarkProxy(object):
 
         try:
             from home.demo.run import get_bias_of_coupler
-            bias = get_bias_of_coupler() 
+            bias = get_bias_of_coupler()
         except Exception as e:
             bias = []
             logger.error(f'Failed to get bias of coupler, {e}!')

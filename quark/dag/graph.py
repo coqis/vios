@@ -44,8 +44,7 @@ class ChipManger(object):
                          'history': []}}
      }
     """
-    VT = {'status': 'Passed',
-          'lifetime': 200,
+    VT = {'lifetime': 200,
           'tolerance': 0.01,
           'history': []}
 
@@ -63,7 +62,7 @@ class ChipManger(object):
         return query_dict_from_string(path, self.info)
 
     def history(self, target: list[str] = ['Q0', 'Q1']):
-        return {t: self[t] for t in target}
+        return {t: self.query(t) for t in target}
 
     def checkpoint(self, path: str = ''):
         with open(path, 'w') as f:
@@ -90,7 +89,7 @@ class TaskManager(nx.DiGraph):
     def __init__(self, task: dict) -> None:
         super().__init__()
         self.checkin = task['check']
-        self.add_edges_from(task['edges'])
+        self.add_edges_from(task['graph'])
 
     def __getitem__(self, key: str):
         return self.nodes[key]  # ['task']

@@ -20,13 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-def execute(method: str = 'ramsey', target: list[str] | tuple[str] = ['Q0', 'Q1'], level: str = 'check'):
+def execute(method: str = 'ramsey', target: list[str] | tuple[str] = ['Q0', 'Q1'], level: str = 'check', history: dict = {}):
     try:
         import home.demo.run as drun
-        return drun.execute(method, target, level)
+        return drun.execute(method, target, level, history)
     except Exception as e:
-        fitted = {'Q0.params.frequency': 4.4e9,
-                  'Q5.params.frequency': 4.8e9}
-        status = {('Q0', 'Q5'): 'Passed',
-                  ('Q1', 'Q8'): 'Failed'}
-        return fitted, status
+        summary = {'Q0': ('red', 5e9),
+                   'Q1': ('green', 5.353e9),
+                   'Q5': ('green', 5.123e9),
+                   'Q8': ('red', 5.1e9)}  # 所有比特
+        return summary

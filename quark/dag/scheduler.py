@@ -42,7 +42,7 @@ bs.add_executor(ThreadPoolExecutor(max_workers=1,
                                    pool_kwargs={'thread_name_prefix': 'QDAG Checking'}))
 
 
-dag = {'task': {'edges': [('S21', 'Spectrum'), ('Spectrum', 'PowerRabi'), ('PowerRabi', 'Ramsey')],
+dag = {'task': {'graph': [('S21', 'Spectrum'), ('Spectrum', 'PowerRabi'), ('PowerRabi', 'Ramsey')],
                 'check': {'period': 60, 'method': 'Ramsey'}
                 },
 
@@ -61,9 +61,10 @@ class Scheduler(object):
             self.cmgr.load(home)
         except Exception as e:
             print('creating dag ...........', e)
-            for n1 in np.array(list(self.cmgr['group'].values())).reshape(-1):
-                for n2 in self.tmgr.nodes:
-                    self.cmgr.update(f'{n1}.{n2}', deepcopy(self.cmgr.VT))
+            for g, ts in self.cmgr['group'].items():
+                for t in ts:
+                    for n2 in self.tmgr.nodes:
+                        self.cmgr.update(f'{t}.{n2}', deepcopy(self.cmgr.VT))
 
         self.start()
 
@@ -90,17 +91,19 @@ class Scheduler(object):
         tx: dict[str, list] = {}
         tc = time.strftime(fmt)
         for g, v in group.items():
-            for e in v:
+            for t in v:
                 try:
-                    lt, lv = self.cmgr.query(f'{e}.{method}.history')[-1]
-                except IndexError as _e:
-                    tx.setdefault(g, []).append(e)
+                    lt, tid, status, value = self.cmgr.query(
+                        f'{t}.{method}.history')[-1]
+                except IndexError as e:
+                    tx.setdefault(g, []).append(t)
                     continue
 
-                lifetime = self.cmgr.query(f'{e}.{method}.lifetime')
-                delta = datetime.strptime(lt, fmt) - datetime.strptime(tc, fmt)
-                if delta.total_seconds() >= lifetime:
-                    tx.setdefault(g, []).append(e)
+                lifetime = self.cmgr.query(f'{t}.{method}.lifetime')
+                dt = datetime.strptime(tc, fmt) - datetime.strptime(lt, fmt)
+                print(t, lt, status, tc, dt)
+                if (dt.total_seconds() >= lifetime) or (status != 'green'):
+                    tx.setdefault(g, []).append(t)
                 else:
                     pass
         return tx
@@ -108,19 +111,19 @@ class Scheduler(object):
     def execute(self, tasks: dict, level: str = ''):
         failed = {}
         for target, method in tasks.items():
-            fitted, status = execute(method, target, level)
-            for k, v in fitted.items():
-                t = k.split('.')[0]
+            history = self.cmgr.history([f'{t}.{method}' for t in target])
+            summary: dict[str, tuple] = execute(method, target, level, history)
+            tid = summary.pop('tid', -1)
+            ts = []
+            for t, (st, v) in summary.items():
                 hh: list = self.cmgr.query(f'{t}.{method}.history')
                 if len(hh) > 10:
                     hh.pop(0)
-                hh.append((time.strftime('%Y-%m-%d %H:%M:%S'), v))
+                hh.append((time.strftime('%Y-%m-%d %H:%M:%S'), tid, st, v))
+                if st == 'red':
+                    ts.append(t)
+            failed[tuple(ts)] = method
 
-            for k, v in status.items():
-                if v == 'Failed':
-                    failed.update({k: method})
-                for t in k:
-                    self.cmgr.update(f'{t}.{method}.status', v)
         self.cmgr.checkpoint(home.as_posix())
         return failed
 
@@ -140,7 +143,7 @@ class Scheduler(object):
                         pmethod = self.tmgr.parents(method)
                         if not pmethod:
                             break
-                        logger.info(
+                        logger.warning(
                             f'failed to calibrate {method}, trying {pmethod[0]}')
                         for target in self.current:
                             self.current[target] = pmethod[0]
