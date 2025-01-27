@@ -20,6 +20,7 @@
 """ A toolkit for the SABRE algorithm."""
 
 import copy
+from functools import partial
 import networkx as nx
 from networkx import floyd_warshall_numpy
 from .quantumcircuit_helpers import (
@@ -42,13 +43,14 @@ def distance_matrix_element(qubit1:int,qubit2:int,coupling_graph:nx.Graph) -> in
     Returns:
         int: The shortest path distance between the two qubits.
     """
-    graph_order = list(coupling_graph.nodes)
-    graph_order_index = [graph_order.index(qn) for qn in graph_order]
-    phy_idx_dic = dict(zip(graph_order,graph_order_index))
-    distance_matrix = floyd_warshall_numpy(coupling_graph)
-    idx1 = phy_idx_dic[qubit1]
-    idx2 = phy_idx_dic[qubit2]
-    dis = distance_matrix[idx1][idx2]
+    #graph_order = list(coupling_graph.nodes)
+    #graph_order_index = [graph_order.index(qn) for qn in graph_order]
+    #phy_idx_dic = dict(zip(graph_order,graph_order_index))
+    #distance_matrix = floyd_warshall_numpy(coupling_graph)
+    #idx1 = phy_idx_dic[qubit1]
+    #idx2 = phy_idx_dic[qubit2]
+    #dis = distance_matrix[idx1][idx2]
+    dis = nx.shortest_path_length(coupling_graph,source=qubit1,target=qubit2)
     return dis 
 
 def mapping_node_to_gate_info(node:'nx.nodes',
@@ -108,6 +110,38 @@ def is_correlation_on_front_layer(node, front_layer,dag):
     else:
         return False
 
+def heuristic_function_parallel(swap_gate_info: tuple,
+                                coupling_graph: 'nx.Graph',
+                                dag: 'nx.DiGraph', 
+                                front_layer: list, 
+                                decay_parameter: list,
+                                extended_successor_set:list,
+                                ) -> float:
+    
+    temp_coupling_graph = update_coupling_graph(swap_gate_info,coupling_graph)
+
+    F = front_layer
+    E = extended_successor_set #create_extended_successor_set(F, dag)
+    min_score_swap_qubits = list(swap_gate_info[1:])
+    size_E = len(E)
+    if size_E == 0:
+        size_E = 1
+    size_F = len(F)
+    W = 0.5
+    max_decay = max(decay_parameter[min_score_swap_qubits[0]], decay_parameter[min_score_swap_qubits[1]])
+    f_distance = 0
+    e_distance = 0
+    for node in F:
+        qubit1, qubit2 = dag.nodes[node]['qubits']
+        f_distance += distance_matrix_element(qubit1,qubit2,temp_coupling_graph)
+    for node in E:
+        qubit1, qubit2 = dag.nodes[node]['qubits']
+        e_distance += distance_matrix_element(qubit1,qubit2,temp_coupling_graph)
+    f_distance = f_distance / size_F
+    e_distance = W * (e_distance / size_E)
+    H = max_decay * (f_distance + e_distance)
+    return H
+
 def heuristic_function(front_layer: list, dag: 'nx.DiGraph', coupling_graph: 'nx.Graph',
                        swap_gate_info: tuple, decay_parameter: list) -> float:
     """Computes a heuristic cost function that is used to rate a candidate SWAP to determine whether the SWAP gate can be inserted in a program to resolve
@@ -150,7 +184,7 @@ def heuristic_function(front_layer: list, dag: 'nx.DiGraph', coupling_graph: 'nx
 def create_extended_successor_set(front_layer: list, dag: 'nx.DiGraph') -> list:
     """Creates an extended set which contains some closet successors of the gates from F in the DAG
     """    
-    E = list()
+    E = []
     for node in front_layer:
         for node_successor in dag.successors(node):
             if node_successor.split('_')[0] in two_qubit_gates_available.keys() or node_successor.split('_')[0] in two_qubit_parameter_gates_available.keys():
@@ -334,31 +368,26 @@ def gates_sabre_routing_once(qc,initial_mapping,coupling_map,largest_qubits_inde
                 dis = distance_matrix_element(q1,q2,coupling_graph)
                 if dis == 1:
                     execute_node_list.append(node)
-                    decay_parameter = [0.001] * (largest_qubits_index) 
-        #print(f'check1 ncycle {ncycle} and F {front_layer}') 
-        #print(f'check1 ncycle {ncycle} and E {execute_node_list}')            
+                    decay_parameter = [0.001] * (largest_qubits_index)          
         if len(execute_node_list) > 0:
             for execute_node in execute_node_list:
                 collect_execute.append(execute_node)
                 front_layer.remove(execute_node)
                 gate_info = mapping_node_to_gate_info(execute_node,dag,physical_qubit_list,initial_mapping)
                 new.append(gate_info)
-                #print(f'check2 ncycle {ncycle} node {execute_node} and F {front_layer} {list(dag.successors(execute_node))}') 
                 for successor_node in dag.successors(execute_node):
                     if is_correlation_on_front_layer(successor_node,front_layer,dag) is False:
-                        paths = nx.all_simple_paths(dag, source = execute_node, target = successor_node,cutoff=1)
-                        #paths_length = [len(path)-1 for path in paths]
-                        if list(paths) != []:
-                            predecessors = list(dag.predecessors(successor_node))
-                            if all(x in (front_layer + collect_execute) for x in predecessors):
-                                front_layer.append(successor_node)
-                                #print(f'check3 ncycle {ncycle} and S {successor_node}') 
-            #print(f'check1 ncycle {ncycle} and F {front_layer}') 
+                        predecessors = list(dag.predecessors(successor_node))
+                        if all(x in (front_layer + collect_execute) for x in predecessors):
+                            front_layer.append(successor_node)
+                        #paths = nx.all_simple_paths(dag, source = execute_node, target = successor_node,cutoff=1)
+                        #if list(paths) != []:
+                        #    predecessors = list(dag.predecessors(successor_node))
+                        #    if all(x in (front_layer + collect_execute) for x in predecessors):
+                        #        front_layer.append(successor_node)
         else:
+            swap_candidate_list = []
             for hard_node in front_layer:
-                # 这一环节会更改coupling map/graph, initial_mapping
-                heuristic_score = dict()
-                swap_candidate_list = []
                 control_qubit, target_qubit = dag.nodes[hard_node]['qubits']
                 control_neighbours = coupling_graph.neighbors(control_qubit)
                 target_neighbours = coupling_graph.neighbors(target_qubit)
@@ -366,28 +395,32 @@ def gates_sabre_routing_once(qc,initial_mapping,coupling_map,largest_qubits_inde
                     swap_candidate_list.append(('swap',control_qubit,fake_target))
                 for fake_control in target_neighbours:
                     swap_candidate_list.append(('swap',fake_control,target_qubit))
-                for swap_gate in swap_candidate_list:
-                    temp_coupling_graph = update_coupling_graph(swap_gate,coupling_graph)
-                    swap_gate_score = heuristic_function(front_layer,dag,temp_coupling_graph,\
-                                                         swap_gate,decay_parameter)
-                    heuristic_score.update({swap_gate:swap_gate_score})
-                    #print(swap_gate,decay_parameter)
-                #print('heuristic_score',heuristic_score)
-                all_scores = list(heuristic_score.values())
-                min_score = min(all_scores)
-                min_score_swap_gate_info = swap_candidate_list[all_scores.index(min_score)]
-                #print('min_score_swap_gate_info',min_score_swap_gate_info)
-                q1 = min_score_swap_gate_info[1]
-                q2 = min_score_swap_gate_info[2]
-                idx1 = initial_mapping.index(q1)
-                idx2 = initial_mapping.index(q2)
-                new.append(('swap',physical_qubit_list[idx1],physical_qubit_list[idx2]))
-                # update couping graph
-                coupling_graph = update_coupling_graph(min_score_swap_gate_info,coupling_graph)
-                # updade initial mapping
-                initial_mapping = update_initial_mapping(min_score_swap_gate_info,initial_mapping)
-                # update decay parameter
-                decay_parameter = update_decay_parameter(min_score_swap_gate_info,decay_parameter)
+
+            extended_successor_set = create_extended_successor_set(front_layer, dag)
+            heuristic_obj = partial(heuristic_function_parallel,
+                                    coupling_graph=coupling_graph,
+                                    dag=dag,
+                                    front_layer=front_layer,
+                                    decay_parameter=decay_parameter,
+                                    extended_successor_set=extended_successor_set,
+                                    )
+            swap_candidate_list = set(swap_candidate_list)
+            swap_scores = [heuristic_obj(swap_gate) for swap_gate in swap_candidate_list]
+            heuristic_score = dict(zip(swap_candidate_list,swap_scores))
+
+            min_score_swap_gate_info,min_score = min(heuristic_score.items(), key=lambda item: item[1])
+
+            q1 = min_score_swap_gate_info[1]
+            q2 = min_score_swap_gate_info[2]
+            idx1 = initial_mapping.index(q1)
+            idx2 = initial_mapping.index(q2)
+            new.append(('swap',physical_qubit_list[idx1],physical_qubit_list[idx2]))
+            # update couping graph
+            coupling_graph = update_coupling_graph(min_score_swap_gate_info,coupling_graph)
+            # updade initial mapping
+            initial_mapping = update_initial_mapping(min_score_swap_gate_info,initial_mapping)
+            # update decay parameter
+            decay_parameter = update_decay_parameter(min_score_swap_gate_info,decay_parameter)
     return new,initial_mapping
     
 def gates_sabre_routing(source_gates, source_qubits, initial_mapping, coupling_map,\
@@ -413,7 +446,6 @@ def gates_sabre_routing(source_gates, source_qubits, initial_mapping, coupling_m
         qc.gates = gates
         new,initial_mapping = gates_sabre_routing_once(qc,initial_mapping,coupling_map,largest_qubits_index)
         final_map = copy.deepcopy(initial_mapping)
-        
     print(f'sabre routing results, after {iterations} iteration(s)')
     print('virtual qubit --> initial mapping --> after routing')
     for idx,qi in enumerate(initial_map):

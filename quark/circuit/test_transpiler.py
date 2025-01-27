@@ -80,7 +80,7 @@ def call_quark_transpiler(qc:QuantumCircuit|list|str,chip_name:str,compile:bool,
     else:
         gates_availale = list(one_qubit_gates_available.keys()) \
             + list(one_qubit_parameter_gates_available.keys()) \
-            + ['cx','cz','barrier','measure'] #chip 支持的语法
+            + ['cx','cz','barrier','measure','delay'] #chip 支持的语法
         collect_two_qubit_gates = []
         for gate_info in quarkQC.gates:
             gate = gate_info[0]
@@ -117,7 +117,8 @@ def call_quark_transpiler(qc:QuantumCircuit|list|str,chip_name:str,compile:bool,
         quarkQC_compiled = quarkQC
 
     # check CZ
-    if quarkQC_compiled.ncz > 100:
+    ncz = quarkQC_compiled.ncz
+    if  ncz > 100:
         raise(ValueError(f'The number of two-qubit gates in the circuit is {ncz} exceeds 100.'))
     
     if return_qlisp:
