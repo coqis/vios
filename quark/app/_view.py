@@ -194,6 +194,76 @@ def network():
     _vs.graph(dict(nodes=nodes, edges=edges))
 
 
+try:
+    import ipywidgets as widgets
+    from IPython.display import display
+
+    class PagedTable(object):
+        def __init__(self, data, page_size=10):
+            self.data = data
+            self.page_size = page_size
+            self.total_pages = (len(data) + page_size - 1) // page_size
+            self.current_page = 1
+
+            # 创建控件
+            self.prev_btn = widgets.Button(description="上一页")
+            self.next_btn = widgets.Button(description="下一页")
+            self.page_slider = widgets.IntSlider(
+                value=1,
+                min=1,
+                max=self.total_pages,
+                description='页码:'
+            )
+            self.output = widgets.Output()
+
+            # 绑定事件
+            self.prev_btn.on_click(self.prev_page)
+            self.next_btn.on_click(self.next_page)
+            self.page_slider.observe(self.slider_changed, names='value')
+
+            # 初始显示
+            self.update_display()
+
+        def get_page_data(self):
+            start = (self.current_page - 1) * self.page_size
+            end = start + self.page_size
+            return self.data.iloc[start:end]
+
+        def update_display(self):
+            self.output.clear_output(wait=True)
+            with self.output:
+                display(self.get_page_data())
+
+            # 更新按钮状态
+            self.prev_btn.disabled = (self.current_page == 1)
+            self.next_btn.disabled = (self.current_page == self.total_pages)
+            self.page_slider.value = self.current_page
+
+        def prev_page(self, btn):
+            self.current_page = max(1, self.current_page - 1)
+            self.update_display()
+
+        def next_page(self, btn):
+            self.current_page = min(self.total_pages, self.current_page + 1)
+            self.update_display()
+
+        def slider_changed(self, change):
+            self.current_page = change['new']
+            self.update_display()
+
+        def show(self):
+            # 布局控件
+            controls = widgets.HBox([
+                self.prev_btn,
+                self.next_btn,
+                self.page_slider
+            ])
+            display(widgets.VBox([controls, self.output]))
+
+except Exception as e:
+    logger.error(f'{e}')
+
+
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 def demo():
     """demo for plot

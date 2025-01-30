@@ -169,11 +169,10 @@ def rollback(tid: int):
 
 
 def lookup(start: str = '', stop: str = '', name: str = '', fmt: str = '%Y-%m-%d-%H-%M-%S'):
-    import ipywidgets as widgets
     import pandas as pd
-    from IPython.display import display
 
     from ._db import get_record_list_by_name
+    from ._view import PagedTable
 
     days = time.time()-14*24*60*60
     start = time.strftime(fmt, time.localtime(days)) if not start else start
@@ -184,45 +183,49 @@ def lookup(start: str = '', stop: str = '', name: str = '', fmt: str = '%Y-%m-%d
     df = pd.DataFrame(rs)[[0, 1, 2, 6]]
     df.columns = ['rid', 'tid', 'name', 'status']
 
-    items_per_page = 10
-    total_pages = (len(df) + items_per_page - 1) // items_per_page
-    setting = {'current': 1}
+    paged_table = PagedTable(df, page_size=10)
+    paged_table.show()
 
-    output = widgets.Output()
-    prev_button = widgets.Button(description="Previous")
-    next_button = widgets.Button(description="Next")
-    page_label = widgets.Label(value=f"Page 1 of {total_pages}")
+    # -------------------------------------------------------------------------
+    # items_per_page = 10
+    # total_pages = (len(df) + items_per_page - 1) // items_per_page
+    # setting = {'current': 1}
 
-    def display_table(page):
-        setting['current'] = page
-        current_page = setting['current']
+    # output = widgets.Output()
+    # prev_button = widgets.Button(description="Previous")
+    # next_button = widgets.Button(description="Next")
+    # page_label = widgets.Label(value=f"Page 1 of {total_pages}")
 
-        start_idx = (current_page - 1) * items_per_page
-        end_idx = start_idx + items_per_page
+    # def display_table(page):
+    #     setting['current'] = page
+    #     current_page = setting['current']
 
-        with output:
-            output.clear_output()
-            display(df.iloc[start_idx:end_idx])
+    #     start_idx = (current_page - 1) * items_per_page
+    #     end_idx = start_idx + items_per_page
 
-        page_label.value = f"Page {current_page} of {total_pages}"
+    #     with output:
+    #         output.clear_output()
+    #         display(df.iloc[start_idx:end_idx])
 
-    def on_prev_clicked(b):
-        current_page = setting['current']
-        if current_page > 1:
-            display_table(current_page - 1)
+    #     page_label.value = f"Page {current_page} of {total_pages}"
 
-    def on_next_clicked(b):
-        current_page = setting['current']
-        if current_page < total_pages:
-            display_table(current_page + 1)
+    # def on_prev_clicked(b):
+    #     current_page = setting['current']
+    #     if current_page > 1:
+    #         display_table(current_page - 1)
 
-    prev_button.on_click(on_prev_clicked)
-    next_button.on_click(on_next_clicked)
+    # def on_next_clicked(b):
+    #     current_page = setting['current']
+    #     if current_page < total_pages:
+    #         display_table(current_page + 1)
 
-    display_table(setting['current'])
+    # prev_button.on_click(on_prev_clicked)
+    # next_button.on_click(on_next_clicked)
 
-    display(widgets.HBox([prev_button, next_button, page_label]))
-    display(output)
+    # display_table(setting['current'])
+
+    # display(widgets.HBox([prev_button, next_button, page_label]))
+    # display(output)
 
 
 def get_config_by_rid(rid: int):
