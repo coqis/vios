@@ -34,23 +34,23 @@ from srpc import loads
 from ._db import get_record_list_by_name, get_record_set_by_name
 
 
-def query(app: str = None,  start: datetime = None, stop: datetime = None, page: int = 1) -> tuple:
+def query(app: str = None,  start: datetime = None, end: datetime = None, page: int = 1) -> tuple:
     """query records from database
 
     Args:
         app (str, optional): task name. Defaults to None.
         start (datetime, optional): start time. Defaults to None.
-        stop (datetime, optional): end time. Defaults to None.
+        end (datetime, optional): end time. Defaults to None.
         page (int, optional): page number. Defaults to 1.
 
     Returns:
         tuple: header, table content, pages, task names
     """
-    print(app, start, stop, page)
+    print(app, start, end, page)
     if not app:
         return [], [], 0, [r[0] for r in get_record_set_by_name()]
     records = get_record_list_by_name(app, start.strftime(
-        '%Y-%m-%d-%H-%M-%S'), stop.strftime('%Y-%m-%d-%H-%M-%S'))
+        '%Y-%m-%d-%H-%M-%S'), end.strftime('%Y-%m-%d-%H-%M-%S'))
     headers = ['id', 'tid', 'name', 'user', 'priority', 'system', 'status',
                'filename', 'dataset', 'created', 'finished', 'committed']
     return headers, records, len(records)//50, {}

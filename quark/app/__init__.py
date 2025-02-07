@@ -168,7 +168,7 @@ def rollback(tid: int):
         logger.error(f'Failed to rollback: {e}')
 
 
-def lookup(start: str = '', stop: str = '', name: str = '', fmt: str = '%Y-%m-%d-%H-%M-%S'):
+def lookup(start: str = '', end: str = '', name: str = '', fmt: str = '%Y-%m-%d-%H-%M-%S'):
     import pandas as pd
 
     from ._db import get_record_list_by_name
@@ -176,9 +176,9 @@ def lookup(start: str = '', stop: str = '', name: str = '', fmt: str = '%Y-%m-%d
 
     days = time.time()-14*24*60*60
     start = time.strftime(fmt, time.localtime(days)) if not start else start
-    stop = time.strftime(fmt) if not stop else stop
+    end = time.strftime(fmt) if not end else end
 
-    rs = get_record_list_by_name(name, start, stop)[::-1]
+    rs = get_record_list_by_name(name, start, end)[::-1]
 
     df = pd.DataFrame(rs)[[0, 1, 2, 6]]
     df.columns = ['rid', 'tid', 'name', 'status']
@@ -320,7 +320,7 @@ def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, tid: 
 
 
 def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
-            start: float = 0, stop: float = 100e-6, srate: float = 0,
+            start: float = 0, end: float = 100e-6, srate: float = 0,
             unit: float = 1e-6, offset: float = 0, space: float = 0):
     import matplotlib.pyplot as plt
     from waveforms import Waveform
@@ -338,7 +338,7 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
                 else:
                     srate = value[-1]['srate']
                 value[-1]['start'] = start
-                value[-1]['LEN'] = stop
+                value[-1]['LEN'] = end
                 value[-1]['filter'] = []
                 if not calibrate:
                     for ch, val in value[-1]['calibration'].items():
@@ -347,7 +347,7 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
                         except Exception as e:
                             logger.error(f'{target, ch, val, e}')
 
-                xt = np.arange(start, stop, 1/srate)/unit
+                xt = np.arange(start, end, 1/srate)/unit
                 (_, _, cmd), _ = calculate('main', target, value)
                 wf[_target] = cmd[1]+index*offset
                 index += 1
