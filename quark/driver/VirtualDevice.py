@@ -91,19 +91,19 @@ class Driver(BaseDriver):
     CHs = list(range(36))
 
     quants = [
-        # Microwave source(MW)
+        # MW
         Quantity('Frequency', value=0, ch=1, unit='Hz'),  # float
         Quantity('Power', value=0, ch=1, unit='dBm'),  # loat
         Quantity('Output', value='OFF', ch=1),  # str
 
-        # 任意波形发生器(AWG)
+        # AWG
         Quantity('Amplitude', value=0, ch=1, unit='Vpp'),  # float
         Quantity('Offset', value=0, ch=1, unit='V'),  # float
         Quantity('Waveform', value=np.array([]), ch=1),  # np.array or Waveform
         Quantity('Marker1', value=[], ch=1),  # Marker1，np.array
         Quantity('Marker2', value=[], ch=1),  # Marker2，np.array
 
-        # Data Acquisition(ADC)
+        # ADC
         Quantity('PointNumber', value=1024, ch=1, unit='point'),  # int
         Quantity('TriggerDelay', value=0, ch=1, unit='s'),  # float
         Quantity('Shot', value=512, ch=1),  # int
@@ -119,10 +119,19 @@ class Driver(BaseDriver):
         Quantity('Classify', value=0, ch=1),
         Quantity('Counts', value=[], ch=1),
 
-        # Trigger(TRIG)
+        # Trigger
         Quantity('TRIG'),
         Quantity('TriggerMode'),  # burst or continuous
         Quantity('Wait', value=0, ch=1),  # wait
+
+        # NA
+        Quantity('S', value=np.array([]), ch=1),
+        Quantity('FrequencyStart', value=0, ch=1),
+        Quantity('FrequencyStop', value=10e9, ch=1),
+        Quantity('NumberOfPoints', value=1001, ch=1),
+        Quantity('Bandwidth', value=101, ch=1),
+        Quantity('Power', value=-10, ch=1),
+        Quantity('Frequency', value=np.linspace(1, 10, 1001)*1e9, ch=1)
     ]
 
     def __init__(self, addr: str = '', timeout: float = 3.0, **kw):
@@ -183,6 +192,9 @@ class Driver(BaseDriver):
             si = np.random.randint(20)+np.random.randn(shot, fnum)
             sq = np.random.randint(20)+np.random.randn(shot, fnum)
             return si, sq
+        elif name == 'S':
+            points = self.getValue('NumberOfPoints')
+            return np.array([np.linspace(3, 7, points)*1e9, np.random.randn(points)])
 
     # *#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*# user defined #*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#
     def get_iq(self):
