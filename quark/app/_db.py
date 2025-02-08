@@ -64,8 +64,15 @@ def get_dataset_by_tid(tid: int, signal: str = ''):
             if shape == -1:
                 data[k] = ds[:]
                 continue
-            data[k] = np.full((*shape, *ds.shape[1:]), 0, ds.dtype)
-            data[k][np.unravel_index(np.arange(ds.shape[0]), shape)] = ds[:]
+
+            try:
+                idx = np.unravel_index(np.arange(ds.shape[0]), shape)
+                data[k] = np.full((*shape, *ds.shape[1:]), 0, ds.dtype)
+                data[k][idx] = ds[:]
+            except Exception as e:
+                logger.error(f'{e}')
+                data[k] = ds[:]
+
     return info, data
 
 
