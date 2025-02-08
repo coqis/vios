@@ -132,6 +132,9 @@ class BaseDriver(ABC):
         """
         pass
 
+    def cancel(self):
+        pass
+
     def check(self, name: str, channel: int):
         assert name in self.quantities, f'{self}: quantity({name}) not Found!'
         assert channel in self.CHs or channel == 'global', f"{self}: channel({channel}) not found!"
