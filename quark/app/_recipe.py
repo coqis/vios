@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+import inspect
+
 import numpy as np
 
 
@@ -64,10 +66,17 @@ class Recipe(object):
 
     @circuit.setter
     def circuit(self, cirq):
-        if isinstance(cirq, list):
-            self.__circuit = cirq
+        if isinstance(cirq, list) and cirq:
+            if isinstance(cirq[0], list):
+                self.__circuit = cirq
+            else:
+                raise TypeError('invalid circuit: list[list] needed!')
         elif callable(cirq):
-            self.__circuit = {'module': cirq.__module__, 'name': cirq.__name__}
+            self.__circuit = {'name': cirq.__name__}
+            if cirq.__module__ == '__main__':
+                self.__circuit['code'] = inspect.getsource(cirq)
+            else:
+                self.__circuit['module'] = cirq.__module__
         else:
             raise TypeError(f'invalid circuit: list[list] or function needed!')
 
@@ -111,10 +120,6 @@ class Recipe(object):
         Args:
             path (str): 变量在cfg表中的完整路径, 如gate.R.Q1.params.amp
             value (Any, optional): 变量的值. Defaults to None.
-
-        Raises:
-            ValueError: _description_
-            ValueError: _description_
 
         Examples: `self.rules`
             >>> self.assign('gate.R.Q0.params.frequency', value='freq.Q0')

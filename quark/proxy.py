@@ -276,12 +276,12 @@ class Task(object):
         """submit the task to the `QuarkServer`
         """
         self.stime = time.time()  # start time
-        try:
-            circuit = self.task['body']['cirq']
-            if isinstance(circuit, list) and callable(circuit[0]):
-                circuit[0] = inspect.getsource(circuit[0])
-        except Exception as e:
-            logger.error(f'Failed to get circuit: {e}')
+        # try:
+        #     circuit = self.task['body']['cirq']
+        #     if isinstance(circuit, list) and callable(circuit[0]):
+        #         circuit[0] = inspect.getsource(circuit[0])
+        # except Exception as e:
+        #     logger.error(f'Failed to get circuit: {e}')
         self.tid = self.server.submit(self.task)
 
     def status(self, key: str = 'runtime'):
