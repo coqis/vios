@@ -294,8 +294,16 @@ class Task(object):
         else:
             return 'supported arguments are: {rumtime, compile}'
 
-    def report(self):
-        return self.server.report(self.tid)
+    def report(self, show=True):
+        r: dict = self.server.report(self.tid)
+        if show:
+            for k, v in r.items():
+                if k == 'exec':
+                    msg = '\r\n'.join([f'{sk}: {sv}' for sk, sv in v.items()])
+                else:
+                    msg = v
+                print(f'{k}: {msg}')
+        return r
 
     def process(self, data: list[dict]):
         for dat in data:
@@ -387,12 +395,12 @@ class Task(object):
                     return 'Task canceled!'
                 else:
                     self.progress = Progress(desc=self.name,
-                                             total=self.report()['size'],
+                                             total=self.report(False)['size'],
                                              postfix=self.thread, disable=disable)
                     break
             except Exception as e:
                 logger.error(
-                    f'Failed to get status: {e},{self.report()}')
+                    f'Failed to get status: {e},{self.report(False)}')
 
         if isinstance(self.timeout, float):
             while True:
