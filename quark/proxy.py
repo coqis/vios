@@ -207,12 +207,10 @@ class Task(object):
         self.timeout = timeout
         self.plot = plot
 
-        self.data: dict[str, np.ndarray] = {}  # retrieve data from server
+        self.data: dict[str, np.ndarray] = {}  # retrieved data from server
         self.meta = {}  # meta info like axis
         self.index = 0  # index of data already retrieved
         self.last = 0  # last index of retrieved data
-
-        self.thread = current_thread().name
 
     @cached_property
     def name(self):
@@ -237,7 +235,7 @@ class Task(object):
         # self.clear()
 
     def circuit(self, sid: int = 0):
-        return self.step(0, 'cirq')[0][-1]
+        return self.step(sid, 'cirq')[0][-1]
 
     def step(self, index: int, stage: str = 'raw') -> dict:
         """step details
@@ -274,10 +272,10 @@ class Task(object):
     def result(self):
         try:
             shape = self.meta['other']['shape']
-            data = {}
-            for k, v in self.data.items():
-                data[k] = np.asarray(v).reshape(*shape, v[0].shape[-1])
+            data = {k: np.asarray(v).reshape(*shape, *v[0].shape)
+                    for k, v in self.data.items()}
         except Exception as e:
+            logger.error(f'Failed to reshape data: {e}')
             data = self.data
         return {'data': data} | {'meta': self.meta}
 
@@ -285,12 +283,6 @@ class Task(object):
         """submit the task to the `QuarkServer`
         """
         self.stime = time.time()  # start time
-        # try:
-        #     circuit = self.task['body']['cirq']
-        #     if isinstance(circuit, list) and callable(circuit[0]):
-        #         circuit[0] = inspect.getsource(circuit[0])
-        # except Exception as e:
-        #     logger.error(f'Failed to get circuit: {e}')
         self.tid = self.server.submit(self.task)
 
     def status(self, key: str = 'runtime'):
@@ -403,7 +395,8 @@ class Task(object):
                 else:
                     self.progress = Progress(desc=self.name,
                                              total=self.report(False)['size'],
-                                             postfix=self.thread, disable=disable)
+                                             postfix=current_thread().name,
+                                             disable=disable)
                     break
             except Exception as e:
                 logger.error(
