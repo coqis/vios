@@ -241,24 +241,23 @@ def get_data_by_rid(rid: int, **kwds):
 
 
 def get_data_by_tid(tid: int, **kwds) -> dict:
-    """load data with given **task id(tid)** and **signal**
+    """load data with given **task id(tid)**
 
     Args:
         tid (int): task id
-        signal (str): signal of the data
 
     Keyword Arguments: Kwds
         plot (bool, optional): plot the result in QuarkStudio after the data is loaded(1D or 2D).
 
     Returns:
-        dict: data、metainfo
+        dict: data & meta
     """
     from ._db import get_dataset_by_tid
     from ._view import plot
 
     info, data = get_dataset_by_tid(tid)
 
-    signal = info['meta']['other']['signal']
+    signal = info['meta']['other']['signal'].split('|')[0]
 
     if kwds.get('plot', False) and signal:
         task = Task({'meta': info['meta']})
@@ -279,7 +278,7 @@ def update_remote_wheel(wheel: str, index: str | Path, host: str = '127.0.0.1', 
         host (str, optional): IP address of remote device. Defaults to '127.0.0.1'.
     """
     if sudo:
-        assert sys.platform != 'win32', 'sudo can not be used on windows'
+        assert sys.platform != 'win32', 'sudo can not be used on Windows'
 
     links = {}
     for filename in Path(index).glob('*.whl'):
@@ -321,13 +320,14 @@ def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, tid: 
 
 def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
             start: float = 0, end: float = 100e-6, srate: float = 0,
-            unit: float = 1e-6, offset: float = 0, space: float = 0):
+            unit: float = 1e-6, offset: float = 0, space: float = 0, ax=None):
     import matplotlib.pyplot as plt
+    from matplotlib.axes import Axes
     from waveforms import Waveform
 
     from quark.runtime import calculate
 
-    plt.figure()
+    ax: Axes = plt.subplot() if not ax else ax
     wf, index = {}, 0
     for target, value in cmds.items():
         if isinstance(value[1], Waveform):
@@ -352,10 +352,9 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
                 wf[_target] = cmd[1]+index*offset
                 index += 1
 
-                plt.plot(xt, wf[_target])
-                plt.text(xt[-1], np.mean(wf[_target]), _target, va='center')
-                plt.xlim(xt[0]-space, xt[-1]+space)
-                # print(xt[0], _target)
+                ax.plot(xt, wf[_target])
+                ax.text(xt[-1], np.mean(wf[_target]), _target, va='center')
+                ax.set_xlim(xt[0]-space, xt[-1]+space)
     # plt.axis('off')
     # plt.legend(tuple(wf))
     return wf
