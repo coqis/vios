@@ -272,7 +272,14 @@ class Task(object):
             return r
 
     def result(self):
-        return {'data': self.data} | {'meta': self.meta}
+        try:
+            shape = self.meta['other']['shape']
+            data = {}
+            for k, v in self.data.items():
+                data[k] = np.asarray(v).reshape(*shape, v[0].shape[-1])
+        except Exception as e:
+            data = self.data
+        return {'data': data} | {'meta': self.meta}
 
     def run(self):
         """submit the task to the `QuarkServer`
