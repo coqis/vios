@@ -33,7 +33,7 @@ from quark.proxy import QUARK
 sql = sqlite3.connect(QUARK/'checkpoint.db', check_same_thread=False)
 
 
-def get_dataset_by_tid(tid: int, signal: str = ''):
+def get_dataset_by_tid(tid: int):
     filename, dataset = get_record_by_tid(tid)[7:9]
 
     info, data = {}, {}
@@ -51,15 +51,7 @@ def get_dataset_by_tid(tid: int, signal: str = ''):
                 for k, v in info['meta']['axis'].items():
                     shape.extend(tuple(v.values())[0].shape)
 
-        if not signal:
-            signal = info['meta'].setdefault(
-                'other', {}).setdefault('signal', '')
-        else:
-            signal = signal
-
         for k in group.keys():
-            if k != signal or not signal:
-                continue
             ds = group[f'{k}']
             if shape == -1:
                 data[k] = ds[:]

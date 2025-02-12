@@ -234,13 +234,13 @@ def get_config_by_rid(rid: int):
     return get_config_by_tid(tid)
 
 
-def get_data_by_rid(rid: int, signal: str = '', **kwds):
+def get_data_by_rid(rid: int, **kwds):
     from ._db import get_record_by_rid
     tid = get_record_by_rid(rid)[1]
-    return get_data_by_tid(tid, signal, **kwds)
+    return get_data_by_tid(tid, **kwds)
 
 
-def get_data_by_tid(tid: int, signal: str = '', **kwds) -> dict:
+def get_data_by_tid(tid: int, **kwds) -> dict:
     """load data with given **task id(tid)** and **signal**
 
     Args:
@@ -256,7 +256,7 @@ def get_data_by_tid(tid: int, signal: str = '', **kwds) -> dict:
     from ._db import get_dataset_by_tid
     from ._view import plot
 
-    info, data = get_dataset_by_tid(tid, signal)
+    info, data = get_dataset_by_tid(tid)
 
     signal = info['meta']['other']['signal']
 
