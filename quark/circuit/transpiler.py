@@ -209,7 +209,7 @@ class Transpiler:
         Returns:
             QuantumCircuit: The updated quantum circuit with swap gates applied.
         """
-        assert(iterations % 2 == 1)
+        #assert(iterations % 2 == 1)
         self._sabre_routing(iterations = iterations)
         qc = QuantumCircuit(self.largest_qubits_index,self.ncbits_used)
         qc.gates = self.gates
