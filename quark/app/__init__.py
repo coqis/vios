@@ -37,6 +37,7 @@ from typing import Callable
 import numpy as np
 from loguru import logger
 from srpc import connect, loads
+from zee import flatten_dict
 
 from quark.proxy import Task
 
@@ -151,14 +152,44 @@ def submit(task: dict, block: bool = False, **kwds):
     return t
 
 
-def diff(rida: int, ridb: int = 0):
-    from ._db import get_commit_by_tid
+def diff(rida: int, ridb: int = 0, fmt: str = 'dict'):
 
-    cma = get_commit_by_tid(get_tid_by_rid(rida))[0]
-    cmb = get_commit_by_tid(get_tid_by_rid(ridb))[0]
-    msg = str(cma.diff(cmb, create_patch=True)[0])
+    if fmt == 'dict':
+        fda = flatten_dict(get_config_by_rid(rida))
+        fdb = flatten_dict(get_config_by_rid(ridb))
+        changes = {}
+        for k in set(fda) | set(fdb):
+            if k.startswith('usr') or k.endswith('pid'):
+                continue
 
-    return msg
+            if k in fda and k in fdb:
+                try:
+                    if isinstance(fda[k], np.ndarray) and isinstance(fdb[k], np.ndarray):
+                        if not np.all(fda[k] == fdb[k]):
+                            changes[k] = f'{fdb[k]} -> {fda[k]}'
+                    elif fda[k] != fdb[k]:
+                        changes[k] = f'{fdb[k]} -> {fda[k]}'
+                except Exception as e:
+                    print(e)
+                    changes[k] = f'{fdb[k]} -> {fda[k]}'
+            elif k in fda and k not in fdb:
+                changes[k] = f'+ -> {fda[k]}'
+            elif k not in fda and k in fdb:
+                changes[k] = f'- -> {fda[k]}'
+
+        return changes
+    else:
+        from ._db import get_commit_by_tid
+
+        cma, filea = get_commit_by_tid(get_tid_by_rid(rida))
+        cmb, fileb = get_commit_by_tid(get_tid_by_rid(ridb))
+        msg = ''
+        for df in cma.diff(cmb, create_patch=True):
+            # msg = str([0])
+            if filea.name == df.a_path and fileb.name == df.b_path:
+                msg = df.diff.decode('utf-8')
+
+        return msg
 
 
 def rollback(rid: int = 0, tid: int = 0):
@@ -247,15 +278,13 @@ def get_config_by_rid(rid: int):
     return get_config_by_tid(get_tid_by_rid(rid))
 
 
-def get_config_by_tid(tid: int = 0):
+def get_config_by_tid(tid: int) -> dict:
     # git config --global --add safe.directory path/to/cfg
     from ._db import get_commit_by_tid
     try:
         commit, file = get_commit_by_tid(tid)
 
-        tree = commit.tree
-        config: dict = loads(tree[file.name].data_stream.read().decode())
-        return config
+        return loads(commit.tree[file.name].data_stream.read().decode())
     except Exception as e:
         logger.error(f'Failed to get config: {e}')
         return {}
