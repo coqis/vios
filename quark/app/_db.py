@@ -68,7 +68,8 @@ def get_dataset_by_tid(tid: int):
     return info, data
 
 
-def get_config_by_tid(tid: int = 0):
+def get_commit_by_tid(tid: int = 0):
+
     # git config --global --add safe.directory path/to/cfg
     try:
         import git
@@ -83,14 +84,17 @@ def get_config_by_tid(tid: int = 0):
 
         repo = git.Repo(file.resolve().parent)
         if not tid:
-            tree = repo.head.commit.tree
+            commit = repo.head.commit
         else:
-            tree = repo.commit(get_record_by_tid(tid)[-1]).tree
-        config: dict = loads(tree[file.name].data_stream.read().decode())
-        return config
+            commit = repo.commit(get_record_by_tid(tid)[-1])
+
+        return commit, file
     except Exception as e:
-        logger.error(f'Failed to get config: {e}')
-        return {}
+        logger.error(f'Failed to get commit: {e}')
+
+
+def get_tid_by_rid(rid: int):
+    return get_record_by_rid(rid)[1]
 
 
 def get_record_by_tid(tid: int, table: str = 'task'):

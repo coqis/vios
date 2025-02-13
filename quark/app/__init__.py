@@ -36,12 +36,12 @@ from typing import Callable
 
 import numpy as np
 from loguru import logger
-from srpc import connect
+from srpc import connect, loads
 
 from quark.proxy import Task
 
 # get_record_by_rid, get_record_by_tid, sql
-from ._db import get_config_by_tid
+from ._db import get_tid_by_rid
 from ._recipe import Recipe
 
 _sp = {}  # defaultdict(lambda: connect('QuarkServer', host, port))
@@ -151,7 +151,17 @@ def submit(task: dict, block: bool = False, **kwds):
     return t
 
 
-def rollback(tid: int):
+def diff(rida: int, ridb: int = 0):
+    from ._db import get_commit_by_tid
+
+    cma = get_commit_by_tid(get_tid_by_rid(rida))[0]
+    cmb = get_commit_by_tid(get_tid_by_rid(ridb))[0]
+    msg = str(cma.diff(cmb, create_patch=True)[0])
+
+    return msg
+
+
+def rollback(rid: int = 0, tid: int = 0):
     """rollback the parameters with given task id and checkpoint name
 
     Args:
@@ -160,7 +170,12 @@ def rollback(tid: int):
     _s = login(verbose=False)
 
     try:
-        config = get_config_by_tid(tid)
+        if rid:
+            config = get_config_by_rid(rid)
+        elif tid:
+            config = get_config_by_tid(tid)
+        else:
+            raise ValueError('one of rid and tid must be given!')
         _s.clear()
         for k, v in config.items():
             _s.create(k, v)
@@ -229,15 +244,25 @@ def lookup(start: str = '', end: str = '', name: str = '', fmt: str = '%Y-%m-%d-
 
 
 def get_config_by_rid(rid: int):
-    from ._db import get_record_by_rid
-    tid = get_record_by_rid(rid)[1]
-    return get_config_by_tid(tid)
+    return get_config_by_tid(get_tid_by_rid(rid))
+
+
+def get_config_by_tid(tid: int = 0):
+    # git config --global --add safe.directory path/to/cfg
+    from ._db import get_commit_by_tid
+    try:
+        commit, file = get_commit_by_tid(tid)
+
+        tree = commit.tree
+        config: dict = loads(tree[file.name].data_stream.read().decode())
+        return config
+    except Exception as e:
+        logger.error(f'Failed to get config: {e}')
+        return {}
 
 
 def get_data_by_rid(rid: int, **kwds):
-    from ._db import get_record_by_rid
-    tid = get_record_by_rid(rid)[1]
-    return get_data_by_tid(tid, **kwds)
+    return get_data_by_tid(get_tid_by_rid(rid), **kwds)
 
 
 def get_data_by_tid(tid: int, **kwds) -> dict:
