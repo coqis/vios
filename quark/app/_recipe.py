@@ -29,8 +29,11 @@ class Recipe(object):
     """**Recipe仅用于生成任务，没有编译/执行/数据处理等任何逻辑！**
     """
 
+    initialize = lambda : []
+    finalize = lambda : []
+
     def __init__(self, name: str, shots: int = 1024, signal: str = 'iq_avg',
-                 align_right: bool = False, waveform_length: float = 98e-6):
+                 align_right: bool = False, waveform_length: float = 98e-6, fillzero: bool = True):
         """初始化任务描述
 
         Args:
@@ -39,16 +42,19 @@ class Recipe(object):
             signal (str, optional): 采集信号. Defaults to 'iq_avg'.
             align_right (bool, optional): 波形是否右对齐. Defaults to False.
             waveform_length (float, optional): 波形长度. Defaults to 98e-6.
+            fillzero (float, optional): 每一步编译开始前初始化所有通道. Defaults to True.
         """
         self.name = name
         self.shots = shots
         self.signal = signal
         self.align_right = align_right
         self.waveform_length = waveform_length
+        self.fillzero = fillzero
 
-        self.fillzero = True  # 每一步编译开始前初始化所有通道
-        self.initcmd = []  # [('AWG.CH1.Waveform', 'zero()', 'au')]
-        self.postcmd = []  # [('AWG.CH1.Waveform', 'zero()', 'au')]
+        # [('AWG.CH1.Waveform', 'zero()', 'au')]
+        self.initcmd = [(t, v, 'au') for t, v in Recipe.initialize()]
+        # [('AWG.CH1.Waveform', 'zero()', 'au')]
+        self.postcmd = [(t, v, 'au') for t, v in Recipe.finalize()]
         self.__circuit: list[list] = []  # qlisp线路
 
         self.filename: str = 'baqis'  # 数据存储文件名, 位于桌面/home/dat文件夹下
