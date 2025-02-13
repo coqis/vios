@@ -75,6 +75,8 @@ def plot(task: Task, append: bool = False, backend: str = 'viewer'):
             # xdata = axis[xlabel][xlabel][task.last:task.index]
             if not hasattr(task, 'xdata'):
                 task.xdata = np.asarray(list(axis[xlabel].values())).T
+                if raw.shape[-1]+1 == task.xdata.shape[-1]:
+                    task.xdata = task.xdata[:, 1:]
             xdata = task.xdata[task.last:task.index]
             ydata = raw
         elif len(label) == 2:
@@ -82,7 +84,11 @@ def plot(task: Task, append: bool = False, backend: str = 'viewer'):
             # xdata = axis[xlabel][xlabel]
             if not hasattr(task, 'xdata'):
                 task.xdata = np.asarray(list(axis[xlabel].values())).T
+                if raw.shape[-1]+1 == task.xdata.shape[-1]:
+                    task.xdata = task.xdata[:, 1:]
                 task.ydata = np.asarray(list(axis[ylabel].values())).T
+                if raw.shape[-1]+1 == task.ydata.shape[-1]:
+                    task.ydata = task.ydata[:, 1:]
             # ydata = axis[ylabel][ylabel]
             xdata = task.xdata
             ydata = task.ydata
@@ -151,13 +157,16 @@ def plot(task: Task, append: bool = False, backend: str = 'viewer'):
                     if task.last == 0:
                         try:
                             line['xdata'] = xdata[..., idx].squeeze()
-                            line['ydata'] = ydata[..., idx]
                         except Exception as e:
                             line['xdata'] = xdata[..., 0].squeeze()
-                            line['ydata'] = ydata[..., 0]
+
+                        try:
+                            line['ydata'] = ydata[..., idx].squeeze()
+                        except Exception as e:
+                            line['ydata'] = ydata[..., 0].squeeze()
                         # colormap of the image, see matplotlib
                         line['colormap'] = 'RdBu'
-                    line['zdata'] = zdata[..., idx]
+                    line['zdata'] = zdata[..., idx].squeeze()
                 except Exception as e:
                     continue
 
