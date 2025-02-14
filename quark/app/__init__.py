@@ -166,19 +166,19 @@ def diff(rida: int, ridb: int = 0, fmt: str = 'dict'):
                 try:
                     if isinstance(fda[k], np.ndarray) and isinstance(fdb[k], np.ndarray):
                         if not np.all(fda[k] == fdb[k]):
-                            changes[k] = f'{fdb[k]} -> {fda[k]}'
+                            changes[k] = f'🔄 <{fdb[k]}> ⟼ <{fda[k]}>'
                     elif fda[k] != fdb[k]:
-                        changes[k] = f'{fdb[k]} -> {fda[k]}'
+                        changes[k] = f'🔄 <{fdb[k]}> ⟼ <{fda[k]}>'
                 except Exception as e:
                     print(e)
-                    changes[k] = f'{fdb[k]} -> {fda[k]}'
+                    changes[k] = f'🔄 <{fdb[k]}> ⟼ <{fda[k]}>'
             elif k in fda and k not in fdb:
-                changes[k] = f'+ -> {fda[k]}'
+                changes[k] = f'✅ <> ⟼ <{fda[k]}>'
             elif k not in fda and k in fdb:
-                changes[k] = f'- -> {fda[k]}'
+                changes[k] = f'❎ <{fdb[k]}> ⟼ <>'
 
         return changes
-    else:
+    elif fmt == 'git':
         from ._db import get_commit_by_tid
 
         cma, filea = get_commit_by_tid(get_tid_by_rid(rida))
