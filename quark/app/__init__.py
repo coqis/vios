@@ -45,7 +45,27 @@ from quark.proxy import Task
 from ._db import get_tid_by_rid
 from ._recipe import Recipe
 
+
+class Super(object):
+    def __init__(self):
+        pass
+
+    def login(self, user: str = 'baqis', host: str = '127.0.0.1'):
+        ss = login(user, host)
+
+        if hasattr(self, 'update'):
+            return
+
+        for mth in ['start', 'query', 'write', 'read']:
+            setattr(self, mth, getattr(ss, mth))
+
+        for name in ['signup', 'update']:
+            setattr(self, name, globals()[name])
+
+
 _sp = {}  # defaultdict(lambda: connect('QuarkServer', host, port))
+
+s = Super()
 
 
 def signup(user: str, system: str, **kwds):
@@ -55,9 +75,9 @@ def signup(user: str, system: str, **kwds):
         user (str): name of the user
         system (str): name of the system(i.e. the name of the cfg file)
     """
-    s = login()
-    logger.info(s.adduser(user, system, **kwds))
-    s.login(user)  # relogin
+    ss = login()
+    logger.info(ss.adduser(user, system, **kwds))
+    ss.login(user)  # relogin
 
 
 def login(user: str = 'baqis', host: str = '127.0.0.1', verbose: bool = True):
@@ -71,14 +91,14 @@ def login(user: str = 'baqis', host: str = '127.0.0.1', verbose: bool = True):
         _type_: a connection to the server
     """
     try:
-        s = _sp[current_thread().name]
+        ss = _sp[current_thread().name]
     except KeyError as e:
-        s = _sp[current_thread().name] = connect('QuarkServer', host, 2088)
+        ss = _sp[current_thread().name] = connect('QuarkServer', host, 2088)
 
-    m = s.login(user)
+    m = ss.login(user)
     if verbose:
         logger.info(m)
-    return s
+    return ss
 
 
 def submit(task: dict, block: bool = False, **kwds):

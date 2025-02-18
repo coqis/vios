@@ -539,6 +539,8 @@ class QuarkProxy(object):
 
         ret = {'count': {''.join((str(i) for i in k)): v for k, v in dres.items()},
                'corrected': {''.join((str(i) for i in k)): v for k, v in cdres.items()},
+               'chip': coqis.get('chip', ''),
+               'circuit': coqis.get('circuit', ''),
                'transpiled': coqis.get('qasm', ''),
                'qlisp': coqis.get('qlisp', ''),
                'tid': meta['tid'],
