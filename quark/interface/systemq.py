@@ -41,17 +41,18 @@ except Exception as e:
     raise e
 
 
-# latest waveforms/qlisp/qlispc
-from qlispc import Signal, get_arch, register_arch
-from qlispc.arch.baqis import baqisArchitecture
-from qlispc.arch.baqis.config import QuarkLocalConfig
-from qlispc.kernel_utils import qcompile, sample_waveform
-
-# waveform==1.7.7
-# from qlisp import Signal,get_arch,register_arch
-# from lib.arch.baqis import baqisArchitecture
-# from lib.arch.baqis_config import QuarkLocalConfig
-# from qlisp.kernel_utils import qcompile,sample_waveform
+try:
+    # latest waveforms/qlisp/qlispc
+    from qlispc import Signal, get_arch, register_arch
+    from qlispc.arch.baqis import baqisArchitecture
+    from qlispc.arch.baqis.config import QuarkLocalConfig
+    from qlispc.kernel_utils import qcompile, sample_waveform
+except ImportError as e:
+    # waveform==1.7.7
+    from qlisp import Signal, get_arch, register_arch
+    from lib.arch.baqis import baqisArchitecture
+    from lib.arch.baqis_config import QuarkLocalConfig
+    from qlisp.kernel_utils import qcompile, sample_waveform
 
 try:
     from systemq.lib.arch.baqis_config import get_all_channels
@@ -69,7 +70,10 @@ except ImportError as e:
 
 # waveforms.math: waveforms or waveform-math
 from waveforms import Waveform, WaveVStack, square, wave_eval
-from waveforms.namespace import DictDriver
+try:
+    from waveforms.namespace import DictDriver
+except ImportError as e:
+    from qlispc.namespace import DictDriver
 
 register_arch(baqisArchitecture)
 
