@@ -152,6 +152,23 @@ def submit(task: dict, block: bool = False, **kwds):
     return t
 
 
+def update(path: str, value, failed: list = []):
+    ss = login(verbose=False)
+    rs: str = ss.update(path, value)
+    if rs.startswith('Failed'):
+        if 'root' in rs:
+            ss.create(path, {})
+        else:
+            path, _f = path.rsplit('.', 1)
+            failed.append((_f, value))
+            update(path, {}, failed)
+
+    while failed:
+        _f, v = failed.pop()
+        path = f'{path}.{_f}'
+        ss.update(path, v)
+
+
 def diff(rida: int, ridb: int = 0, fmt: str = 'dict'):
 
     if fmt == 'dict':
