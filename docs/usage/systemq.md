@@ -36,6 +36,10 @@ Then you can install and start using SystemQ from [**QuarkServer**](https://quar
     # install systemq and its dependencies
     cd systemq
     pip install -e.
+
+    # update if needed
+    quark update --server
+    quark update --studio
     ```
 
 ???+ warning "systemq"
