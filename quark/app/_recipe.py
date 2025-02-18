@@ -29,11 +29,13 @@ class Recipe(object):
     """**Recipe仅用于生成任务，没有编译/执行/数据处理等任何逻辑！**
     """
 
-    initialize = lambda : []
-    finalize = lambda : []
+    # ignore=E731
+    initialize = lambda: []
+    finalize = lambda: []
 
     def __init__(self, name: str, shots: int = 1024, signal: str = 'iq_avg',
-                 align_right: bool = False, waveform_length: float = 98e-6, fillzero: bool = True):
+                 align_right: bool = False, waveform_length: float = 98e-6, fillzero: bool = True,
+                 filename: str = 'baiqs', priority: int = 0):
         """初始化任务描述
 
         Args:
@@ -42,7 +44,7 @@ class Recipe(object):
             signal (str, optional): 采集信号. Defaults to 'iq_avg'.
             align_right (bool, optional): 波形是否右对齐. Defaults to False.
             waveform_length (float, optional): 波形长度. Defaults to 98e-6.
-            fillzero (float, optional): 每一步编译开始前初始化所有通道. Defaults to True.
+            fillzero (float, optional): 每一步编译开始前初始化所有通道波形为zero(). Defaults to True.
         """
         self.name = name
         self.shots = shots
@@ -51,17 +53,17 @@ class Recipe(object):
         self.waveform_length = waveform_length
         self.fillzero = fillzero
 
+        self.filename = filename  # 数据存储文件名, 位于桌面/home/dat文件夹下
+        self.priority = priority  # 任务排队用, 越小优先级越高
+
         # [('AWG.CH1.Waveform', 'zero()', 'au')]
         self.initcmd = [(t, v, 'au') for t, v in Recipe.initialize()]
         # [('AWG.CH1.Waveform', 'zero()', 'au')]
         self.postcmd = [(t, v, 'au') for t, v in Recipe.finalize()]
         self.__circuit: list[list] = []  # qlisp线路
 
-        self.filename: str = 'baqis'  # 数据存储文件名, 位于桌面/home/dat文件夹下
-        self.priority: int = 0  # 任务排队用, 越小优先级越高
-
-        self.rules: list[str] = []  # 变量依赖关系列表
-        self.loops: dict[str, list] = {}  # 变量列表
+        self.__rules: list[str] = []  # 变量依赖关系列表
+        self.__loops: dict[str, list] = {}  # 变量列表
 
         self.__ckey = ''
         self.__dict = {}
@@ -127,21 +129,21 @@ class Recipe(object):
             path (str): 变量在cfg表中的完整路径, 如gate.R.Q1.params.amp
             value (Any, optional): 变量的值. Defaults to None.
 
-        Examples: `self.rules`
+        Examples: `self.__rules`
             >>> self.assign('gate.R.Q0.params.frequency', value='freq.Q0')
             >>> self.assign('gate.R.Q1.params.amp', value=0.1)
             ['⟨gate.R.Q0.params.frequency⟩=⟨freq.Q0⟩', '⟨gate.R.Q1.params.amp⟩=0.1']
         """
         if isinstance(value, str):
-            if '.' in value and value.split('.')[0] in self.loops:
+            if '.' in value and value.split('.')[0] in self.__loops:
                 dep = f'⟨{path}⟩=⟨{value}⟩'
             else:
                 dep = f'⟨{path}⟩="{value}"'
         else:
             dep = f'⟨{path}⟩={value}'
 
-        if dep not in self.rules:
-            self.rules.append(dep)
+        if dep not in self.__rules:
+            self.__rules.append(dep)
 
     def define(self, group: str, target: str, value: list | np.ndarray):
         """增加变量target到组group中
@@ -151,7 +153,7 @@ class Recipe(object):
             target (str): 变量对应的标识符号, 任意即可.
             value (list | np.array): 变量对应的取值范围.
 
-        Examples: `self.loops`
+        Examples: `self.__loops`
             >>> self.define('freq', 'Q0', array([2e6, 1e6,  0. ,  1e6,  2e6]))
             >>> self.define('freq', 'Q1', array([-3e6, -1.5e6,  0. ,  1.5e6,  3e6]))
             >>> self.define('amps', 'Q0', array([-0.2, -0.1,  0. ,  0.1,  0.2]))
@@ -160,11 +162,11 @@ class Recipe(object):
              'amps':[('Q0',array([-0.2, -0.1,  0. ,  0.1,  0.2]), 'au')), ('Q1',array([-0.24, -0.12,  0. ,  0.12,  0.24]), 'au'))]
             }
         """
-        self.loops.setdefault(group, [])
+        self.__loops.setdefault(group, [])
         var = (target, value, 'au')
 
-        if var not in self.loops[group]:
-            self.loops[group].append(var)
+        if var not in self.__loops[group]:
+            self.__loops[group].append(var)
 
     def export(self):
         """导出任务
@@ -179,17 +181,17 @@ class Recipe(object):
                                    'align_right': self.align_right,
                                    'fillzero': self.fillzero,
                                    'waveform_length': self.waveform_length,
-                                   'shape': [len(v[0][1]) for v in self.loops.values()]
+                                   'shape': [len(v[0][1]) for v in self.__loops.values()]
                                    } | {k: v for k, v in self.__dict.items() if not isinstance(v, (list, np.ndarray))}
                          },
-                'body': {'step': {'main': ['WRITE', tuple(self.loops)],
+                'body': {'step': {'main': ['WRITE', tuple(self.__loops)],
                                   'trig': ['WRITE', 'trig'],
                                   'read': ['READ', 'read'],
                                   },
                          'init': self.initcmd,
                          'post': self.postcmd,
                          'cirq': self.circuit,
-                         'rule': self.rules,
-                         'loop': {} | self.loops
+                         'rule': self.__rules,
+                         'loop': {} | self.__loops
                          },
                 }
