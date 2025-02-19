@@ -30,8 +30,8 @@ class Recipe(object):
     """
 
     # ignore=E731
-    initialize = lambda: []
-    finalize = lambda: []
+    initialize = lambda shots: []
+    finalize = lambda shots: []
 
     def __init__(self, name: str, shots: int = 1024, signal: str = 'iq_avg',
                  align_right: bool = False, waveform_length: float = 98e-6, fillzero: bool = True,
@@ -57,9 +57,9 @@ class Recipe(object):
         self.priority = priority  # 任务排队用, 越小优先级越高
 
         # [('AWG.CH1.Waveform', 'zero()', 'au')]
-        self.initcmd = [(t, v, 'au') for t, v in Recipe.initialize()]
+        self.initcmd = [(t, v, 'au') for t, v in Recipe.initialize(shots)]
         # [('AWG.CH1.Waveform', 'zero()', 'au')]
-        self.postcmd = [(t, v, 'au') for t, v in Recipe.finalize()]
+        self.postcmd = [(t, v, 'au') for t, v in Recipe.finalize(shots)]
         self.__circuit: list[list] = []  # qlisp线路
 
         self.__rules: list[str] = []  # 变量依赖关系列表

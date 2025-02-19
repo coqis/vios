@@ -56,7 +56,7 @@ class Super(object):
         if hasattr(self, 'update'):
             return
 
-        for mth in ['start', 'query', 'write', 'read']:
+        for mth in ['ping', 'start', 'query', 'write', 'read', 'snapshot']:
             setattr(self, mth, getattr(ss, mth))
 
         for name in ['signup', 'update']:
