@@ -58,7 +58,7 @@ try:
     from systemq.lib.arch.baqis_config import get_all_channels
 
     def set_all_channels(ctx: 'Context'):
-        return [('WRITE', *cmd) for cmd in get_all_channels(ctx.export())]
+        return [('WRITE', *cmd, 'au') for cmd in get_all_channels(ctx.export())]
 except ImportError as e:
     from qlispc.kernel_utils import get_all_channels
 
