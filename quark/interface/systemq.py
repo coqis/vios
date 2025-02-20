@@ -284,10 +284,11 @@ class Workflow(object):
         ctx._getGateConfig.cache_clear()
         ctx.snapshot().cache = kwds.pop('cache', {})
 
-        if kwds.get('fillzero', False):  # whether to initialize all channels to zero()
-            compiled = {'main': set_all_channels(ctx)}
-        else:
-            compiled = {}
+        # if kwds.get('fillzero', False):  # whether to initialize all channels to zero()
+        #     compiled = {'main': set_all_channels(ctx)}
+        # else:
+        #     compiled = {}
+        compiled = {}
 
         _, (cmds, dmap) = qcompile(circuit,
                                    lib=kwds.get('lib', stdlib),

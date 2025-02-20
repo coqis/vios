@@ -51,7 +51,7 @@ def initialize(snapshot, **kwds):
     if isinstance(snapshot, int):
         return os.getpid()
     ctx.reset(snapshot)
-    ctx.initial = kwds.get('initial', {'restore': []})
+    # ctx.initial = kwds.get('initial', {'restore': []})
     ctx.bypass = kwds.get('bypass', {})
     ctx._keys = kwds.get('keys', [])
     return ctx
@@ -83,7 +83,7 @@ def ccompile(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
              hold=kwds.get('hold', False))
 
     if sid == 0:
-        kwds['restore'] = ctx.initial
+        # kwds['restore'] = ctx.initial
         kwds['clear'] = True
     logger.info(f'>>>>>>>>>>>>>>>>>>>>>>>> Step {sid} is compiled!')
 
@@ -188,7 +188,7 @@ MAPPING = {
 
 
 # command filters
-SUFFIX = ('Waveform', 'Shot', 'Coefficient', 'TriggerDelay')
+SUFFIX = ('Waveform', 'Shot')  # , 'Coefficient', 'TriggerDelay')
 
 
 def decode(target: str, context: dict, mapping: dict = MAPPING) -> str:
