@@ -189,11 +189,13 @@ def update(path: str, value, failed: list = []):
         ss.update(path, v)
 
 
-def diff(rida: int, ridb: int = 0, fmt: str = 'dict'):
+def diff(new: int | dict, old: int | dict, fmt: str = 'dict'):
 
     if fmt == 'dict':
-        fda = flatten_dict(get_config_by_rid(rida))
-        fdb = flatten_dict(get_config_by_rid(ridb))
+        fda = flatten_dict(get_config_by_rid(
+            new) if isinstance(new, int) else new)
+        fdb = flatten_dict(get_config_by_rid(
+            old) if isinstance(old, int) else old)
         changes = {}
         for k in set(fda) | set(fdb):
             if k.startswith('usr') or k.endswith('pid'):
@@ -203,23 +205,25 @@ def diff(rida: int, ridb: int = 0, fmt: str = 'dict'):
                 try:
                     if isinstance(fda[k], np.ndarray) and isinstance(fdb[k], np.ndarray):
                         if not np.all(fda[k] == fdb[k]):
-                            changes[k] = f'🔄 <{fdb[k]}> ⟼ <{fda[k]}>'
+                            changes[k] = f'🔄 {fdb[k]}> ⟼ {fda[k]}'
                     elif fda[k] != fdb[k]:
-                        changes[k] = f'🔄 <{fdb[k]}> ⟼ <{fda[k]}>'
+                        changes[k] = f'🔄 {fdb[k]}> ⟼ {fda[k]}'
                 except Exception as e:
                     print(e)
-                    changes[k] = f'🔄 <{fdb[k]}> ⟼ <{fda[k]}>'
+                    changes[k] = f'🔄 {fdb[k]} ⟼ {fda[k]}'
             elif k in fda and k not in fdb:
-                changes[k] = f'✅ <> ⟼ <{fda[k]}>'
+                changes[k] = f'✅ ⟼ {fda[k]}'
             elif k not in fda and k in fdb:
-                changes[k] = f'❎ <{fdb[k]}> ⟼ <>'
+                changes[k] = f'❌ {fdb[k]} ⟼ '
 
         return changes
     elif fmt == 'git':
         from ._db import get_commit_by_tid
+        assert isinstance(new, int), 'argument must be an integer'
+        assert isinstance(old, int), 'argument must be an integer'
 
-        cma, filea = get_commit_by_tid(get_tid_by_rid(rida))
-        cmb, fileb = get_commit_by_tid(get_tid_by_rid(ridb))
+        cma, filea = get_commit_by_tid(get_tid_by_rid(new))
+        cmb, fileb = get_commit_by_tid(get_tid_by_rid(old))
         msg = ''
         for df in cma.diff(cmb, create_patch=True):
             # msg = str([0])
