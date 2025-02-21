@@ -528,7 +528,7 @@ class QuarkProxy(object):
                 logger.error(f'Failed to dropout: {e}')
 
             try:
-                if meta['coqis']['correct']:
+                if coqis['correct']:
                     from home.ylfeng.cloud import correct_readout
                     cdres = correct_readout(dres, meta['other']['measure'])
                 else:

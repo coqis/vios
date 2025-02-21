@@ -82,7 +82,8 @@ def sample(target: str, cmd: dict, canvas: dict = {}, delay: float = 0.0) -> dic
     if not canvas.get('filter', []):
         return {}
 
-    if cmd[-1]['target'].split('.')[0] not in canvas['filter'] or cmd[-1]['sid'] < 0:
+    # or cmd[-1]['sid'] < 0:
+    if cmd[-1]['target'].split('.')[0] not in canvas['filter']:
         return {}
 
     if target.endswith('Waveform'):

@@ -78,6 +78,43 @@ except ImportError as e:
 register_arch(baqisArchitecture)
 
 
+def _form_signal(sig):
+    """signal类型
+    """
+    sig_tab = {
+        'trace': Signal.trace,
+        'iq': Signal.iq,
+        'state': Signal.state,
+        'count': Signal.count,
+        'diag': Signal.diag,
+        'population': Signal.population,
+        'trace_avg': Signal.trace_avg,
+        'iq_avg': Signal.iq_avg,
+        'remote_trace_avg': Signal.remote_trace_avg,
+        'remote_iq_avg': Signal.remote_iq_avg,
+        'remote_state': Signal.remote_state,
+        'remote_population': Signal.remote_population,
+        'remote_count': Signal.remote_count,
+    }
+    if isinstance(sig, str):
+        if sig == 'raw':
+            sig = 'iq'
+        try:
+            if '|' not in sig:
+                return sig_tab[sig]
+            _sig = None
+            for s in sig.split('|'):
+                _s = getattr(Signal, s)
+                _sig = _s if not _sig else _sig | _s
+            return _sig
+        except KeyError:
+            pass
+    elif isinstance(sig, Signal):
+        return sig
+    raise ValueError(f'unknow type of signal "{sig}".'
+                     f" optional signal types: {list(sig_tab.keys())}")
+
+
 class Context(QuarkLocalConfig):
 
     def __init__(self, data) -> None:
@@ -135,43 +172,6 @@ class Context(QuarkLocalConfig):
                 except:
                     break
             raise Exception(f"gate {name} of {qubits} not calibrated.")
-
-
-def _form_signal(sig):
-    """signal类型
-    """
-    sig_tab = {
-        'trace': Signal.trace,
-        'iq': Signal.iq,
-        'state': Signal.state,
-        'count': Signal.count,
-        'diag': Signal.diag,
-        'population': Signal.population,
-        'trace_avg': Signal.trace_avg,
-        'iq_avg': Signal.iq_avg,
-        'remote_trace_avg': Signal.remote_trace_avg,
-        'remote_iq_avg': Signal.remote_iq_avg,
-        'remote_state': Signal.remote_state,
-        'remote_population': Signal.remote_population,
-        'remote_count': Signal.remote_count,
-    }
-    if isinstance(sig, str):
-        if sig == 'raw':
-            sig = 'iq'
-        try:
-            if '|' not in sig:
-                return sig_tab[sig]
-            _sig = None
-            for s in sig.split('|'):
-                _s = getattr(Signal, s)
-                _sig = _s if not _sig else _sig | _s
-            return _sig
-        except KeyError:
-            pass
-    elif isinstance(sig, Signal):
-        return sig
-    raise ValueError(f'unknow type of signal "{sig}".'
-                     f" optional signal types: {list(sig_tab.keys())}")
 
 
 class Pulse(object):
