@@ -50,7 +50,7 @@ def get_coef(coef_info, sampleRate):
             w = np.zeros(numberOfPoints, dtype=complex)
             w[:len(w)] = w
             w = shift(w, t0 - start)
-            phases.append(np.mod(phase + 2 * np.pi * Delta * start, 2*np.pi))
+            phases.append(np.mod(phase + 2 * np.pi * Delta * start, 2 * np.pi))
         else:
             weight = weight
             if isinstance(weight, np.ndarray):
@@ -69,7 +69,7 @@ def get_coef(coef_info, sampleRate):
                             phaseList=[phase],
                             weight=weight,
                             sampleRate=sampleRate)[:, 0]
-            phases.append(np.mod(phase, 2*np.pi))
+            phases.append(np.mod(phase, 2 * np.pi))
         wList.append(w)
     return np.asarray(wList), fList, numberOfPoints, phases
 
@@ -131,7 +131,7 @@ class Driver(BaseDriver):
         Quantity('NumberOfPoints', value=1001, ch=1),
         Quantity('Bandwidth', value=101, ch=1),
         Quantity('Power', value=-10, ch=1),
-        Quantity('Frequency', value=np.linspace(1, 10, 1001)*1e9, ch=1)
+        Quantity('Frequency', value=np.linspace(1, 10, 1001) * 1e9, ch=1)
     ]
 
     def __init__(self, addr: str = '', timeout: float = 3.0, **kw):
@@ -189,12 +189,12 @@ class Driver(BaseDriver):
             shot = self.getValue('Shot', **kw)
             fnum = self.getValue('Coefficient', **kw).shape[0]
             # time.sleep(0.1)
-            si = np.random.randint(20)+np.random.randn(shot, fnum)
-            sq = np.random.randint(20)+np.random.randn(shot, fnum)
+            si = np.random.randint(20) + np.random.randn(shot, fnum)
+            sq = np.random.randint(20) + np.random.randn(shot, fnum)
             return si, sq
         elif name == 'S':
             points = self.getValue('NumberOfPoints')
-            return np.array([np.linspace(3, 7, points)*1e9, np.random.randn(points)])
+            return np.array([np.linspace(3, 7, points) * 1e9, np.random.randn(points)])
 
     # *#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*# user defined #*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#
     def get_iq(self):

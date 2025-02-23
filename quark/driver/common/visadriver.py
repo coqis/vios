@@ -32,7 +32,7 @@ class VisaDriver(BaseDriver):
 
     error_command = 'SYST:ERR?'
 
-    def __init__(self, addr,  **kw):
+    def __init__(self, addr, **kw):
         super().__init__(addr, **kw)
         self.visa_backend = kw.get('visa_backend', '')
 
@@ -121,7 +121,7 @@ class VisaDriver(BaseDriver):
                            termination=None, encoding=None,):
         if self.handle is None:
             return None
-        log_msg = message+('<%d values>' % len(values))
+        log_msg = message + ('<%d values>' % len(values))
         try:
             self.handle.write_ascii_values(message, values, converter,
                                            separator, termination, encoding)
@@ -134,7 +134,7 @@ class VisaDriver(BaseDriver):
         if self.handle is None:
             return None
         block, header = IEEE_488_2_BinBlock(values, datatype, is_big_endian)
-        log_msg = message+header+'<DATABLOCK>'
+        log_msg = message + header + '<DATABLOCK>'
         try:
             self.handle.write_binary_values(message, values, datatype,
                                             is_big_endian, termination, encoding)
@@ -174,4 +174,4 @@ def IEEE_488_2_BinBlock(datalist, dtype="int16", is_big_endian=True):
     size = '%d' % len(datablock)
     header = '#%d%s' % (len(size), size)
 
-    return header.encode()+datablock, header
+    return header.encode() + datablock, header

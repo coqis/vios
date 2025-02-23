@@ -205,16 +205,16 @@ def diff(new: int | dict, old: int | dict, fmt: str = 'dict'):
                 try:
                     if isinstance(fda[k], np.ndarray) and isinstance(fdb[k], np.ndarray):
                         if not np.all(fda[k] == fdb[k]):
-                            changes[k] = f'🔄 {fdb[k]}> ⟼ {fda[k]}'
+                            changes[k] = f'{fdb[k]}> ⇴ {fda[k]}'
                     elif fda[k] != fdb[k]:
-                        changes[k] = f'🔄 {fdb[k]}> ⟼ {fda[k]}'
+                        changes[k] = f'{fdb[k]}> ⇴ {fda[k]}'
                 except Exception as e:
                     print(e)
-                    changes[k] = f'🔄 {fdb[k]} ⟼ {fda[k]}'
+                    changes[k] = f'{fdb[k]} ⇴ {fda[k]}'
             elif k in fda and k not in fdb:
-                changes[k] = f'✅ ⟼ {fda[k]}'
+                changes[k] = f' ⥅ {fda[k]}'
             elif k not in fda and k in fdb:
-                changes[k] = f'❌ {fdb[k]} ⟼ '
+                changes[k] = f'{fdb[k]} ⥇ '
 
         return changes
     elif fmt == 'git':
@@ -239,7 +239,7 @@ def rollback(rid: int = 0, tid: int = 0):
     Args:
         tid (int): task id
     """
-    _s = login(verbose=False)
+    ss = login(verbose=False)
 
     try:
         if rid:
@@ -248,9 +248,9 @@ def rollback(rid: int = 0, tid: int = 0):
             config = get_config_by_tid(tid)
         else:
             raise ValueError('one of rid and tid must be given!')
-        _s.clear()
+        ss.clear()
         for k, v in config.items():
-            _s.create(k, v)
+            ss.create(k, v)
     except Exception as e:
         logger.error(f'Failed to rollback: {e}')
 
@@ -261,7 +261,7 @@ def lookup(start: str = '', end: str = '', name: str = '', fmt: str = '%Y-%m-%d-
     from ._db import get_record_list_by_name
     from ._view import PagedTable
 
-    days = time.time()-14*24*60*60
+    days = time.time() - 14 * 24 * 60 * 60
     start = time.strftime(fmt, time.localtime(days)) if not start else start
     end = time.strftime(fmt) if not end else end
 
@@ -442,14 +442,14 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
                         except Exception as e:
                             logger.error(f'{target, ch, val, e}')
 
-                xt = np.arange(start, end, 1/srate)/unit
+                xt = np.arange(start, end, 1 / srate) / unit
                 (_, _, cmd), _ = calculate('main', target, value)
-                wf[_target] = cmd[1]+index*offset
+                wf[_target] = cmd[1] + index * offset
                 index += 1
 
                 ax.plot(xt, wf[_target])
                 ax.text(xt[-1], np.mean(wf[_target]), _target, va='center')
-                ax.set_xlim(xt[0]-space, xt[-1]+space)
+                ax.set_xlim(xt[0] - space, xt[-1] + space)
     # plt.axis('off')
     # plt.legend(tuple(wf))
     return wf

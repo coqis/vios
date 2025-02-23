@@ -98,12 +98,13 @@ def process(raw_data, **kwds):
                     # result[k] = np.hstack((base, count[:, None]))
                     nb, nq, shots = *base.shape, kwds.get('shots', 1024)
                     # _k = k.removeprefix('remote_')
-                    result[k] = np.zeros((min(2**nq, shots), nq+1), int) - 1
+                    result[k] = np.zeros((min(2**nq, shots), nq + 1), int) - 1
                     result[k][:nb] = np.hstack((base, count[:, None]))
                 else:
                     result[k] = np.asarray(v)
     except Exception as e:
-        logger.error(f"{'>'*10} 'Failed to process the result', {e}, {'<'*10}")
+        logger.error(
+            f"{'>' * 10} 'Failed to process the result', {e}, {'<' * 10}")
         # print('raw data', raw_data)
         # print('data map', dataMap)
         raise e

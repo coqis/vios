@@ -30,7 +30,7 @@ from srpc import loads
 
 from quark.proxy import QUARK
 
-sql = sqlite3.connect(QUARK/'checkpoint.db', check_same_thread=False)
+sql = sqlite3.connect(QUARK / 'checkpoint.db', check_same_thread=False)
 
 
 def get_dataset_by_tid(tid: int):
@@ -74,19 +74,21 @@ def get_commit_by_tid(tid: int = 0):
     try:
         import git
 
-        ckpt, _, filename = get_record_by_tid(tid)[5:8]
+        record = get_record_by_tid(tid)
+        ckpt, filename, hexsha = record[5], record[7], record[-1]
+
         if 'Desktop' not in filename:
             home = Path(filename.split('dat')[0])
         else:
-            home = Path.home()/'Desktop/home'
+            home = Path.home() / 'Desktop/home'
 
-        file = (home/f'cfg/{ckpt}').with_suffix('.json')
+        file = (home / f'cfg/{ckpt}').with_suffix('.json')
 
         repo = git.Repo(file.resolve().parent)
         if not tid:
             commit = repo.head.commit
         else:
-            commit = repo.commit(get_record_by_tid(tid)[-1])
+            commit = repo.commit(hexsha)
 
         return commit, file
     except Exception as e:

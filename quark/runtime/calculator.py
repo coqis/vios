@@ -62,7 +62,7 @@ def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
         line = sample(target, cmd, canvas, delay)
     except Exception as e:
         logger.error(
-            f"{'>'*30}'  failed to calculate waveform', {e}, {type(e).__name__}")
+            f"{'>' * 30}'  failed to calculate waveform', {e}, {type(e).__name__}")
 
     return (step, target, cmd), line
 
@@ -90,11 +90,11 @@ def sample(target: str, cmd: dict, canvas: dict = {}, delay: float = 0.0) -> dic
 
         srate = cmd[-1]['srate']
         t1, t2 = canvas['range']
-        xr = slice(int(t1*srate), int(t2*srate))
+        xr = slice(int(t1 * srate), int(t2 * srate))
 
         val = Pulse.sample(cmd[1])
 
-        xt = (np.arange(len(val))/srate)[xr] - delay
+        xt = (np.arange(len(val)) / srate)[xr] - delay
         yt = val[xr]
 
         line = {'xdata': xt, 'ydata': yt, 'suptitle': str(cmd[-1]["sid"])}

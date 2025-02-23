@@ -34,7 +34,7 @@ from srpc import loads
 from ._db import get_record_list_by_name, get_record_set_by_name
 
 
-def query(app: str = None,  start: datetime = None, end: datetime = None, page: int = 1) -> tuple:
+def query(app: str = None, start: datetime = None, end: datetime = None, page: int = 1) -> tuple:
     """query records from database
 
     Args:
@@ -53,7 +53,7 @@ def query(app: str = None,  start: datetime = None, end: datetime = None, page: 
         '%Y-%m-%d-%H-%M-%S'), end.strftime('%Y-%m-%d-%H-%M-%S'))
     headers = ['id', 'tid', 'name', 'user', 'priority', 'system', 'status',
                'filename', 'dataset', 'created', 'finished', 'committed']
-    return headers, records, len(records)//50, {}
+    return headers, records, len(records) // 50, {}
 
 
 def update(rid: int, tags: str):
@@ -109,11 +109,11 @@ def demo(fig):
         {'name': 'example of image[array]', 'zdata': np.random.randn(5, 101, 201)})
 
     # demo: plot layer by layer
-    tlist = np.arange(-2*np.pi, 2*np.pi, 0.05)
+    tlist = np.arange(-2 * np.pi, 2 * np.pi, 0.05)
     for i in range(8):
         fig.layer(dict(name=f'example of layer plot[{i}]',
                        ydata=np.random.random(
-                           1)*np.sin(2*np.pi*0.707*tlist)/tlist,
+                           1) * np.sin(2 * np.pi * 0.707 * tlist) / tlist,
                        xdata=tlist,
                        title='vcplot',
                        legend='scatter',
@@ -128,7 +128,7 @@ def demo(fig):
                        yunits='yunits'))
         fig.layer(dict(name=f'example of layer plot[{i}]',
                        ydata=np.random.random(
-                           1)*2*np.sin(2*np.pi*0.707*tlist)/tlist,
+                           1) * 2 * np.sin(2 * np.pi * 0.707 * tlist) / tlist,
                        xdata=tlist))
     # demo: subplot like matplotlib
     axes = fig.subplot(4, 4)
@@ -136,7 +136,7 @@ def demo(fig):
         cmap = random.choice(plt.colormaps())
         # ax.imshow(img[0, :, :], colormap=cmap, title=cmap)
     for ax in axes[1::2]:
-        ax.plot(np.sin(2*np.pi*0.707*tlist)/tlist,
+        ax.plot(np.sin(2 * np.pi * 0.707 * tlist) / tlist,
                 title='vcplot',
                 xdata=tlist,
                 marker=random.choice(

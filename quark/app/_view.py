@@ -75,7 +75,7 @@ def plot(task: Task, append: bool = False, backend: str = 'viewer'):
             # xdata = axis[xlabel][xlabel][task.last:task.index]
             if not hasattr(task, 'xdata'):
                 task.xdata = np.asarray(list(axis[xlabel].values())).T
-                if raw.shape[-1]+1 == task.xdata.shape[-1]:
+                if raw.shape[-1] + 1 == task.xdata.shape[-1]:
                     task.xdata = task.xdata[:, 1:]
             xdata = task.xdata[task.last:task.index]
             ydata = raw
@@ -84,10 +84,10 @@ def plot(task: Task, append: bool = False, backend: str = 'viewer'):
             # xdata = axis[xlabel][xlabel]
             if not hasattr(task, 'xdata'):
                 task.xdata = np.asarray(list(axis[xlabel].values())).T
-                if raw.shape[-1]+1 == task.xdata.shape[-1]:
+                if raw.shape[-1] + 1 == task.xdata.shape[-1]:
                     task.xdata = task.xdata[:, 1:]
                 task.ydata = np.asarray(list(axis[ylabel].values())).T
-                if raw.shape[-1]+1 == task.ydata.shape[-1]:
+                if raw.shape[-1] + 1 == task.ydata.shape[-1]:
                     task.ydata = task.ydata[:, 1:]
             # ydata = axis[ylabel][ylabel]
             xdata = task.xdata
@@ -191,14 +191,14 @@ def network():
     for i in range(12):
         r, c = divmod(i, 3)
         nodes[i] = {'name': f'Q{i}',
-                    'index': (r*3, c*3),
+                    'index': (r * 3, c * 3),
                     'color': (35, 155, 75, 255, 2),
-                    'value': {'a': np.random.random(1)[0]+5}}
+                    'value': {'a': np.random.random(1)[0] + 5}}
         if i > 10:
             break
-        edges[(i, i+1)] = {'name': f'C{i}',
-                           'color': (55, 123, 255, 180, 21),
-                           'value': {'b': np.random.random(1)[0]+5, 'c': {'e': 134}, 'f': [(1, 2, 34)]}}
+        edges[(i, i + 1)] = {'name': f'C{i}',
+                             'color': (55, 123, 255, 180, 21),
+                             'value': {'b': np.random.random(1)[0] + 5, 'c': {'e': 134}, 'f': [(1, 2, 34)]}}
 
     _vs.graph(dict(nodes=nodes, edges=edges))
 
@@ -312,8 +312,8 @@ def demo():
                 cell = {}
                 for j in range(1):
                     line = {}
-                    line['xdata'] = np.arange(i, i+1)*1e8
-                    line['ydata'] = np.random.random(1)*1e8
+                    line['xdata'] = np.arange(i, i + 1) * 1e8
+                    line['ydata'] = np.random.random(1) * 1e8
 
                     # line['xdata'] = np.arange(-9,9)*1e-6
                     # line['ydata'] = np.arange(-10,10)*1e-8

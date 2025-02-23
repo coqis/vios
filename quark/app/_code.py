@@ -43,7 +43,7 @@ def replace_function_in_module(module: str, target: str, code: str):
         print(f"function '{target}' not found!")
         updated = old[:end] + ['\n'] + new
     else:
-        updated = old[:start] + new + old[end+1:]
+        updated = old[:start] + new + old[end + 1:]
 
     with open(module, 'w', encoding='utf-8') as f:
         f.write('\n'.join(updated))

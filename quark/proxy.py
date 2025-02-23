@@ -42,10 +42,10 @@ from threading import current_thread
 import numpy as np
 from loguru import logger
 
-QUARK = Path.home()/'quark'
+QUARK = Path.home() / 'quark'
 
 try:
-    qjs = QUARK/'startup.json'
+    qjs = QUARK / 'startup.json'
     if qjs.exists():
         with open(qjs, 'r') as f:
             startup = json.loads(f.read())
@@ -62,8 +62,8 @@ except Exception as e:
 
 def setlog(prefix: str = ''):
     logger.remove()
-    root = Path.home()/f"Desktop/home/log/proxy/{prefix}"
-    path = root/"{time:%Y-%m-%d}.log"
+    root = Path.home() / f"Desktop/home/log/proxy/{prefix}"
+    path = root / "{time:%Y-%m-%d}.log"
     level = "INFO"
     config = {'handlers': [{'sink': sys.stdout,
                             'level': level},
@@ -77,7 +77,7 @@ def setlog(prefix: str = ''):
     logger.configure(**config)
 
 
-TABLE = string.digits+string.ascii_uppercase
+TABLE = string.digits + string.ascii_uppercase
 
 
 def basen(number: int, base: int, table: str = TABLE):
@@ -92,7 +92,7 @@ def basen(number: int, base: int, table: str = TABLE):
 
 
 def baser(number: str, base: int, table: str = TABLE):
-    return sum([table.index(c)*base**i for i, c in enumerate(reversed(number))])
+    return sum([table.index(c) * base**i for i, c in enumerate(reversed(number))])
 
 
 def dumpv(value):
@@ -262,7 +262,7 @@ class Task(object):
             r = self.server.track(self.tid, index)
 
         try:
-            assert stage in review+track, f'stage should be {review+track}'
+            assert stage in review + track, f'stage should be {review + track}'
             return r[stage]
         except (AssertionError, KeyError) as e:
             return f'{type(e).__name__}: {e}'
@@ -446,7 +446,7 @@ class QuarkProxy(object):
 
         # by server
         # logger.info(f'task will be executed on local machine: {chip}!')
-        logger.warning(f'\n\n\n{"#"*80} task start to run ...\n')
+        logger.warning(f'\n\n\n{"#" * 80} task start to run ...\n')
 
         try:
             from home.demo.run import get_bias_of_coupler
@@ -454,12 +454,12 @@ class QuarkProxy(object):
         except Exception as e:
             bias = []
             logger.error(f'Failed to get bias of coupler, {e}!')
-        circuit = [bias+c for c in task['body']['cirq']]
+        circuit = [bias + c for c in task['body']['cirq']]
         task['body']['cirq'] = circuit
 
         qlisp = ',\n'.join([str(op) for op in circuit[0]])
         qasm = task['meta']['coqis']['qasm']
-        logger.info(f"\n{'>'*36}qasm:\n{qasm}\n{'>'*36}qlisp:\n[{qlisp}]")
+        logger.info(f"\n{'>' * 36}qasm:\n{qasm}\n{'>' * 36}qlisp:\n[{qlisp}]")
 
         t: Task = submit(task, block=block)  # local machine
         if block:
@@ -489,7 +489,7 @@ class QuarkProxy(object):
         def _delete_dict(ret: dict, num: int = 0):
             while num > 0:
                 tmp = np.cumsum(list(ret.values()))
-                ran_num = np.random.randint(tmp[-1]+1)
+                ran_num = np.random.randint(tmp[-1] + 1)
                 ran_pos = np.searchsorted(tmp, ran_num)
                 ret[list(ret.keys())[ran_pos]] -= 1
                 if ret[list(ret.keys())[ran_pos]] == 0:
@@ -516,14 +516,14 @@ class QuarkProxy(object):
                 for kv in dat:
                     if kv[-1] < 0:
                         continue
-                    base = tuple(kv[:-1]-1)  # from 1&2 to 0&1
-                    dres[base] = dres.get(base, 0)+int(kv[-1])
+                    base = tuple(kv[:-1] - 1)  # from 1&2 to 0&1
+                    dres[base] = dres.get(base, 0) + int(kv[-1])
 
             try:
                 if dropout:
                     shots = meta['other']['shots'] * \
                         len(meta['axis']['repeat']['repeat'])
-                    _delete_dict(dres, shots - (shots//1000)*1000)
+                    _delete_dict(dres, shots - (shots // 1000) * 1000)
             except Exception as e:
                 logger.error(f'Failed to dropout: {e}')
 

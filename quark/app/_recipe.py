@@ -29,9 +29,10 @@ class Recipe(object):
     """**Recipe仅用于生成任务，没有编译/执行/数据处理等任何逻辑！**
     """
 
-    # ignore=E731
-    initialize = lambda shots: []
-    finalize = lambda shots: []
+    # --ignore=E731
+    initialize = lambda shots: []  # 任务开始前初始化
+    precompile = lambda shots: []  # 每步开始前初始化
+    finalize = lambda shots: []  # 任务结束后复位
 
     def __init__(self, name: str, shots: int = 1024, signal: str = 'iq_avg',
                  align_right: bool = False, waveform_length: float = 98e-6, fillzero: bool = True,

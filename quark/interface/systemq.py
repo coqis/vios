@@ -196,7 +196,7 @@ class Pulse(object):
                 return False
 
             if isinstance(a, Waveform) and isinstance(b, Waveform):
-                return (a*cls.WINDOW) == (b*cls.WINDOW)
+                return (a * cls.WINDOW) == (b * cls.WINDOW)
 
             return a == b
         except Exception as e:
