@@ -120,11 +120,8 @@ def _form_signal(sig):
 
 def get_gate_lib(lib):
     if isinstance(lib, str) and lib:
-        try:
-            logger.warning(f'using lib: {lib}')
-            return reload(import_module(lib)).lib
-        except Exception as e:
-            logger.error(f'lib: {e}')
+        logger.warning(f'using lib: {lib}')
+        return reload(import_module(lib)).lib
     else:
         return lib
 

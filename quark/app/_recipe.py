@@ -36,7 +36,7 @@ class Recipe(object):
 
     def __init__(self, name: str, shots: int = 1024, signal: str = 'iq_avg',
                  align_right: bool = False, waveform_length: float = 98e-6,
-                 gates: str = '', filename: str = 'baiqs', priority: int = 0):
+                 lib: str = '', filename: str = 'baiqs', priority: int = 0):
         """初始化任务描述
 
         Args:
@@ -51,7 +51,7 @@ class Recipe(object):
         self.signal = signal
         self.align_right = align_right
         self.waveform_length = waveform_length
-        self.gates = gates
+        self.lib = lib
 
         self.filename = filename  # 数据存储文件名, 位于桌面/home/dat文件夹下
         self.priority = priority  # 任务排队用, 越小优先级越高
@@ -176,12 +176,11 @@ class Recipe(object):
                          'priority': self.priority,
                          'other': {'shots': self.shots,
                                    'signal': self.signal,
-                                   'gates': self.gates,
-                                   'cirq': self.circuit,
+                                   'lib': self.lib,
                                    'align_right': self.align_right,
                                    'precompile': Recipe.precompile(self.shots),
                                    'waveform_length': self.waveform_length,
-                                   'shape': [len(v[0][1]) for v in self.__loops.values()]
+                                   'shape': [len(v[0][1]) for v in self.__loops.values()],
                                    } | {k: v for k, v in self.__dict.items() if not isinstance(v, (list, np.ndarray))}
                          },
                 'body': {'step': {'main': ['WRITE', tuple(self.__loops)],
