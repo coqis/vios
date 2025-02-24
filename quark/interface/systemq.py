@@ -118,12 +118,11 @@ def _form_signal(sig):
                      f" optional signal types: {list(sig_tab.keys())}")
 
 
-def get_gate_lib(lib):
-    if isinstance(lib, str) and lib:
-        logger.warning(f'using lib: {lib}')
+def get_gate_lib(lib: str):
+    if lib:
         return reload(import_module(lib)).lib
     else:
-        return lib
+        return stdlib
 
 
 class Context(QuarkLocalConfig):
@@ -302,7 +301,7 @@ class Workflow(object):
         compiled = {}
 
         _, (cmds, dmap) = qcompile(circuit,
-                                   lib=get_gate_lib(kwds.get('lib', stdlib)),
+                                   lib=get_gate_lib(kwds.get('lib', '')),
                                    cfg=kwds.get('ctx', ctx),
                                    signal=signal,
                                    shots=kwds.get('shots', 1024),
