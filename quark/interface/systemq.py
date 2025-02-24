@@ -25,6 +25,7 @@
 
 
 from copy import deepcopy
+from importlib import import_module, reload
 from itertools import permutations
 
 import numpy as np
@@ -49,9 +50,9 @@ try:
     from qlispc.kernel_utils import qcompile, sample_waveform
 except ImportError as e:
     # waveform==1.7.7
-    from qlisp import Signal, get_arch, register_arch
     from lib.arch.baqis import baqisArchitecture
     from lib.arch.baqis_config import QuarkLocalConfig
+    from qlisp import Signal, get_arch, register_arch
     from qlisp.kernel_utils import qcompile, sample_waveform
 
 try:
@@ -70,6 +71,8 @@ except ImportError as e:
 
 # waveforms.math: waveforms or waveform-math
 from waveforms import Waveform, WaveVStack, square, wave_eval
+
+
 try:
     from waveforms.namespace import DictDriver
 except ImportError as e:
@@ -113,6 +116,17 @@ def _form_signal(sig):
         return sig
     raise ValueError(f'unknow type of signal "{sig}".'
                      f" optional signal types: {list(sig_tab.keys())}")
+
+
+def get_gate_lib(lib):
+    if isinstance(lib, str) and lib:
+        try:
+            logger.warning(f'using lib: {lib}')
+            return reload(import_module(lib)).lib
+        except Exception as e:
+            logger.error(f'lib: {e}')
+    else:
+        return lib
 
 
 class Context(QuarkLocalConfig):
@@ -291,7 +305,7 @@ class Workflow(object):
         compiled = {}
 
         _, (cmds, dmap) = qcompile(circuit,
-                                   lib=kwds.get('lib', stdlib),
+                                   lib=get_gate_lib(kwds.get('lib', stdlib)),
                                    cfg=kwds.get('ctx', ctx),
                                    signal=signal,
                                    shots=kwds.get('shots', 1024),
