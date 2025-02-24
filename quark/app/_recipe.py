@@ -35,8 +35,8 @@ class Recipe(object):
     finalize = lambda shots: []  # 任务结束后复位
 
     def __init__(self, name: str, shots: int = 1024, signal: str = 'iq_avg',
-                 align_right: bool = False, waveform_length: float = 98e-6, fillzero: bool = True,
-                 filename: str = 'baiqs', priority: int = 0):
+                 align_right: bool = False, waveform_length: float = 98e-6,
+                 gates: str = '', filename: str = 'baiqs', priority: int = 0):
         """初始化任务描述
 
         Args:
@@ -45,14 +45,13 @@ class Recipe(object):
             signal (str, optional): 采集信号. Defaults to 'iq_avg'.
             align_right (bool, optional): 波形是否右对齐. Defaults to False.
             waveform_length (float, optional): 波形长度. Defaults to 98e-6.
-            fillzero (float, optional): 每一步编译开始前初始化所有通道波形为zero(). Defaults to True.
         """
         self.name = name
         self.shots = shots
         self.signal = signal
         self.align_right = align_right
         self.waveform_length = waveform_length
-        self.fillzero = fillzero
+        self.gates = gates
 
         self.filename = filename  # 数据存储文件名, 位于桌面/home/dat文件夹下
         self.priority = priority  # 任务排队用, 越小优先级越高
@@ -81,11 +80,9 @@ class Recipe(object):
             else:
                 raise TypeError('invalid circuit: list[list] needed!')
         elif callable(cirq):
-            self.__circuit = {'name': cirq.__name__}
-            if cirq.__module__ == '__main__':
-                self.__circuit['code'] = inspect.getsource(cirq)
-            else:
-                self.__circuit['module'] = cirq.__module__
+            self.__circuit = {'name': cirq.__name__,
+                              'code': inspect.getsource(cirq),
+                              'module': cirq.__module__}
         else:
             raise TypeError(f'invalid circuit: list[list] or function needed!')
 
@@ -179,8 +176,10 @@ class Recipe(object):
                          'priority': self.priority,
                          'other': {'shots': self.shots,
                                    'signal': self.signal,
+                                   'gates': self.gates,
+                                   'cirq': self.circuit,
                                    'align_right': self.align_right,
-                                   'fillzero': self.fillzero,
+                                   'precompile': Recipe.precompile(self.shots),
                                    'waveform_length': self.waveform_length,
                                    'shape': [len(v[0][1]) for v in self.__loops.values()]
                                    } | {k: v for k, v in self.__dict.items() if not isinstance(v, (list, np.ndarray))}
