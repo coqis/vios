@@ -401,6 +401,8 @@ class Task(object):
             except Exception as e:
                 logger.error(
                     f'Failed to get status: {e},{self.report(False)}')
+                if not hasattr(self.progress, 'disp'):
+                    break
 
         if isinstance(self.timeout, float):
             while True:
