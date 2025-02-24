@@ -283,7 +283,7 @@ class Task(object):
         """submit the task to the `QuarkServer`
         """
         self.stime = time.time()  # start time
-        self.tid = self.server.submit(self.task)
+        self.tid = self.server.submit(self.task, keep=True)
 
     def status(self, key: str = 'runtime'):
         if key == 'runtime':
