@@ -314,6 +314,12 @@ def lookup(start: str = '', end: str = '', name: str = '', fmt: str = '%Y-%m-%d-
     # display(output)
 
 
+def run_task_by_rid(rid: int):
+    t = submit(get_task_by_rid(rid) | {'base': get_config_by_rid(rid)})
+    t.bar()
+    return t
+
+
 def get_task_by_rid(rid: int):
     from ._db import get_dataset_by_tid
 
