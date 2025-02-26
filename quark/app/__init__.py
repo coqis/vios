@@ -49,14 +49,27 @@ class Super(object):
     def __init__(self):
         pass
 
+    def __repr__(self):
+        try:
+            return f'connection to {self._s.raddr}'
+        except Exception as e:
+            return ''
+
+    def ss(self):
+        try:
+            return self._s
+        except Exception as e:
+            return login()
+
     def login(self, user: str = 'baqis', host: str = '127.0.0.1'):
-        ss = login(user, host)
 
-        if hasattr(self, 'update'):
-            return
+        self._s = login(user, host)
 
-        for mth in ['ping', 'start', 'query', 'write', 'read', 'snapshot']:
-            setattr(self, mth, getattr(ss, mth))
+        # if hasattr(self, 'ping'):
+        #     return
+
+        for mth in ['ping', 'start', 'create', 'remove', 'query', 'write', 'read', 'snapshot']:
+            setattr(self, mth, getattr(self._s, mth))
 
         for name in ['signup', 'update']:
             setattr(self, name, globals()[name])
@@ -65,18 +78,6 @@ class Super(object):
 _sp = {}  # defaultdict(lambda: connect('QuarkServer', host, port))
 
 s = Super()
-
-
-def signup(user: str, system: str, **kwds):
-    """register a new **user** on the **system**
-
-    Args:
-        user (str): name of the user
-        system (str): name of the system(i.e. the name of the cfg file)
-    """
-    ss = login()
-    logger.info(ss.adduser(user, system, **kwds))
-    ss.login(user)  # relogin
 
 
 def login(user: str = 'baqis', host: str = '127.0.0.1', verbose: bool = True):
@@ -89,15 +90,28 @@ def login(user: str = 'baqis', host: str = '127.0.0.1', verbose: bool = True):
     Returns:
         _type_: a connection to the server
     """
+    uid = f'{current_thread().name}: {user}@{host}'
     try:
-        ss = _sp[current_thread().name]
+        ss = _sp[uid]
     except KeyError as e:
-        ss = _sp[current_thread().name] = connect('QuarkServer', host, 2088)
+        ss = _sp[uid] = connect('QuarkServer', host, 2088)
 
     m = ss.login(user)
     if verbose:
         logger.info(m)
     return ss
+
+
+def signup(user: str, system: str, **kwds):
+    """register a new **user** on the **system**
+
+    Args:
+        user (str): name of the user
+        system (str): name of the system(i.e. the name of the cfg file)
+    """
+    ss = s.ss()  # login()
+    logger.info(ss.adduser(user, system, **kwds))
+    ss.login(user)  # relogin
 
 
 def submit(task: dict, block: bool = False, **kwds):
@@ -152,7 +166,7 @@ def submit(task: dict, block: bool = False, **kwds):
     if 'backend' in kwds:  # from master
         ss = kwds['backend']
     else:
-        ss = login(verbose=False)
+        ss = s.ss()  # login(verbose=False)
 
         trigger: list[str] = ss.query('station.triggercmds')
         task['body']['loop']['trig'] = [(t, 0, 'au') for t in trigger]
@@ -172,7 +186,7 @@ def submit(task: dict, block: bool = False, **kwds):
 
 
 def update(path: str, value, failed: list = []):
-    ss = login(verbose=False)
+    ss = s.ss()  # login(verbose=False)
     rs: str = ss.update(path, value)
     if rs.startswith('Failed'):
         if 'root' in rs:
@@ -186,6 +200,28 @@ def update(path: str, value, failed: list = []):
         _f, v = failed.pop()
         path = f'{path}.{_f}'
         ss.update(path, v)
+
+
+def rollback(rid: int = 0, tid: int = 0):
+    """rollback the parameters with given task id and checkpoint name
+
+    Args:
+        tid (int): task id
+    """
+    ss = s.ss()  # login(verbose=False)
+
+    try:
+        if rid:
+            config = get_config_by_rid(rid)
+        elif tid:
+            config = get_config_by_tid(tid)
+        else:
+            raise ValueError('one of rid and tid must be given!')
+        ss.clear()
+        for k, v in config.items():
+            ss.create(k, v)
+    except Exception as e:
+        logger.error(f'Failed to rollback: {e}')
 
 
 def diff(new: int | dict, old: int | dict, fmt: str = 'dict'):
@@ -230,28 +266,6 @@ def diff(new: int | dict, old: int | dict, fmt: str = 'dict'):
                 msg = df.diff.decode('utf-8')
 
         return msg
-
-
-def rollback(rid: int = 0, tid: int = 0):
-    """rollback the parameters with given task id and checkpoint name
-
-    Args:
-        tid (int): task id
-    """
-    ss = login(verbose=False)
-
-    try:
-        if rid:
-            config = get_config_by_rid(rid)
-        elif tid:
-            config = get_config_by_tid(tid)
-        else:
-            raise ValueError('one of rid and tid must be given!')
-        ss.clear()
-        for k, v in config.items():
-            ss.create(k, v)
-    except Exception as e:
-        logger.error(f'Failed to rollback: {e}')
 
 
 def lookup(start: str = '', end: str = '', name: str = '', fmt: str = '%Y-%m-%d-%H-%M-%S'):
