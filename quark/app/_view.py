@@ -92,7 +92,7 @@ def plot(task: Task, append: bool = False, backend: str = 'viewer'):
             # ydata = axis[ylabel][ylabel]
             xdata = task.xdata
             ydata = task.ydata
-            zdata = raw
+            zdata = np.abs(raw)
         if len(label) > 3:  # 2D image at maximum
             return
 
