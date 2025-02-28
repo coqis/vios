@@ -5,7 +5,11 @@ watch: [mkdocs.yml, README.md, quark]
 nav:
   - Home:
     - Home: index.md
-    - cloud: usage/cloudnote.ipynb
+    - cloud: usage/jupyter/cloud.ipynb
+    - demo: 
+      - demo: usage/jupyter/demo.ipynb
+      - circuit: usage/jupyter/circuit.py
+
     # - cloud: usage/cloud copy.md
     # - gallery: gallery.md
     # - matrix: html/index.html
@@ -90,6 +94,7 @@ extra_css:
 
 
 extra_javascript:
+  - javascript/extra.js
   - javascript/mathjax.js
   # - https://polyfill.io/v3/polyfill.min.js?features=es6
   # - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
