@@ -40,3 +40,13 @@
 /* .md-typeset pre>code {
     background-color: antiquewhite;
 } */
+
+.jp-InputPrompt,
+.jp-OutputPrompt {
+    display: none !important;
+}
+/* 页面顶部一级标题 */
+/* article h1:first-of-type {
+    display: none;
+} */
+ 
