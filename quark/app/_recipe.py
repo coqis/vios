@@ -21,6 +21,7 @@
 
 
 import inspect
+import sys
 
 import numpy as np
 
@@ -83,6 +84,10 @@ class Recipe(object):
             self.__circuit = {'name': cirq.__name__,
                               'code': inspect.getsource(cirq),
                               'module': cirq.__module__}
+            try:
+                self.__circuit['file'] = sys.modules[cirq.__module__].__file__
+            except Exception as e:
+                self.__circuit['file'] = ''
         else:
             raise TypeError(f'invalid circuit: list[list] or function needed!')
 
