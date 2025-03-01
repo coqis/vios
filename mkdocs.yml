@@ -5,10 +5,8 @@ watch: [mkdocs.yml, README.md, quark]
 nav:
   - Home:
     - Home: index.md
-    - cloud: usage/jupyter/cloud.ipynb
-    - demo: 
-      - demo: usage/jupyter/demo.ipynb
-      - circuit: usage/jupyter/circuit.py
+    # - cloud: usage/jupyter/cloud.ipynb
+    # - demo: usage/jupyter/demo.ipynb
 
     # - cloud: usage/cloud copy.md
     # - gallery: gallery.md
@@ -96,11 +94,11 @@ extra_css:
 extra_javascript:
   - javascript/extra.js
   - javascript/mathjax.js
+  - javascript/tex-mml-chtml.js
   # - https://polyfill.io/v3/polyfill.min.js?features=es6
   # - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
   # - https://unpkg.com/mathjax@3.2.2/es5/tex-mml-chtml.js
-  - javascript/tex-mml-chtml.js
-
+  
 
 markdown_extensions:
 # see https://facelessuser.github.io/pymdown-extensions/extensions/arithmatex/

@@ -1,0 +1,3801 @@
+{
+    "tmp": {
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green"
+    },
+    "usr": {
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green",
+        "workflow": "default",
+        "autorun": true,
+        "autosave": true,
+        "filesize": 3.359,
+        "workshop": "default",
+        "quark": {
+            "pid": 21664,
+            "sub": {
+                "pid": 14992,
+                "sub": {
+                    "Assembler": {
+                        "0": 14340
+                    },
+                    "Calculator": 18940,
+                    "DeviceManager": 20804,
+                    "Demodulator": 19252
+                }
+            }
+        }
+    },
+    "station": {
+        "sample": "144v424_WCL_MYJ_240307",
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green",
+        "triggercmds": [
+            "ZW_Trig.CH1.TRIG"
+        ],
+        "crosstalk": {},
+        "z_before": 0,
+        "reset": {
+            "delay": 2.4e-06,
+            "first_withR12": false,
+            "n": 2
+        },
+        "shots": 1024,
+        "cz_before": {
+            "c_par": [
+                [
+                    0,
+                    2
+                ],
+                [
+                    1,
+                    3
+                ],
+                [
+                    4
+                ]
+            ],
+            "cz_num": 0
+        }
+    },
+    "gate": {
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green",
+        "Measure": {
+            "Q0": {
+                "params": {
+                    "duration": 4e-06,
+                    "amp": 0.012,
+                    "frequency": 6965447457.23823,
+                    "weight": "const(1)",
+                    "phi": -2.1814890350845695,
+                    "threshold": 4621349023.817672,
+                    "ring_up_amp": 0.024,
+                    "ring_up_waist": 0.006,
+                    "ring_up_time": 6e-07,
+                    "default_type": "default"
+                },
+                "e2f": {
+                    "duration": 4e-06,
+                    "amp": 0.019,
+                    "frequency": 6964950000.0,
+                    "weight": "const(1)",
+                    "phi": 2.7678138242169874,
+                    "threshold": 5453564391.573079,
+                    "ring_up_amp": 0.038,
+                    "ring_up_waist": 0.0095,
+                    "ring_up_time": 6e-07
+                },
+                "default_type": "default",
+                "jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.0066,
+                    "frequency": 6965450000.0,
+                    "weight": "const(1)",
+                    "phi": 2.627060110045811,
+                    "threshold": 13563399529.92167,
+                    "ring_up_amp": 0.0132,
+                    "ring_up_waist": 0.0033,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                },
+                "e2f_jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.007399999999999998,
+                    "frequency": 6965050000.0,
+                    "weight": "const(1)",
+                    "phi": 2.7197048084828355,
+                    "threshold": 9821219703.416685,
+                    "ring_up_amp": 0.014799999999999995,
+                    "ring_up_waist": 0.003699999999999999,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                }
+            },
+            "Q1": {
+                "params": {
+                    "duration": 4e-06,
+                    "amp": 0.012,
+                    "frequency": 6699547514.253923,
+                    "weight": "const(1)",
+                    "phi": -0.5762935409380968,
+                    "threshold": 3808396682.969819,
+                    "ring_up_amp": 0.024,
+                    "ring_up_waist": 0.006,
+                    "ring_up_time": 6e-07
+                },
+                "e2f": {
+                    "duration": 4.096e-06,
+                    "amp": 0.0768,
+                    "frequency": 6699547514.253923,
+                    "weight": "const(1)",
+                    "phi": 0,
+                    "threshold": 0,
+                    "ring_up_amp": 0.1536,
+                    "ring_up_waist": 0.0384,
+                    "ring_up_time": 6e-07
+                },
+                "default_type": "default",
+                "jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.007,
+                    "frequency": 6699560000.0,
+                    "weight": "const(1)",
+                    "phi": -0.35717657709988804,
+                    "threshold": 25450441309.169765,
+                    "ring_up_amp": 0.014,
+                    "ring_up_waist": 0.0035,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                },
+                "e2f_jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.0068000000000000005,
+                    "frequency": 6698950000.0,
+                    "weight": "const(1)",
+                    "phi": 0.8806255958611084,
+                    "threshold": -12995349929.474117,
+                    "ring_up_amp": 0.013600000000000001,
+                    "ring_up_waist": 0.0034000000000000002,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                }
+            },
+            "Q2": {
+                "params": {
+                    "duration": 4e-06,
+                    "amp": 0.023000000000000003,
+                    "frequency": 7003250000.0,
+                    "weight": "const(1)",
+                    "phi": 0.8946802153016385,
+                    "threshold": -5487779852.6756115,
+                    "ring_up_amp": 0.046000000000000006,
+                    "ring_up_waist": 0.011500000000000002,
+                    "ring_up_time": 3.2e-07
+                },
+                "e2f": {
+                    "duration": 4e-06,
+                    "amp": 0.023,
+                    "frequency": 7002950000.0,
+                    "weight": "const(1)",
+                    "phi": -1.979590828129937,
+                    "threshold": 4590744446.922595,
+                    "ring_up_amp": 0.046,
+                    "ring_up_waist": 0.0115,
+                    "ring_up_time": 6e-07
+                },
+                "default_type": "e2f_jpa",
+                "jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.008400000000000001,
+                    "frequency": 7003400000.0,
+                    "weight": "const(1)",
+                    "phi": -2.5589494510143322,
+                    "threshold": 10579305726.17783,
+                    "ring_up_amp": 0.016800000000000002,
+                    "ring_up_waist": 0.004200000000000001,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                },
+                "e2f_jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.010799999999999995,
+                    "frequency": 7002960000.0,
+                    "weight": "const(1)",
+                    "phi": -2.012307571312038,
+                    "threshold": 5915040906.53914,
+                    "ring_up_amp": 0.02159999999999999,
+                    "ring_up_waist": 0.005399999999999998,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                }
+            },
+            "Q3": {
+                "params": {
+                    "duration": 4e-06,
+                    "amp": 0.020000000000000004,
+                    "frequency": 6745030000.0,
+                    "weight": "const(1)",
+                    "phi": 0.5036536077686719,
+                    "threshold": 812278948.7780365,
+                    "ring_up_amp": 0.04000000000000001,
+                    "ring_up_waist": 0.010000000000000002,
+                    "ring_up_time": 3.2e-07
+                },
+                "e2f": {
+                    "duration": 4e-06,
+                    "amp": 0.02,
+                    "frequency": 6744830000.0,
+                    "weight": "const(1)",
+                    "phi": -2.0465380810540044,
+                    "threshold": 8197411496.580065,
+                    "ring_up_amp": 0.04,
+                    "ring_up_waist": 0.01,
+                    "ring_up_time": 6e-07
+                },
+                "default_type": "e2f_jpa",
+                "jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.0072,
+                    "frequency": 6745020000.0,
+                    "weight": "const(1)",
+                    "phi": -0.35472140055187673,
+                    "threshold": 36885285709.49234,
+                    "ring_up_amp": 0.0144,
+                    "ring_up_waist": 0.0036,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                },
+                "e2f_jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.0084,
+                    "frequency": 6744730000.0,
+                    "weight": "const(1)",
+                    "phi": 0.09870202756734536,
+                    "threshold": 25335829812.99777,
+                    "ring_up_amp": 0.0168,
+                    "ring_up_waist": 0.0042,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                }
+            },
+            "Q4": {
+                "params": {
+                    "duration": 4e-06,
+                    "amp": 0.025000000000000012,
+                    "frequency": 7052990000.0,
+                    "weight": "const(1)",
+                    "phi": 0.7918530588401524,
+                    "threshold": -1568879061.2924109,
+                    "ring_up_amp": 0.050000000000000024,
+                    "ring_up_waist": 0.012500000000000006,
+                    "ring_up_time": 3.2e-07
+                },
+                "e2f": {
+                    "duration": 4e-06,
+                    "amp": 0.025,
+                    "frequency": 7052390000.0,
+                    "weight": "const(1)",
+                    "phi": -1.2799519337531446,
+                    "threshold": 2525088648.1949286,
+                    "ring_up_amp": 0.05,
+                    "ring_up_waist": 0.0125,
+                    "ring_up_time": 6e-07
+                },
+                "default_type": "e2f_jpa",
+                "jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.008199999999999999,
+                    "frequency": 7052970000.0,
+                    "weight": "const(1)",
+                    "phi": -1.8316486793894746,
+                    "threshold": 6945746155.41179,
+                    "ring_up_amp": 0.016399999999999998,
+                    "ring_up_waist": 0.0040999999999999995,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                },
+                "e2f_jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.012399999999999998,
+                    "frequency": 7052390000.0,
+                    "weight": "const(1)",
+                    "phi": -1.1470200901207763,
+                    "threshold": -1572608877.8106499,
+                    "ring_up_amp": 0.024799999999999996,
+                    "ring_up_waist": 0.006199999999999999,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                }
+            },
+            "Q5": {
+                "params": {
+                    "duration": 4e-06,
+                    "amp": 0.012,
+                    "frequency": 6782197457.23823,
+                    "weight": "const(1)",
+                    "phi": 1.6153874279786642,
+                    "threshold": 4152429335.2696524,
+                    "ring_up_amp": 0.024,
+                    "ring_up_waist": 0.006,
+                    "ring_up_time": 6e-07
+                },
+                "e2f": {
+                    "duration": 4e-06,
+                    "amp": 0.027,
+                    "frequency": 6781800000.0,
+                    "weight": "const(1)",
+                    "phi": 0.04983559555669251,
+                    "threshold": 6145754171.890499,
+                    "ring_up_amp": 0.054,
+                    "ring_up_waist": 0.0135,
+                    "ring_up_time": 6e-07
+                },
+                "default_type": "e2f_jpa",
+                "jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.009000000000000001,
+                    "frequency": 6782280000.0,
+                    "weight": "const(1)",
+                    "phi": 1.5069650718938903,
+                    "threshold": 26671651462.944473,
+                    "ring_up_amp": 0.018000000000000002,
+                    "ring_up_waist": 0.0045000000000000005,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                },
+                "e2f_jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.0038,
+                    "frequency": 6781600000.0,
+                    "weight": "const(1)",
+                    "phi": 1.4383232495654208,
+                    "threshold": 10165534286.871635,
+                    "ring_up_amp": 0.0076,
+                    "ring_up_waist": 0.0019,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                }
+            },
+            "Q6": {
+                "params": {
+                    "duration": 4e-06,
+                    "amp": 0.016,
+                    "frequency": 7087067628.285311,
+                    "weight": "const(1)",
+                    "phi": 1.8731048002703252,
+                    "threshold": 4809795836.703213,
+                    "ring_up_amp": 0.032,
+                    "ring_up_waist": 0.008,
+                    "ring_up_time": 6e-07
+                },
+                "e2f": {
+                    "duration": 4e-06,
+                    "amp": 0.018,
+                    "frequency": 7086970000.0,
+                    "weight": "const(1)",
+                    "phi": 0.32829437601986117,
+                    "threshold": 6562821869.227901,
+                    "ring_up_amp": 0.036,
+                    "ring_up_waist": 0.009,
+                    "ring_up_time": 6e-07
+                },
+                "default_type": "e2f_jpa",
+                "jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.008400000000000001,
+                    "frequency": 7087120000.0,
+                    "weight": "const(1)",
+                    "phi": 0.24298343310423884,
+                    "threshold": 7359330439.107304,
+                    "ring_up_amp": 0.016800000000000002,
+                    "ring_up_waist": 0.004200000000000001,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                },
+                "e2f_jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.010999999999999996,
+                    "frequency": 7086770000.0,
+                    "weight": "const(1)",
+                    "phi": 1.203447605000351,
+                    "threshold": -2492411660.546172,
+                    "ring_up_amp": 0.021999999999999992,
+                    "ring_up_waist": 0.005499999999999998,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                }
+            },
+            "Q7": {
+                "params": {
+                    "duration": 4e-06,
+                    "amp": 0.018,
+                    "frequency": 6822902713.808851,
+                    "weight": "const(1)",
+                    "phi": -3.041018512367872,
+                    "threshold": 5570365706.684563,
+                    "ring_up_amp": 0.036,
+                    "ring_up_waist": 0.009,
+                    "ring_up_time": 6e-07
+                },
+                "e2f": {
+                    "duration": 4.096e-06,
+                    "amp": 0.0768,
+                    "frequency": 6822902713.808851,
+                    "weight": "const(1)",
+                    "phi": 0,
+                    "threshold": 0,
+                    "ring_up_amp": 0.1536,
+                    "ring_up_waist": 0.0384,
+                    "ring_up_time": 6e-07
+                },
+                "default_type": "e2f_jpa",
+                "jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.005200000000000001,
+                    "frequency": 6822780000.0,
+                    "weight": "const(1)",
+                    "phi": 2.7653478455948424,
+                    "threshold": 18713942716.533947,
+                    "ring_up_amp": 0.010400000000000001,
+                    "ring_up_waist": 0.0026000000000000003,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                },
+                "e2f_jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.0044,
+                    "frequency": 6822650000.0,
+                    "weight": "const(1)",
+                    "phi": 2.574490681206195,
+                    "threshold": 18187061945.55141,
+                    "ring_up_amp": 0.0088,
+                    "ring_up_waist": 0.0022,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                }
+            },
+            "Q8": {
+                "params": {
+                    "duration": 4e-06,
+                    "amp": 0.029000000000000012,
+                    "frequency": 7131350000.0,
+                    "weight": "const(1)",
+                    "phi": -2.9821040196291193,
+                    "threshold": -2571019516.347371,
+                    "ring_up_amp": 0.058000000000000024,
+                    "ring_up_waist": 0.014500000000000006,
+                    "ring_up_time": 3.2e-07
+                },
+                "e2f": {
+                    "duration": 4e-06,
+                    "amp": 0.029,
+                    "frequency": 7131070000.0,
+                    "weight": "const(1)",
+                    "phi": 1.2237589981448298,
+                    "threshold": 6160117687.408875,
+                    "ring_up_amp": 0.058,
+                    "ring_up_waist": 0.0145,
+                    "ring_up_time": 6e-07
+                },
+                "default_type": "e2f_jpa",
+                "jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.010600000000000002,
+                    "frequency": 7131390000.0,
+                    "weight": "const(1)",
+                    "phi": 0.9425330721171187,
+                    "threshold": 7630077018.239664,
+                    "ring_up_amp": 0.021200000000000004,
+                    "ring_up_waist": 0.005300000000000001,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                },
+                "e2f_jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.017399999999999992,
+                    "frequency": 7130970000.0,
+                    "weight": "const(1)",
+                    "phi": 1.3372181676403316,
+                    "threshold": 5317333988.878461,
+                    "ring_up_amp": 0.034799999999999984,
+                    "ring_up_waist": 0.008699999999999996,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                }
+            },
+            "Q9": {
+                "params": {
+                    "duration": 4e-06,
+                    "amp": 0.020999999999999998,
+                    "frequency": 6866110000.0,
+                    "weight": "const(1)",
+                    "phi": -1.4705984867441166,
+                    "threshold": -2580141752.3065987,
+                    "ring_up_amp": 0.041999999999999996,
+                    "ring_up_waist": 0.010499999999999999,
+                    "ring_up_time": 3.2e-07
+                },
+                "e2f": {
+                    "duration": 4e-06,
+                    "amp": 0.021,
+                    "frequency": 6865510000.0,
+                    "weight": "const(1)",
+                    "phi": 2.5853288378152874,
+                    "threshold": 3555160703.9282637,
+                    "ring_up_amp": 0.042,
+                    "ring_up_waist": 0.0105,
+                    "ring_up_time": 6e-07
+                },
+                "default_type": "e2f_jpa",
+                "jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.0066,
+                    "frequency": 6866090000.0,
+                    "weight": "const(1)",
+                    "phi": 2.750877790225453,
+                    "threshold": 26785113317.60996,
+                    "ring_up_amp": 0.0132,
+                    "ring_up_waist": 0.0033,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                },
+                "e2f_jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.006199999999999999,
+                    "frequency": 6865820000.0,
+                    "weight": "const(1)",
+                    "phi": 2.924090115408136,
+                    "threshold": 21776098301.18903,
+                    "ring_up_amp": 0.012399999999999998,
+                    "ring_up_waist": 0.0030999999999999995,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                }
+            },
+            "Q10": {
+                "params": {
+                    "duration": 4e-06,
+                    "amp": 0.019000000000000003,
+                    "frequency": 7167430000.0,
+                    "weight": "const(1)",
+                    "phi": -1.2643734118245344,
+                    "threshold": 1021809318.833609,
+                    "ring_up_amp": 0.038000000000000006,
+                    "ring_up_waist": 0.009500000000000001,
+                    "ring_up_time": 3.2e-07
+                },
+                "e2f": {
+                    "duration": 4e-06,
+                    "amp": 0.019,
+                    "frequency": 7167030000.0,
+                    "weight": "const(1)",
+                    "phi": -3.1137090321478538,
+                    "threshold": 5082644720.530091,
+                    "ring_up_amp": 0.038,
+                    "ring_up_waist": 0.0095,
+                    "ring_up_time": 6e-07
+                },
+                "default_type": "default",
+                "jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.0104,
+                    "frequency": 7167460000.0,
+                    "weight": "const(1)",
+                    "phi": 2.7838058869422433,
+                    "threshold": 7476492851.361015,
+                    "ring_up_amp": 0.0208,
+                    "ring_up_waist": 0.0052,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                },
+                "e2f_jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.014999999999999994,
+                    "frequency": 7167030000.0,
+                    "weight": "const(1)",
+                    "phi": -3.016450896780718,
+                    "threshold": 4708339108.669683,
+                    "ring_up_amp": 0.02999999999999999,
+                    "ring_up_waist": 0.007499999999999997,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                }
+            },
+            "Q11": {
+                "params": {
+                    "duration": 4e-06,
+                    "amp": 0.02600000000000001,
+                    "frequency": 6901700000.0,
+                    "weight": "const(1)",
+                    "phi": 0.4629952688599678,
+                    "threshold": -6851863364.65832,
+                    "ring_up_amp": 0.05200000000000002,
+                    "ring_up_waist": 0.013000000000000005,
+                    "ring_up_time": 3.2e-07
+                },
+                "e2f": {
+                    "duration": 4e-06,
+                    "amp": 0.026,
+                    "frequency": 6901300000.0,
+                    "weight": "const(1)",
+                    "phi": -1.7845135470014721,
+                    "threshold": 992707670.8540037,
+                    "ring_up_amp": 0.052,
+                    "ring_up_waist": 0.013,
+                    "ring_up_time": 6e-07
+                },
+                "default_type": "e2f_jpa",
+                "jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.0066,
+                    "frequency": 6901720000.0,
+                    "weight": "const(1)",
+                    "phi": -1.852576551272644,
+                    "threshold": 13937172232.654734,
+                    "ring_up_amp": 0.0132,
+                    "ring_up_waist": 0.0033,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                },
+                "e2f_jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.0074,
+                    "frequency": 6901310000.0,
+                    "weight": "const(1)",
+                    "phi": -1.3239850666711737,
+                    "threshold": -3296899337.7024026,
+                    "ring_up_amp": 0.0148,
+                    "ring_up_waist": 0.0037,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                }
+            },
+            "Q12": {
+                "params": {
+                    "duration": 4e-06,
+                    "amp": 0.034000000000000016,
+                    "frequency": 7211810000.0,
+                    "weight": "const(1)",
+                    "phi": -0.5720809028375622,
+                    "threshold": -3417398727.598444,
+                    "ring_up_amp": 0.06800000000000003,
+                    "ring_up_waist": 0.017000000000000008,
+                    "ring_up_time": 3.2e-07
+                },
+                "e2f": {
+                    "duration": 4e-06,
+                    "amp": 0.034,
+                    "frequency": 7211310000.0,
+                    "weight": "const(1)",
+                    "phi": -2.251435308373707,
+                    "threshold": 2873092965.905812,
+                    "ring_up_amp": 0.068,
+                    "ring_up_waist": 0.017,
+                    "ring_up_time": 6e-07
+                },
+                "default_type": "e2f_jpa",
+                "jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.012,
+                    "frequency": 7211870000.0,
+                    "weight": "const(1)",
+                    "phi": -2.672026167616095,
+                    "threshold": 5674499241.670139,
+                    "ring_up_amp": 0.024,
+                    "ring_up_waist": 0.006,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                },
+                "e2f_jpa": {
+                    "duration": 4.096e-06,
+                    "amp": 0.020000000000000004,
+                    "frequency": 7211110000.0,
+                    "weight": "const(1)",
+                    "phi": -1.605858779209626,
+                    "threshold": -2864796770.9530897,
+                    "ring_up_amp": 0.04000000000000001,
+                    "ring_up_waist": 0.010000000000000002,
+                    "ring_up_time": 2.56e-07,
+                    "jpa_q": "Q65536"
+                }
+            }
+        },
+        "R": {
+            "Q0": {
+                "params": {
+                    "width": 2.1e-08,
+                    "amp": 0.5012667632372333,
+                    "frequency": 4470988165.0700445,
+                    "delta": -65355.27400446916,
+                    "plateau": 2.1e-08
+                }
+            },
+            "Q1": {
+                "params": {
+                    "width": 2.1e-08,
+                    "amp": 0.3367902496375451,
+                    "frequency": 4092972216.5741844,
+                    "delta": 1726066.089693178,
+                    "plateau": 2.1e-08
+                }
+            },
+            "Q2": {
+                "params": {
+                    "width": 2.1e-08,
+                    "amp": 0.44023908614272533,
+                    "frequency": 4408249336.335474,
+                    "delta": 509189.2686560773,
+                    "plateau": 2.1e-08
+                }
+            },
+            "Q3": {
+                "params": {
+                    "width": 2.1e-08,
+                    "amp": 0.32614968270199785,
+                    "frequency": 3930171548.405957,
+                    "delta": 732179.5034542391,
+                    "plateau": 2.1e-08
+                }
+            },
+            "Q4": {
+                "params": {
+                    "width": 2.1e-08,
+                    "amp": 0.5460148083831485,
+                    "frequency": 4459655293.329154,
+                    "delta": 1600846.8028248972,
+                    "plateau": 2.1e-08
+                }
+            },
+            "Q5": {
+                "params": {
+                    "width": 2.1e-08,
+                    "amp": 0.2523692778401017,
+                    "frequency": 4052978061.9116144,
+                    "delta": 237850.96099810535,
+                    "plateau": 2.1e-08
+                }
+            },
+            "Q6": {
+                "params": {
+                    "width": 2.1e-08,
+                    "amp": 0.5333333333333334,
+                    "frequency": 4391429103.541183,
+                    "delta": 50913.38768757507,
+                    "plateau": 2.1e-08
+                }
+            },
+            "Q7": {
+                "params": {
+                    "width": 2.1e-08,
+                    "amp": 0.30404501505223874,
+                    "frequency": 4030526051.839432,
+                    "delta": -3065277.1302166535,
+                    "plateau": 2.1e-08
+                }
+            },
+            "Q8": {
+                "params": {
+                    "width": 2.1e-08,
+                    "amp": 0.6468654534114546,
+                    "frequency": 4412142319.314658,
+                    "delta": -103992.8615750419,
+                    "plateau": 2.1e-08
+                }
+            },
+            "Q9": {
+                "params": {
+                    "width": 2.1e-08,
+                    "amp": 0.28073817480502355,
+                    "frequency": 4162878667.438181,
+                    "delta": -237076.6979722106,
+                    "plateau": 2.1e-08
+                }
+            },
+            "Q10": {
+                "params": {
+                    "width": 2.1e-08,
+                    "amp": 0.5325423514188365,
+                    "frequency": 4463624430.263644,
+                    "delta": 47526.090904785786,
+                    "plateau": 2.1e-08
+                }
+            },
+            "Q11": {
+                "params": {
+                    "width": 2.1e-08,
+                    "amp": 0.296917489428317,
+                    "frequency": 4100089121.4124494,
+                    "delta": 2515231.301782363,
+                    "plateau": 2.1e-08
+                }
+            },
+            "Q12": {
+                "params": {
+                    "width": 2.1e-08,
+                    "amp": 0.4990604204890066,
+                    "frequency": 4434661615.646594,
+                    "delta": 65665.04042789433,
+                    "plateau": 2.1e-08
+                }
+            }
+        },
+        "R12": {
+            "Q0": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.39437406507574646,
+                    "frequency": 4283464704.8456435,
+                    "delta": 0
+                }
+            },
+            "Q1": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 1e-05,
+                    "frequency": 3829496123.307644,
+                    "delta": 0
+                }
+            },
+            "Q2": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.3173433280148492,
+                    "frequency": 4229825651.8404164,
+                    "delta": 0
+                }
+            },
+            "Q3": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.211908072236602,
+                    "frequency": 3731024473.3627205,
+                    "delta": 0
+                }
+            },
+            "Q4": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.4496557602971718,
+                    "frequency": 4278539027.8638077,
+                    "delta": 0
+                }
+            },
+            "Q5": {
+                "params": {
+                    "width": 5e-08,
+                    "amp": 0.2139682007447584,
+                    "frequency": 3839191859.0254674,
+                    "delta": 0
+                }
+            },
+            "Q6": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 1e-05,
+                    "frequency": 4196876337.0705647,
+                    "delta": 0
+                }
+            },
+            "Q7": {
+                "params": {
+                    "width": 5e-08,
+                    "amp": 0.1907042758440456,
+                    "frequency": 3837348438.358789,
+                    "delta": 0
+                }
+            },
+            "Q8": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.44404850468529,
+                    "frequency": 4228821015.009523,
+                    "delta": 0
+                }
+            },
+            "Q9": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.22700734828570868,
+                    "frequency": 3969560866.557636,
+                    "delta": 0
+                }
+            },
+            "Q10": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.4301461482950268,
+                    "frequency": 4284487360.779601,
+                    "delta": 0
+                }
+            },
+            "Q11": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.20105642119277495,
+                    "frequency": 3904775222.535261,
+                    "delta": 0
+                }
+            },
+            "Q12": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.33375254655679354,
+                    "frequency": 4244912392.628195,
+                    "delta": 0
+                }
+            }
+        },
+        "CZ": {
+            "Q0_Q1": {
+                "v4": {
+                    "width": 5e-08,
+                    "ampc": 0.2557345850244436,
+                    "plateau": 4.5e-07,
+                    "before": 5e-09,
+                    "after": 3.5e-08,
+                    "shape": "coshPulse",
+                    "phi1": 0,
+                    "phi2": 0
+                },
+                "default_type": "v4_nz",
+                "v4_nz": {
+                    "width": 7.7e-08,
+                    "ampc": 0.3045749968756277,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2.1e-08,
+                    "shape": "coshPulse",
+                    "phi1": 1.7201378257320845,
+                    "phi2": -2.0567337344354786,
+                    "before_all": 3e-09,
+                    "after_all": 1.1e-08,
+                    "eps": 10
+                },
+                "v4_echo": {
+                    "width": 6.3e-08,
+                    "ampc": 0.30604132487644836,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2e-08,
+                    "shape": "coshPulse",
+                    "phi1": 1.504351668032856,
+                    "phi2": 1.5091253111298149,
+                    "before_all": 2e-09,
+                    "after_all": 0,
+                    "eps": 10
+                },
+                "v4_echo_2": {
+                    "width": 2.5e-08,
+                    "ampc": 0.27992822300530185,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 0,
+                    "shape": "coshPulse",
+                    "phi1": 1.5334714052440497,
+                    "phi2": 1.536585211216144,
+                    "before_all": 2e-09,
+                    "after_all": 4e-09,
+                    "coeff": [
+                        1,
+                        -1,
+                        1,
+                        -1
+                    ],
+                    "eps": 10
+                },
+                "v4_nz_2": {
+                    "width": 6.3e-08,
+                    "ampc": 0.32446420183021846,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 1.9e-08,
+                    "shape": "coshPulse",
+                    "phi1": 0,
+                    "phi2": 0,
+                    "before_all": 3e-09,
+                    "after_all": 1e-09,
+                    "eps": 5,
+                    "coeff": [
+                        1,
+                        -1
+                    ]
+                }
+            },
+            "Q1_Q2": {
+                "v4": {
+                    "width": 5e-08,
+                    "ampc": 0.37655148870091765,
+                    "plateau": 4.5e-07,
+                    "before": 5e-09,
+                    "after": 3.5e-08,
+                    "shape": "coshPulse",
+                    "phi1": 0,
+                    "phi2": 0
+                },
+                "default_type": "v4_nz",
+                "v4_nz": {
+                    "width": 7.7e-08,
+                    "ampc": 0.45186940341312126,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2.1e-08,
+                    "shape": "coshPulse",
+                    "phi1": 3.800996017139188,
+                    "phi2": 4.119314834934122,
+                    "before_all": 3e-09,
+                    "after_all": 1.1e-08,
+                    "eps": 10
+                },
+                "v4_echo": {
+                    "width": 6.3e-08,
+                    "ampc": 0.45149906258111444,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2e-08,
+                    "shape": "coshPulse",
+                    "phi1": 1.5645392420618873,
+                    "phi2": 1.456212310755728,
+                    "before_all": 2e-09,
+                    "after_all": 0,
+                    "eps": 10
+                },
+                "v4_echo_2": {
+                    "width": 2.5e-08,
+                    "ampc": 0.4014798137153026,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 0,
+                    "shape": "coshPulse",
+                    "phi1": 1.6096641357466113,
+                    "phi2": 1.4630429285401265,
+                    "before_all": 2e-09,
+                    "after_all": 4e-09,
+                    "coeff": [
+                        1,
+                        -1,
+                        1,
+                        -1
+                    ],
+                    "eps": 10
+                },
+                "v4_nz_2": {
+                    "width": 6.3e-08,
+                    "ampc": 0.473491035957517,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 1.9e-08,
+                    "shape": "coshPulse",
+                    "phi1": -2.323264593243354,
+                    "phi2": -2.1133408513151526,
+                    "before_all": 3e-09,
+                    "after_all": 1e-09,
+                    "eps": 5,
+                    "coeff": [
+                        1,
+                        -1
+                    ]
+                }
+            },
+            "Q2_Q3": {
+                "v4": {
+                    "width": 5e-08,
+                    "ampc": 0.45896830240444186,
+                    "plateau": 4.5e-07,
+                    "before": 5e-09,
+                    "after": 3.5e-08,
+                    "shape": "coshPulse",
+                    "phi1": 0,
+                    "phi2": 0
+                },
+                "default_type": "v4_nz",
+                "v4_nz": {
+                    "width": 7.7e-08,
+                    "ampc": 0.5154074527626928,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2.1e-08,
+                    "shape": "coshPulse",
+                    "phi1": 0.5044458529071397,
+                    "phi2": -2.024641926757493,
+                    "before_all": 3e-09,
+                    "after_all": 1.1e-08,
+                    "eps": 10
+                },
+                "v4_echo": {
+                    "width": 6.3e-08,
+                    "ampc": 0.5216295577546517,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2e-08,
+                    "shape": "coshPulse",
+                    "phi1": 1.4909416769882997,
+                    "phi2": 1.546821565415651,
+                    "before_all": 2e-09,
+                    "after_all": 0,
+                    "eps": 10
+                },
+                "v4_echo_2": {
+                    "width": 2.5e-08,
+                    "ampc": 0.4666072568856351,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 0,
+                    "shape": "coshPulse",
+                    "phi1": 1.5529324342992152,
+                    "phi2": 1.5305524212035573,
+                    "before_all": 2e-09,
+                    "after_all": 4e-09,
+                    "coeff": [
+                        1,
+                        -1,
+                        1,
+                        -1
+                    ],
+                    "eps": 10
+                },
+                "v4_nz_2": {
+                    "width": 6.3e-08,
+                    "ampc": 0.5385466781513738,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 1.9e-08,
+                    "shape": "coshPulse",
+                    "phi1": 0.70457188690014,
+                    "phi2": -1.927763670548488,
+                    "before_all": 3e-09,
+                    "after_all": 1e-09,
+                    "eps": 5,
+                    "coeff": [
+                        1,
+                        -1
+                    ]
+                }
+            },
+            "Q3_Q4": {
+                "v4": {
+                    "width": 5e-08,
+                    "ampc": 0.4306206378147884,
+                    "plateau": 4.5e-07,
+                    "before": 5e-09,
+                    "after": 3.5e-08,
+                    "shape": "coshPulse",
+                    "phi1": 0,
+                    "phi2": 0
+                },
+                "default_type": "v4_nz",
+                "v4_nz": {
+                    "width": 7.7e-08,
+                    "ampc": 0.49552095509145594,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2.1e-08,
+                    "shape": "coshPulse",
+                    "phi1": -1.716768460916663,
+                    "phi2": -4.200825635086334,
+                    "before_all": 3e-09,
+                    "after_all": 1.1e-08,
+                    "eps": 10
+                },
+                "v4_echo": {
+                    "width": 6.3e-08,
+                    "ampc": 0.496146223061968,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2e-08,
+                    "shape": "coshPulse",
+                    "phi1": 1.588546876719827,
+                    "phi2": 1.9366612602897382,
+                    "before_all": 2e-09,
+                    "after_all": 0,
+                    "eps": 10
+                },
+                "v4_echo_2": {
+                    "width": 2.5e-08,
+                    "ampc": 0.4606013897203033,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 0,
+                    "shape": "coshPulse",
+                    "phi1": 1.5073060546274588,
+                    "phi2": 1.5547814721069826,
+                    "before_all": 2e-09,
+                    "after_all": 4e-09,
+                    "coeff": [
+                        1,
+                        -1,
+                        1,
+                        -1
+                    ],
+                    "eps": 10
+                },
+                "v4_nz_2": {
+                    "width": 6.3e-08,
+                    "ampc": 0.5229133145775571,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 1.9e-08,
+                    "shape": "coshPulse",
+                    "phi1": -1.7009230061385792,
+                    "phi2": 2.006198009172491,
+                    "before_all": 3e-09,
+                    "after_all": 1e-09,
+                    "eps": 5,
+                    "coeff": [
+                        1,
+                        -1
+                    ]
+                }
+            },
+            "Q4_Q5": {
+                "v4": {
+                    "width": 5e-08,
+                    "ampc": 0.44089994245842223,
+                    "plateau": 4.5e-07,
+                    "before": 5e-09,
+                    "after": 3.5e-08,
+                    "shape": "coshPulse",
+                    "phi1": 0,
+                    "phi2": 0
+                },
+                "default_type": "v4_nz",
+                "v4_nz": {
+                    "width": 7.7e-08,
+                    "ampc": 0.5073131604486922,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2.1e-08,
+                    "shape": "coshPulse",
+                    "phi1": 4.864811303179385,
+                    "phi2": -2.303627734502783,
+                    "before_all": 3e-09,
+                    "after_all": 1.1e-08,
+                    "eps": 10
+                }
+            },
+            "Q5_Q6": {
+                "v4": {
+                    "width": 5e-08,
+                    "ampc": 0.5130469607772944,
+                    "plateau": 4.5e-07,
+                    "before": 5e-09,
+                    "after": 3.5e-08,
+                    "shape": "coshPulse",
+                    "phi1": 0,
+                    "phi2": 0
+                },
+                "default_type": "v4_nz",
+                "v4_nz": {
+                    "width": 7.7e-08,
+                    "ampc": 0.5393879826006017,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2.1e-08,
+                    "shape": "coshPulse",
+                    "phi1": -2.7267158242672194,
+                    "phi2": 4.373653838793084,
+                    "before_all": 3e-09,
+                    "after_all": 1.1e-08,
+                    "eps": 10
+                }
+            },
+            "Q6_Q7": {
+                "v4": {
+                    "width": 2e-08,
+                    "ampc": 0.4233291996192238,
+                    "plateau": 1.98e-07,
+                    "before": 5e-09,
+                    "after": 3.5e-08,
+                    "shape": "coshPulse",
+                    "phi1": 0,
+                    "phi2": 0
+                },
+                "default_type": "v4_nz",
+                "v4_nz": {
+                    "width": 8.4e-08,
+                    "ampc": 0.5327772254317766,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 1.4e-08,
+                    "shape": "coshPulse",
+                    "phi1": -1.1157287917510677,
+                    "phi2": -2.94630733139356,
+                    "before_all": 3e-09,
+                    "after_all": 1.1e-08,
+                    "eps": 5
+                },
+                "v4_echo": {
+                    "width": 6.3e-08,
+                    "ampc": 0.4913554201453803,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2e-08,
+                    "shape": "coshPulse",
+                    "phi1": 1.9340065213449524,
+                    "phi2": 1.7407063963494718,
+                    "before_all": 2e-09,
+                    "after_all": 0,
+                    "eps": 10
+                },
+                "v4_echo_2": {
+                    "width": 2.5e-08,
+                    "ampc": 0.4407884775492721,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 0,
+                    "shape": "coshPulse",
+                    "phi1": 1.526301142779269,
+                    "phi2": 1.620542349080828,
+                    "before_all": 2e-09,
+                    "after_all": 4e-09,
+                    "coeff": [
+                        1,
+                        -1,
+                        1,
+                        -1
+                    ],
+                    "eps": 10
+                },
+                "v4_nz_2": {
+                    "width": 6.3e-08,
+                    "ampc": 0.5371596900427288,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 1.9e-08,
+                    "shape": "coshPulse",
+                    "phi1": 0,
+                    "phi2": 0,
+                    "before_all": 3e-09,
+                    "after_all": 1e-09,
+                    "eps": 5,
+                    "coeff": [
+                        1,
+                        -1
+                    ]
+                }
+            },
+            "Q7_Q8": {
+                "v4": {
+                    "width": 2e-08,
+                    "ampc": 0.32482735198881807,
+                    "plateau": 1.98e-07,
+                    "before": 5e-09,
+                    "after": 3.5e-08,
+                    "shape": "coshPulse",
+                    "phi1": 0,
+                    "phi2": 0
+                },
+                "default_type": "v4_nz",
+                "v4_nz": {
+                    "width": 7.7e-08,
+                    "ampc": 0.3978678103013084,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2.1e-08,
+                    "shape": "coshPulse",
+                    "phi1": 4.082753211218529,
+                    "phi2": 1.1361001618194084,
+                    "before_all": 3e-09,
+                    "after_all": 1.1e-08,
+                    "eps": 5
+                },
+                "v4_echo": {
+                    "width": 6.3e-08,
+                    "ampc": 0.36795170239038066,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2e-08,
+                    "shape": "coshPulse",
+                    "phi1": 1.6823686549328676,
+                    "phi2": 1.7382963581596964,
+                    "before_all": 2e-09,
+                    "after_all": 0,
+                    "eps": 10
+                },
+                "v4_echo_2": {
+                    "width": 2.5e-08,
+                    "ampc": 0.3450571137664403,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 0,
+                    "shape": "coshPulse",
+                    "phi1": 1.4976426581977806,
+                    "phi2": 1.5817028891161606,
+                    "before_all": 2e-09,
+                    "after_all": 4e-09,
+                    "coeff": [
+                        1,
+                        -1,
+                        1,
+                        -1
+                    ],
+                    "eps": 10
+                },
+                "v4_nz_2": {
+                    "width": 6.3e-08,
+                    "ampc": 0.40320116227261554,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 1.9e-08,
+                    "shape": "coshPulse",
+                    "phi1": -1.8928322035844556,
+                    "phi2": -0.2978203979325582,
+                    "before_all": 3e-09,
+                    "after_all": 1e-09,
+                    "eps": 5,
+                    "coeff": [
+                        1,
+                        -1
+                    ]
+                }
+            },
+            "Q8_Q9": {
+                "v4": {
+                    "width": 5e-08,
+                    "ampc": 0.42435229866834295,
+                    "plateau": 4.5e-07,
+                    "before": 5e-09,
+                    "after": 3.5e-08,
+                    "shape": "coshPulse",
+                    "phi1": 0,
+                    "phi2": 0
+                },
+                "default_type": "v4_nz",
+                "v4_nz": {
+                    "width": 7.7e-08,
+                    "ampc": 0.4784482025332728,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2.1e-08,
+                    "shape": "coshPulse",
+                    "phi1": 1.1657213392315988,
+                    "phi2": 3.166193099075286,
+                    "before_all": 3e-09,
+                    "after_all": 1.1e-08,
+                    "eps": 10
+                },
+                "v4_echo": {
+                    "width": 6.3e-08,
+                    "ampc": 0.48029710752925586,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2e-08,
+                    "shape": "coshPulse",
+                    "phi1": 2.0109365022853303,
+                    "phi2": 1.6191957129147627,
+                    "before_all": 2e-09,
+                    "after_all": 0,
+                    "eps": 10
+                },
+                "v4_echo_2": {
+                    "width": 2.5e-08,
+                    "ampc": 0.420919429119568,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 0,
+                    "shape": "coshPulse",
+                    "phi1": 1.5288532099807812,
+                    "phi2": 1.4291458192956736,
+                    "before_all": 2e-09,
+                    "after_all": 4e-09,
+                    "coeff": [
+                        1,
+                        -1,
+                        1,
+                        -1
+                    ],
+                    "eps": 10
+                },
+                "v4_nz_2": {
+                    "width": 6.3e-08,
+                    "ampc": 0.5022206028817602,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 1.9e-08,
+                    "shape": "coshPulse",
+                    "phi1": 1.4185381576346805,
+                    "phi2": -3.0442748333387684,
+                    "before_all": 3e-09,
+                    "after_all": 1e-09,
+                    "eps": 5,
+                    "coeff": [
+                        1,
+                        -1
+                    ]
+                }
+            },
+            "Q9_Q10": {
+                "v4": {
+                    "width": 5e-08,
+                    "ampc": 0.4360266310446339,
+                    "plateau": 4.5e-07,
+                    "before": 5e-09,
+                    "after": 3.5e-08,
+                    "shape": "coshPulse",
+                    "phi1": 0,
+                    "phi2": 0
+                },
+                "default_type": "v4_nz",
+                "v4_nz": {
+                    "width": 7.7e-08,
+                    "ampc": 0.5152260177686063,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2.1e-08,
+                    "shape": "coshPulse",
+                    "phi1": 3.5869031861484224,
+                    "phi2": 5.744975375494392,
+                    "before_all": 3e-09,
+                    "after_all": 1.1e-08,
+                    "eps": 10
+                },
+                "v4_echo": {
+                    "width": 6.3e-08,
+                    "ampc": 0.4772364330306801,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2e-08,
+                    "shape": "coshPulse",
+                    "phi1": -0.9659312819874423,
+                    "phi2": -1.4754453838458517,
+                    "before_all": 2e-09,
+                    "after_all": 0,
+                    "eps": 10
+                },
+                "v4_echo_2": {
+                    "width": 2.5e-08,
+                    "ampc": 0.4471302163829186,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 0,
+                    "shape": "coshPulse",
+                    "phi1": 1.548527420101507,
+                    "phi2": 1.5358008072670672,
+                    "before_all": 2e-09,
+                    "after_all": 4e-09,
+                    "coeff": [
+                        1,
+                        -1,
+                        1,
+                        -1
+                    ],
+                    "eps": 10
+                },
+                "v4_nz_2": {
+                    "width": 6.3e-08,
+                    "ampc": 0.4928771949868761,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 1.9e-08,
+                    "shape": "coshPulse",
+                    "phi1": -2.648257171781356,
+                    "phi2": -0.3627590498298604,
+                    "before_all": 3e-09,
+                    "after_all": 1e-09,
+                    "eps": 5,
+                    "coeff": [
+                        1,
+                        -1
+                    ]
+                }
+            },
+            "Q10_Q11": {
+                "v4": {
+                    "width": 5e-08,
+                    "ampc": 0.3335390328217572,
+                    "plateau": 4.5e-07,
+                    "before": 5e-09,
+                    "after": 3.5e-08,
+                    "shape": "coshPulse",
+                    "phi1": 0,
+                    "phi2": 0
+                },
+                "default_type": "v4_nz",
+                "v4_nz": {
+                    "width": 7.7e-08,
+                    "ampc": 0.3749597192399148,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2.1e-08,
+                    "shape": "coshPulse",
+                    "phi1": 1.5991457876719462,
+                    "phi2": 3.6202645736406733,
+                    "before_all": 3e-09,
+                    "after_all": 1.1e-08,
+                    "eps": 10
+                },
+                "v4_echo": {
+                    "width": 6.3e-08,
+                    "ampc": 0.38010547308804443,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2e-08,
+                    "shape": "coshPulse",
+                    "phi1": 1.701414894169656,
+                    "phi2": 1.5878226479087247,
+                    "before_all": 2e-09,
+                    "after_all": 0,
+                    "eps": 10
+                },
+                "v4_echo_2": {
+                    "width": 2.5e-08,
+                    "ampc": 0.332623095620332,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 0,
+                    "shape": "coshPulse",
+                    "phi1": 1.5538088294639798,
+                    "phi2": 1.5491452499254899,
+                    "before_all": 2e-09,
+                    "after_all": 4e-09,
+                    "coeff": [
+                        1,
+                        -1,
+                        1,
+                        -1
+                    ],
+                    "eps": 10
+                },
+                "v4_nz_2": {
+                    "width": 6.3e-08,
+                    "ampc": 0.3915392926023605,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 1.9e-08,
+                    "shape": "coshPulse",
+                    "phi1": 2.1042058377018336,
+                    "phi2": -2.579202345684534,
+                    "before_all": 3e-09,
+                    "after_all": 1e-09,
+                    "eps": 5,
+                    "coeff": [
+                        1,
+                        -1
+                    ]
+                }
+            },
+            "Q11_Q12": {
+                "v4": {
+                    "width": 5e-08,
+                    "ampc": 0.3399917392610571,
+                    "plateau": 4.5e-07,
+                    "before": 5e-09,
+                    "after": 3.5e-08,
+                    "shape": "coshPulse",
+                    "phi1": 0,
+                    "phi2": 0
+                },
+                "default_type": "v4_nz",
+                "v4_nz": {
+                    "width": 7.7e-08,
+                    "ampc": 0.38561907380032723,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2.1e-08,
+                    "shape": "coshPulse",
+                    "phi1": -2.845841965461273,
+                    "phi2": -3.661920179818098,
+                    "before_all": 3e-09,
+                    "after_all": 1.1e-08,
+                    "eps": 10
+                },
+                "v4_echo": {
+                    "width": 6.3e-08,
+                    "ampc": 0.3876361061328387,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 2e-08,
+                    "shape": "coshPulse",
+                    "phi1": 1.5825587020055096,
+                    "phi2": 1.6680850473590305,
+                    "before_all": 2e-09,
+                    "after_all": 0,
+                    "eps": 10
+                },
+                "v4_echo_2": {
+                    "width": 2.5e-08,
+                    "ampc": 0.33497420098758945,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 0,
+                    "shape": "coshPulse",
+                    "phi1": 1.5552324764928676,
+                    "phi2": 1.555937192790757,
+                    "before_all": 2e-09,
+                    "after_all": 4e-09,
+                    "coeff": [
+                        1,
+                        -1,
+                        1,
+                        -1
+                    ],
+                    "eps": 10
+                },
+                "v4_nz_2": {
+                    "width": 6.3e-08,
+                    "ampc": 0.40130418104644844,
+                    "plateau": 0,
+                    "before": 0,
+                    "after": 1.9e-08,
+                    "shape": "coshPulse",
+                    "phi1": -2.7435582098144717,
+                    "phi2": -3.126740622262066,
+                    "before_all": 3e-09,
+                    "after_all": 1e-09,
+                    "eps": 5,
+                    "coeff": [
+                        1,
+                        -1
+                    ]
+                }
+            },
+            "__order_senstive__": false
+        },
+        "Reset": {
+            "Q0": {
+                "default_type": "ac",
+                "ac": {
+                    "width": 1e-07,
+                    "amp": 1,
+                    "frequency": 5860727134.737219,
+                    "plateau": 4e-07
+                }
+            },
+            "Q1": {
+                "default_type": "ac",
+                "ac": {
+                    "width": 1e-07,
+                    "amp": 1,
+                    "frequency": 4943725980.226269,
+                    "plateau": 4e-07
+                }
+            },
+            "Q2": {
+                "default_type": "ac",
+                "ac": {
+                    "width": 1e-07,
+                    "amp": 1,
+                    "frequency": 5658779816.453247,
+                    "plateau": 4e-07
+                }
+            },
+            "Q3": {
+                "default_type": "ac",
+                "ac": {
+                    "width": 1e-07,
+                    "amp": 1,
+                    "frequency": 4425009230.879696,
+                    "plateau": 4e-07
+                }
+            },
+            "Q4": {
+                "default_type": "ac",
+                "ac": {
+                    "width": 1e-07,
+                    "amp": 1,
+                    "frequency": 5757066385.479879,
+                    "plateau": 4e-07
+                }
+            },
+            "Q5": {
+                "default_type": "ac",
+                "ac": {
+                    "width": 1e-07,
+                    "amp": 1,
+                    "frequency": 4743587292.577276,
+                    "plateau": 4e-07
+                }
+            },
+            "Q6": {
+                "default_type": "ac",
+                "ac": {
+                    "width": 1e-07,
+                    "amp": 1,
+                    "frequency": 5525723237.907885,
+                    "plateau": 4e-07
+                }
+            },
+            "Q7": {
+                "default_type": "ac",
+                "ac": {
+                    "width": 1e-07,
+                    "amp": 1,
+                    "frequency": 4661862018.075296,
+                    "plateau": 4e-07
+                }
+            },
+            "Q8": {
+                "default_type": "ac",
+                "ac": {
+                    "width": 1e-07,
+                    "amp": 1,
+                    "frequency": 5425917088.326357,
+                    "plateau": 4e-07
+                }
+            },
+            "Q9": {
+                "default_type": "ac",
+                "ac": {
+                    "width": 1e-07,
+                    "amp": 1,
+                    "frequency": 5020627927.76944,
+                    "plateau": 4e-07
+                }
+            },
+            "Q10": {
+                "default_type": "ac",
+                "ac": {
+                    "width": 1e-07,
+                    "amp": 1,
+                    "frequency": 5661396257.41045,
+                    "plateau": 4e-07
+                }
+            },
+            "Q11": {
+                "default_type": "ac",
+                "ac": {
+                    "width": 1e-07,
+                    "amp": 1,
+                    "frequency": 4791573158.903305,
+                    "plateau": 4e-07
+                }
+            },
+            "Q12": {
+                "default_type": "ac",
+                "ac": {
+                    "width": 1e-07,
+                    "amp": 1,
+                    "frequency": 5502389389.653194,
+                    "plateau": 4e-07
+                }
+            }
+        },
+        "R23": {
+            "Q0": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.290426101446733,
+                    "frequency": 4071954584.696034,
+                    "delta": 0
+                }
+            },
+            "Q1": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.13583673469387755,
+                    "frequency": 3677048805.905006,
+                    "delta": 0
+                }
+            },
+            "Q2": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.19835525113628988,
+                    "frequency": 4024151340.450407,
+                    "delta": 0
+                }
+            },
+            "Q3": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.11923549715048809,
+                    "frequency": 3509146539.7191916,
+                    "delta": 0
+                }
+            },
+            "Q4": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.25606666444607523,
+                    "frequency": 4072033420.208905,
+                    "delta": 0
+                }
+            },
+            "Q5": {
+                "params": {
+                    "width": 5e-08,
+                    "amp": 0.09433106575963719,
+                    "frequency": 3659555432.498872,
+                    "delta": 0
+                }
+            },
+            "Q6": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.23817252656691568,
+                    "frequency": 4009320267.6711087,
+                    "delta": 0
+                }
+            },
+            "Q7": {
+                "params": {
+                    "width": 5e-08,
+                    "amp": 0.11701439847188029,
+                    "frequency": 3621440992.7761045,
+                    "delta": 0
+                }
+            },
+            "Q8": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.220734693877551,
+                    "frequency": 4022478146.559113,
+                    "delta": 0
+                }
+            },
+            "Q9": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.13003943234414148,
+                    "frequency": 3754361927.1726737,
+                    "delta": 0
+                }
+            },
+            "Q10": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.2548530150808711,
+                    "frequency": 4080880051.5488067,
+                    "delta": 0
+                }
+            },
+            "Q11": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.11552405910531421,
+                    "frequency": 3688485741.9452586,
+                    "delta": 0
+                }
+            },
+            "Q12": {
+                "params": {
+                    "width": 4.2e-08,
+                    "amp": 0.18215334032483813,
+                    "frequency": 4034752420.604603,
+                    "delta": 0
+                }
+            }
+        }
+    },
+    "Q0": {
+        "probe": "M1",
+        "couplers": [
+            "C0"
+        ],
+        "waveform": {
+            "SR": 6000000000.0,
+            "LEN": 8e-05,
+            "DDS_LO": 6000000000.0,
+            "RF": "zero()",
+            "DDS": "zero()"
+        },
+        "channel": {
+            "DDS": "ZW_AWG_13.CH2"
+        },
+        "calibration": {
+            "DDS": {
+                "delay": 3.05e-08
+            }
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green",
+        "params": {
+            "T1": 7.544957236854869e-05,
+            "T2_star": 1.9762589666408893e-05,
+            "T2_echo": 3.951455640774801e-05,
+            "chi": 0.525,
+            "Ec": null,
+            "T2star": 21.77932423416822
+        },
+        "setting": {},
+        "readout_matrix": {
+            "ndarray": "V4iLWYqFLkBXiItZioUswP/6O4q98DDA//o7ir3wMUA=",
+            "dtype": "<f8",
+            "shape": [
+                2,
+                2
+            ]
+        }
+    },
+    "Q1": {
+        "probe": "M1",
+        "couplers": [
+            "C0",
+            "C1"
+        ],
+        "setting": {},
+        "waveform": {
+            "SR": 6000000000.0,
+            "LEN": 8e-05,
+            "DDS_LO": 6000000000.0,
+            "RF": "zero()",
+            "DDS": "zero()"
+        },
+        "channel": {
+            "DDS": "ZW_AWG_13.CH9"
+        },
+        "calibration": {
+            "DDS": {
+                "delay": 1.1e-08
+            }
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green",
+        "params": {
+            "T1": 5.939933195552646e-05,
+            "T2_star": 9.225299210602649e-06,
+            "T2_echo": 3.0786656837914333e-05,
+            "chi": 0.5125,
+            "Ec": null
+        },
+        "readout_matrix": {
+            "ndarray": "tdnYaHOsQ0C12dhocyxDwGSiUr3xJzTAZKJSvfEnNUA=",
+            "dtype": "<f8",
+            "shape": [
+                2,
+                2
+            ]
+        }
+    },
+    "Q2": {
+        "probe": "M1",
+        "couplers": [
+            "C1",
+            "C2",
+            "C12"
+        ],
+        "setting": {},
+        "waveform": {
+            "SR": 6000000000.0,
+            "LEN": 8e-05,
+            "DDS_LO": 6000000000.0,
+            "RF": "zero()",
+            "DDS": "zero()"
+        },
+        "channel": {
+            "DDS": "ZW_AWG_13.CH17"
+        },
+        "calibration": {
+            "DDS": {
+                "delay": 1.14e-07
+            }
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green",
+        "params": {
+            "T1": 7.862227063963491e-05,
+            "T2_star": 1.8314173441400332e-05,
+            "T2_echo": 4.289939170114087e-05,
+            "chi": 0.5,
+            "Ec": null
+        },
+        "readout_matrix": {
+            "ndarray": "V1keSW6oMECusjyS3FAvwFXomi4pSUTAVeiaLinJREA=",
+            "dtype": "<f8",
+            "shape": [
+                2,
+                2
+            ]
+        }
+    },
+    "Q3": {
+        "probe": "M1",
+        "couplers": [
+            "C2",
+            "C3"
+        ],
+        "setting": {},
+        "waveform": {
+            "SR": 6000000000.0,
+            "LEN": 8e-05,
+            "DDS_LO": 6000000000.0,
+            "RF": "zero()",
+            "DDS": "zero()"
+        },
+        "channel": {
+            "DDS": "ZW_AWG_11.CH2"
+        },
+        "calibration": {
+            "DDS": {
+                "delay": 3.55e-08
+            }
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green",
+        "params": {
+            "T1": 5.6386322540522616e-05,
+            "T2_star": 1.4257205498353947e-05,
+            "T2_echo": 3.487251794890868e-05,
+            "chi": 0.4125,
+            "Ec": null
+        },
+        "readout_matrix": {
+            "ndarray": "iJit/E55MUCImK38TnkwwJ3b+3i4oDDAndv7eLigMUA=",
+            "dtype": "<f8",
+            "shape": [
+                2,
+                2
+            ]
+        }
+    },
+    "Q4": {
+        "probe": "M1",
+        "couplers": [
+            "C3",
+            "C4"
+        ],
+        "setting": {},
+        "waveform": {
+            "SR": 6000000000.0,
+            "LEN": 8e-05,
+            "DDS_LO": 6000000000.0,
+            "RF": "zero()",
+            "DDS": "zero()"
+        },
+        "channel": {
+            "DDS": "ZW_AWG_11.CH11"
+        },
+        "calibration": {
+            "DDS": {
+                "delay": 3.85e-08
+            }
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green",
+        "params": {
+            "T1": 3.551977738182792e-05,
+            "T2_star": 1.6860752139146644e-05,
+            "T2_echo": 3.0209832291399745e-05,
+            "chi": 0.4725,
+            "Ec": null
+        },
+        "readout_matrix": {
+            "ndarray": "tPNSoZPZI0C081Khk9khwAyfy7h0oEPADJ/LuHQgREA=",
+            "dtype": "<f8",
+            "shape": [
+                2,
+                2
+            ]
+        }
+    },
+    "Q5": {
+        "probe": "M1",
+        "couplers": [
+            "C4",
+            "C5"
+        ],
+        "setting": {},
+        "waveform": {
+            "SR": 6000000000.0,
+            "LEN": 8e-05,
+            "DDS_LO": 6000000000.0,
+            "RF": "zero()",
+            "DDS": "zero()"
+        },
+        "channel": {
+            "DDS": "ZW_AWG_13.CH3"
+        },
+        "calibration": {
+            "DDS": {
+                "delay": 2.05e-08
+            }
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green",
+        "params": {
+            "T1": 4.60855611720867e-05,
+            "T2_star": 1.068326644734661e-05,
+            "T2_echo": 3.0471636855008606e-05,
+            "chi": 0.4625,
+            "Ec": null
+        },
+        "readout_matrix": {
+            "ndarray": "3tCsdmz8IkDe0Kx2bPwgwKOZLqk0nDzAo5kuqTScPUA=",
+            "dtype": "<f8",
+            "shape": [
+                2,
+                2
+            ]
+        }
+    },
+    "Q6": {
+        "probe": "M1",
+        "couplers": [
+            "C5",
+            "C6",
+            "C13"
+        ],
+        "setting": {},
+        "waveform": {
+            "SR": 6000000000.0,
+            "LEN": 8e-05,
+            "DDS_LO": 6000000000.0,
+            "RF": "zero()",
+            "DDS": "zero()"
+        },
+        "channel": {
+            "DDS": "ZW_AWG_13.CH10"
+        },
+        "calibration": {
+            "DDS": {
+                "delay": 6e-09
+            }
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green",
+        "params": {
+            "T1": 4.3171547520882735e-05,
+            "T2_star": 1.9993674052321164e-05,
+            "T2_echo": 2.869674038897699e-05,
+            "chi": 0.475,
+            "Ec": null
+        }
+    },
+    "Q7": {
+        "probe": "M1",
+        "couplers": [
+            "C6",
+            "C7"
+        ],
+        "setting": {},
+        "waveform": {
+            "SR": 6000000000.0,
+            "LEN": 8e-05,
+            "DDS_LO": 6000000000.0,
+            "RF": "zero()",
+            "DDS": "zero()"
+        },
+        "channel": {
+            "DDS": "ZW_AWG_11.CH16"
+        },
+        "calibration": {
+            "DDS": {
+                "delay": 4.05e-08
+            }
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green",
+        "params": {
+            "T1": 4.84346584652903e-05,
+            "T2_star": 7.326598144046954e-06,
+            "T2_echo": 3.1024027481637564e-05,
+            "chi": 0.3,
+            "Ec": null
+        },
+        "readout_matrix": {
+            "ndarray": "+ZF4UVrHNED5kXhRWsczwAglRHj3uTXACCVEePe5NkA=",
+            "dtype": "<f8",
+            "shape": [
+                2,
+                2
+            ]
+        }
+    },
+    "Q8": {
+        "probe": "M1",
+        "couplers": [
+            "C7",
+            "C8"
+        ],
+        "setting": {},
+        "waveform": {
+            "SR": 6000000000.0,
+            "LEN": 8e-05,
+            "DDS_LO": 6000000000.0,
+            "RF": "zero()",
+            "DDS": "zero()"
+        },
+        "channel": {
+            "DDS": "ZW_AWG_13.CH8"
+        },
+        "calibration": {
+            "DDS": {
+                "delay": 2.9e-08
+            }
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green",
+        "params": {
+            "T1": 4.932836324307927e-05,
+            "T2_star": 2.2194567871979852e-05,
+            "T2_echo": 3.3232212505602365e-05,
+            "chi": 0.1225,
+            "Ec": null
+        },
+        "readout_matrix": {
+            "ndarray": "VA9WYpLDTEBUD1ZikkNMwIphetFMSDHAimF60UxIMkA=",
+            "dtype": "<f8",
+            "shape": [
+                2,
+                2
+            ]
+        }
+    },
+    "Q9": {
+        "probe": "M1",
+        "couplers": [
+            "C8",
+            "C9"
+        ],
+        "setting": {},
+        "waveform": {
+            "SR": 6000000000.0,
+            "LEN": 8e-05,
+            "DDS_LO": 6000000000.0,
+            "RF": "zero()",
+            "DDS": "zero()"
+        },
+        "channel": {
+            "DDS": "ZW_AWG_13.CH16"
+        },
+        "calibration": {
+            "DDS": {
+                "delay": 9.5e-09
+            }
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green",
+        "params": {
+            "T2_star": 3.276871711596274e-05,
+            "T2_echo": 3.649581920814519e-05,
+            "T1": 6.450309618285572e-05,
+            "chi": 0.475,
+            "Ec": null
+        },
+        "readout_matrix": {
+            "ndarray": "iRZXEvkWSUCIFlcS+ZZIwIsDAPelJivAigMA96UmLUA=",
+            "dtype": "<f8",
+            "shape": [
+                2,
+                2
+            ]
+        }
+    },
+    "Q10": {
+        "probe": "M1",
+        "couplers": [
+            "C9",
+            "C10",
+            "C14"
+        ],
+        "setting": {},
+        "waveform": {
+            "SR": 6000000000.0,
+            "LEN": 8e-05,
+            "DDS_LO": 6000000000.0,
+            "RF": "zero()",
+            "DDS": "zero()"
+        },
+        "channel": {
+            "DDS": "ZW_AWG_11.CH3"
+        },
+        "calibration": {
+            "DDS": {
+                "delay": 3.55e-08
+            }
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green",
+        "params": {
+            "T1": 6.791387514373877e-05,
+            "T2_star": 2.417987402332957e-05,
+            "T2_echo": 3.708917194492986e-05,
+            "chi": 0.3875,
+            "Ec": null
+        },
+        "readout_matrix": {
+            "ndarray": "55SHkYsnJUDnlIeRiycjwNAKr8fqLEzA0Aqvx+qsTEA=",
+            "dtype": "<f8",
+            "shape": [
+                2,
+                2
+            ]
+        }
+    },
+    "Q11": {
+        "probe": "M1",
+        "couplers": [
+            "C10",
+            "C11"
+        ],
+        "setting": {},
+        "waveform": {
+            "SR": 6000000000.0,
+            "LEN": 8e-05,
+            "DDS_LO": 6000000000.0,
+            "RF": "zero()",
+            "DDS": "zero()"
+        },
+        "channel": {
+            "DDS": "ZW_AWG_11.CH10"
+        },
+        "calibration": {
+            "DDS": {
+                "delay": 4.4e-08
+            }
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green",
+        "params": {
+            "T1": 8.711095497830496e-05,
+            "T2_star": 2.359342611421589e-05,
+            "T2_echo": 3.5299916223623394e-05,
+            "chi": 0.4625,
+            "Ec": null
+        },
+        "readout_matrix": {
+            "ndarray": "n5ZSU8s6MkCfllJTyzoxwM/0oXwbJjHAz/ShfBsmMkA=",
+            "dtype": "<f8",
+            "shape": [
+                2,
+                2
+            ]
+        }
+    },
+    "Q12": {
+        "probe": "M1",
+        "couplers": [
+            "C11"
+        ],
+        "setting": {},
+        "waveform": {
+            "SR": 6000000000.0,
+            "LEN": 8e-05,
+            "DDS_LO": 6000000000.0,
+            "RF": "zero()",
+            "DDS": "zero()"
+        },
+        "channel": {
+            "DDS": "ZW_AWG_13.CH1"
+        },
+        "calibration": {
+            "DDS": {
+                "delay": 3e-08
+            }
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green",
+        "params": {
+            "T1": 6.864577229003301e-05,
+            "T2_star": 1.8660593791172395e-05,
+            "T2_echo": 4.148826684691782e-05,
+            "chi": 0.455,
+            "Ec": null
+        },
+        "readout_matrix": {
+            "ndarray": "AqPnCEP3MUACo+cIQ/cwwCaLFMR3hDvAJosUxHeEPEA=",
+            "dtype": "<f8",
+            "shape": [
+                2,
+                2
+            ]
+        }
+    },
+    "C0": {
+        "qubits": [
+            "Q0",
+            "Q1"
+        ],
+        "setting": {
+            "OFFSET": -0.0608
+        },
+        "waveform": {
+            "SR": 2000000000.0,
+            "LEN": 8e-05,
+            "Z": "zero()"
+        },
+        "channel": {
+            "Z": "AWG_16_116_53.CH3",
+            "ZBIAS": "AWG_16_116_53.CH3"
+        },
+        "calibration": {
+            "Z": {
+                "delay": 8.3e-08,
+                "distortion": {
+                    "decay": [
+                        [
+                            0.003348958280793078,
+                            6.111620272921399e-05
+                        ],
+                        [
+                            0.014374529838358727,
+                            1.7234830131946948e-06
+                        ],
+                        [
+                            0.059067492731176584,
+                            1.9479126750308649e-07
+                        ]
+                    ]
+                }
+            }
+        },
+        "bias": {
+            "amps": [
+                0.003348958280793078,
+                0.014374529838358727,
+                0.059067492731176584
+            ],
+            "taus": [
+                6.111620272921399e-05,
+                1.7234830131946948e-06,
+                1.9479126750308649e-07
+            ],
+            "sym": -0.0608,
+            "Q0_min": 0.276,
+            "Q1_min": 0.42,
+            "edge": [
+                -0.09286073614014896,
+                -0.028494319426845216
+            ]
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green"
+    },
+    "C1": {
+        "qubits": [
+            "Q1",
+            "Q2"
+        ],
+        "setting": {
+            "OFFSET": -0.0488
+        },
+        "waveform": {
+            "SR": 2000000000.0,
+            "LEN": 8e-05,
+            "Z": "zero()"
+        },
+        "channel": {
+            "Z": "AWG_16_116_51.CH8",
+            "ZBIAS": "AWG_16_116_51.CH8"
+        },
+        "calibration": {
+            "Z": {
+                "delay": 8.5e-08,
+                "distortion": {
+                    "decay": [
+                        [
+                            0.005705237154544386,
+                            2.859411109981787e-05
+                        ],
+                        [
+                            0.01952275840125321,
+                            1.701118665477762e-06
+                        ],
+                        [
+                            0.04884840923438657,
+                            1.9703647790561616e-07
+                        ]
+                    ]
+                }
+            }
+        },
+        "bias": {
+            "amps": [
+                0.005705237154544386,
+                0.01952275840125321,
+                0.04884840923438657
+            ],
+            "taus": [
+                2.859411109981787e-05,
+                1.701118665477762e-06,
+                1.9703647790561616e-07
+            ],
+            "sym": -0.0488,
+            "Q2_min": 0.42,
+            "Q1_min": 0.592
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green"
+    },
+    "C2": {
+        "qubits": [
+            "Q2",
+            "Q3"
+        ],
+        "setting": {
+            "OFFSET": -0.0766
+        },
+        "waveform": {
+            "SR": 2000000000.0,
+            "LEN": 8e-05,
+            "Z": "zero()"
+        },
+        "channel": {
+            "Z": "AWG_16_116_52.CH16",
+            "ZBIAS": "AWG_16_116_52.CH16"
+        },
+        "calibration": {
+            "Z": {
+                "delay": 8.05e-08,
+                "distortion": {
+                    "decay": [
+                        [
+                            0.0053143433882587915,
+                            7.33737420912081e-06
+                        ],
+                        [
+                            0.01935305064623514,
+                            5.566225405126605e-07
+                        ],
+                        [
+                            0.05691977184507083,
+                            1.675382045152594e-07
+                        ]
+                    ]
+                }
+            }
+        },
+        "bias": {
+            "amps": [
+                0.0053143433882587915,
+                0.01935305064623514,
+                0.05691977184507083
+            ],
+            "taus": [
+                7.33737420912081e-06,
+                5.566225405126605e-07,
+                1.675382045152594e-07
+            ],
+            "sym": -0.0766,
+            "Q2_min": 0.456,
+            "Q3_min": 0.6774
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green"
+    },
+    "C3": {
+        "qubits": [
+            "Q3",
+            "Q4"
+        ],
+        "setting": {
+            "OFFSET": -0.0435
+        },
+        "waveform": {
+            "SR": 2000000000.0,
+            "LEN": 8e-05,
+            "Z": "zero()"
+        },
+        "channel": {
+            "Z": "AWG_16_116_48.CH7",
+            "ZBIAS": "AWG_16_116_48.CH7"
+        },
+        "calibration": {
+            "Z": {
+                "delay": 8.3e-08,
+                "distortion": {
+                    "decay": [
+                        [
+                            0.004325024226698492,
+                            2.0592261825016693e-05
+                        ],
+                        [
+                            0.025010411071791437,
+                            6.316653267206856e-07
+                        ],
+                        [
+                            0.0513520845748463,
+                            1.46910724769414e-07
+                        ]
+                    ]
+                }
+            }
+        },
+        "bias": {
+            "amps": [
+                0.004325024226698492,
+                0.025010411071791437,
+                0.0513520845748463
+            ],
+            "taus": [
+                2.0592261825016693e-05,
+                6.316653267206856e-07,
+                1.46910724769414e-07
+            ],
+            "sym": -0.0435,
+            "Q4_min": 0.42,
+            "Q3_min": 0.688
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green"
+    },
+    "C4": {
+        "qubits": [
+            "Q4",
+            "Q5"
+        ],
+        "setting": {
+            "OFFSET": -0.013
+        },
+        "waveform": {
+            "SR": 2000000000.0,
+            "LEN": 8e-05,
+            "Z": "zero()"
+        },
+        "channel": {
+            "Z": "AWG_16_116_38.CH14",
+            "ZBIAS": "AWG_16_116_38.CH14"
+        },
+        "calibration": {
+            "Z": {
+                "delay": 8.2e-08,
+                "distortion": {
+                    "decay": [
+                        [
+                            0.0045184810477259234,
+                            2.0479786165242957e-05
+                        ],
+                        [
+                            0.012349815727657469,
+                            1.7523558063857396e-06
+                        ],
+                        [
+                            0.05463845297879562,
+                            1.9183622750605465e-07
+                        ]
+                    ]
+                }
+            }
+        },
+        "bias": {
+            "amps": [
+                0.0045184810477259234,
+                0.012349815727657469,
+                0.05463845297879562
+            ],
+            "taus": [
+                2.0479786165242957e-05,
+                1.7523558063857396e-06,
+                1.9183622750605465e-07
+            ],
+            "sym": -0.013,
+            "Q4_min": 0.444,
+            "Q5_min": 0.652
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green"
+    },
+    "C5": {
+        "qubits": [
+            "Q5",
+            "Q6"
+        ],
+        "setting": {
+            "OFFSET": -0.0192
+        },
+        "waveform": {
+            "SR": 2000000000.0,
+            "LEN": 8e-05,
+            "Z": "zero()"
+        },
+        "channel": {
+            "Z": "AWG_16_116_51.CH14",
+            "ZBIAS": "AWG_16_116_51.CH14"
+        },
+        "calibration": {
+            "Z": {
+                "delay": 8.1e-08,
+                "distortion": {
+                    "decay": [
+                        [
+                            0.011025994217575458,
+                            6.194304349042288e-05
+                        ],
+                        [
+                            0.04911612447650677,
+                            2.0786794159537315e-07
+                        ],
+                        [
+                            0.032084802692239164,
+                            2.0783895298759346e-07
+                        ]
+                    ]
+                }
+            }
+        },
+        "bias": {
+            "amps": [
+                0.011025994217575458,
+                0.04911612447650677,
+                0.032084802692239164
+            ],
+            "taus": [
+                6.194304349042288e-05,
+                2.0786794159537315e-07,
+                2.0783895298759346e-07
+            ],
+            "sym": -0.0192,
+            "Q6_min": 0.46,
+            "Q5_min": 0.62
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green"
+    },
+    "C6": {
+        "qubits": [
+            "Q6",
+            "Q7"
+        ],
+        "setting": {
+            "OFFSET": 0.0409
+        },
+        "waveform": {
+            "SR": 2000000000.0,
+            "LEN": 8e-05,
+            "Z": "zero()"
+        },
+        "channel": {
+            "Z": "AWG_16_116_38.CH9",
+            "ZBIAS": "AWG_16_116_38.CH9"
+        },
+        "calibration": {
+            "Z": {
+                "delay": 8.45e-08,
+                "distortion": {
+                    "decay": [
+                        [
+                            0.005655698441780213,
+                            2.939670236509617e-05
+                        ],
+                        [
+                            0.01106051001409255,
+                            1.738486621619678e-06
+                        ],
+                        [
+                            0.05619645118774782,
+                            2.119000693185049e-07
+                        ]
+                    ]
+                }
+            }
+        },
+        "bias": {
+            "amps": [
+                0.005655698441780213,
+                0.01106051001409255,
+                0.05619645118774782
+            ],
+            "taus": [
+                2.939670236509617e-05,
+                1.738486621619678e-06,
+                2.119000693185049e-07
+            ],
+            "sym": 0.0409,
+            "Q6_min": 0.456,
+            "Q7_min": 0.632
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green"
+    },
+    "C7": {
+        "qubits": [
+            "Q7",
+            "Q8"
+        ],
+        "setting": {
+            "OFFSET": 0.1335
+        },
+        "waveform": {
+            "SR": 2000000000.0,
+            "LEN": 8e-05,
+            "Z": "zero()"
+        },
+        "channel": {
+            "Z": "AWG_16_116_53.CH2",
+            "ZBIAS": "AWG_16_116_53.CH2"
+        },
+        "calibration": {
+            "Z": {
+                "delay": 8.1e-08,
+                "distortion": {
+                    "decay": [
+                        [
+                            0.05400936557717,
+                            2.4526225295748856e-07
+                        ],
+                        [
+                            0.006797014549548204,
+                            2.445154195263213e-07
+                        ],
+                        [
+                            0.026050556518797674,
+                            5.102329643963442e-08
+                        ]
+                    ]
+                }
+            }
+        },
+        "bias": {
+            "amps": [
+                0.05400936557717,
+                0.006797014549548204,
+                0.026050556518797674
+            ],
+            "taus": [
+                2.4526225295748856e-07,
+                2.445154195263213e-07,
+                5.102329643963442e-08
+            ],
+            "sym": 0.1335,
+            "Q8_min": 0.348,
+            "Q7_min": 0.488
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green"
+    },
+    "C8": {
+        "qubits": [
+            "Q8",
+            "Q9"
+        ],
+        "setting": {
+            "OFFSET": 0.1818
+        },
+        "waveform": {
+            "SR": 2000000000.0,
+            "LEN": 8e-05,
+            "Z": "zero()"
+        },
+        "channel": {
+            "Z": "AWG_16_116_53.CH4",
+            "ZBIAS": "AWG_16_116_53.CH4"
+        },
+        "calibration": {
+            "Z": {
+                "delay": 8.25e-08,
+                "distortion": {
+                    "decay": [
+                        [
+                            0.007236996014161523,
+                            2.5774430221603323e-07
+                        ],
+                        [
+                            0.059350528785505875,
+                            2.571478933221241e-07
+                        ],
+                        [
+                            0.023857609642537587,
+                            5.59738711980109e-08
+                        ]
+                    ]
+                }
+            }
+        },
+        "bias": {
+            "amps": [
+                0.007236996014161523,
+                0.059350528785505875,
+                0.023857609642537587
+            ],
+            "taus": [
+                2.5774430221603323e-07,
+                2.571478933221241e-07,
+                5.59738711980109e-08
+            ],
+            "sym": 0.1818,
+            "Q8_min": 0.472,
+            "Q9_min": -0.5981,
+            "edge": [
+                0.1439135454935382,
+                0.22065811926709267
+            ]
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green"
+    },
+    "C9": {
+        "qubits": [
+            "Q9",
+            "Q10"
+        ],
+        "setting": {
+            "OFFSET": -0.2388
+        },
+        "waveform": {
+            "SR": 2000000000.0,
+            "LEN": 8e-05,
+            "Z": "zero()"
+        },
+        "channel": {
+            "Z": "AWG_16_116_53.CH8",
+            "ZBIAS": "AWG_16_116_53.CH8"
+        },
+        "calibration": {
+            "Z": {
+                "delay": 8.15e-08,
+                "distortion": {
+                    "decay": [
+                        [
+                            0.004264861582357599,
+                            1.4435431837439797e-05
+                        ],
+                        [
+                            0.032853028950819145,
+                            6.910489728331028e-07
+                        ],
+                        [
+                            0.04318621101101183,
+                            1.796447166701415e-07
+                        ]
+                    ]
+                }
+            }
+        },
+        "bias": {
+            "amps": [
+                0.004264861582357599,
+                0.032853028950819145,
+                0.04318621101101183
+            ],
+            "taus": [
+                1.4435431837439797e-05,
+                6.910489728331028e-07,
+                1.796447166701415e-07
+            ],
+            "sym": -0.2388,
+            "Q10_min": 0.428,
+            "Q9_min": 0.5729
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green"
+    },
+    "C10": {
+        "qubits": [
+            "Q10",
+            "Q11"
+        ],
+        "setting": {
+            "OFFSET": 0.0402
+        },
+        "waveform": {
+            "SR": 2000000000.0,
+            "LEN": 8e-05,
+            "Z": "zero()"
+        },
+        "channel": {
+            "Z": "AWG_16_116_38.CH15",
+            "ZBIAS": "AWG_16_116_38.CH15"
+        },
+        "calibration": {
+            "Z": {
+                "delay": 8.8e-08,
+                "distortion": {
+                    "decay": [
+                        [
+                            0.00915732948707674,
+                            3.160895754465245e-06
+                        ],
+                        [
+                            0.035295638703269336,
+                            3.489258743395156e-07
+                        ],
+                        [
+                            0.0363724234199818,
+                            1.1162629635927339e-07
+                        ]
+                    ]
+                }
+            }
+        },
+        "bias": {
+            "amps": [
+                0.00915732948707674,
+                0.035295638703269336,
+                0.0363724234199818
+            ],
+            "taus": [
+                3.160895754465245e-06,
+                3.489258743395156e-07,
+                1.1162629635927339e-07
+            ],
+            "sym": 0.0402,
+            "Q10_min": 0.344,
+            "Q11_min": 0.468
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green"
+    },
+    "C11": {
+        "qubits": [
+            "Q11",
+            "Q12"
+        ],
+        "setting": {
+            "OFFSET": 0.0972
+        },
+        "waveform": {
+            "SR": 2000000000.0,
+            "LEN": 8e-05,
+            "Z": "zero()"
+        },
+        "channel": {
+            "Z": "AWG_16_116_53.CH1",
+            "ZBIAS": "AWG_16_116_53.CH1"
+        },
+        "calibration": {
+            "Z": {
+                "delay": 8.25e-08,
+                "distortion": {
+                    "decay": [
+                        [
+                            0.009892238950085109,
+                            3.7817104643876865e-06
+                        ],
+                        [
+                            0.012156279129653426,
+                            7.247926540855335e-07
+                        ],
+                        [
+                            0.055895329364581824,
+                            1.8678093796953826e-07
+                        ]
+                    ]
+                }
+            }
+        },
+        "bias": {
+            "amps": [
+                0.009892238950085109,
+                0.012156279129653426,
+                0.055895329364581824
+            ],
+            "taus": [
+                3.7817104643876865e-06,
+                7.247926540855335e-07,
+                1.8678093796953826e-07
+            ],
+            "sym": 0.0972,
+            "Q12_min": 0.356,
+            "Q11_min": 0.476
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green"
+    },
+    "C12": {
+        "qubits": [
+            "Q2",
+            "Q15"
+        ],
+        "setting": {
+            "OFFSET": -0.0641
+        },
+        "waveform": {
+            "SR": 2000000000.0,
+            "LEN": 8e-05,
+            "Z": "zero()"
+        },
+        "channel": {
+            "Z": "AWG_16_116_35.CH7",
+            "ZBIAS": "AWG_16_116_35.CH7"
+        },
+        "calibration": {
+            "Z": {
+                "delay": 7.9e-08,
+                "distortion": {
+                    "decay": [
+                        [
+                            0.005656926604486979,
+                            1.2750090384566291e-05
+                        ],
+                        [
+                            0.01759751980951931,
+                            4.116800050764309e-07
+                        ],
+                        [
+                            0.052319629428215386,
+                            1.7148691694454345e-07
+                        ]
+                    ]
+                }
+            }
+        },
+        "bias": {
+            "amps": [
+                0.005656926604486979,
+                0.01759751980951931,
+                0.052319629428215386
+            ],
+            "taus": [
+                1.2750090384566291e-05,
+                4.116800050764309e-07,
+                1.7148691694454345e-07
+            ],
+            "sym": -0.0641,
+            "Q2_min": 0.428,
+            "Q15_min": 0.612
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green"
+    },
+    "M1": {
+        "qubits": [
+            "Q0",
+            "Q1",
+            "Q2",
+            "Q3",
+            "Q4",
+            "Q5",
+            "Q6",
+            "Q7",
+            "Q8",
+            "Q9",
+            "Q10",
+            "Q11",
+            "Q12"
+        ],
+        "adcsr": 2500000000.0,
+        "setting": {
+            "TRIGD": 5.222e-06,
+            "LO": 0
+        },
+        "waveform": {
+            "SR": 8000000000.0,
+            "LEN": 0.0002,
+            "DDS_LO": 8000000000.0,
+            "RF": "zero()",
+            "TRIG": "zero()",
+            "DDS": "zero()"
+        },
+        "channel": {
+            "DDS": "ZW_AD3.CH1",
+            "ADC": "ZW_AD3.CH13",
+            "TRIG": null,
+            "LO": null
+        },
+        "calibration": {
+            "DDS": {
+                "delay": 5e-06
+            }
+        },
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green"
+    },
+    "dev": {
+        "index": [
+            -9,
+            -9
+        ],
+        "color": "green",
+        "LH_Trig": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "MW1": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "NA": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "model": "3672A",
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "ZW_AWG_2": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_AD2": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_AD1": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_AD3": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_AWG_3": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_Trig": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "ZW_AWG_4": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_AWG_5": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_AWG_6": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_AWG_7": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_AWG_8": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_AWG_9": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_AWG_10": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_AWG_11": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_AWG_12": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_AWG_13": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_AWG_14": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_AWG_15": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_AWG_16": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_AWG_17": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_AWG_18": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_AWG_19": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "DG645_203": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "ZW_AWG_1": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        },
+        "ZW_Trig2": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "AWG_16_116_47": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "AWG_16_116_48": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "AWG_16_116_49": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "AWG_16_116_50": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "AWG_16_116_51": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "AWG_16_116_52": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "AWG_16_116_33": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "AWG_16_116_34": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "AWG_16_116_35": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "AWG_16_116_36": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "AWG_16_116_37": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "AWG_16_116_38": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "AWG_16_116_39": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "AWG_16_116_53": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer",
+            "port": -1
+        },
+        "ZW_AWG_35": {
+            "addr": "192.168.103.2",
+            "name": "VirtualDevice",
+            "type": "driver",
+            "port": -1,
+            "srate": 1000000000.0,
+            "pid": 20804,
+            "host": "QuarkServer"
+        }
+    },
+    "var": {},
+    "etc": {
+        "driver": {
+            "path": "sss",
+            "concurrent": true,
+            "timeout": 30.0,
+            "filter": [
+                "Waveform or np.array"
+            ],
+            "mapping": {
+                "setting_LO": "LO.Frequency",
+                "setting_POW": "LO.Power",
+                "setting_OFFSET": "ZBIAS.Offset",
+                "waveform_RF_I": "I.Waveform",
+                "waveform_RF_Q": "Q.Waveform",
+                "waveform_TRIG": "TRIG.Marker1",
+                "waveform_DDS": "DDS.Waveform",
+                "waveform_SW": "SW.Marker1",
+                "waveform_Z": "Z.Waveform",
+                "setting_PNT": "ADC.PointNumber",
+                "setting_SHOT": "ADC.Shot",
+                "setting_TRIGD": "ADC.TriggerDelay"
+            },
+            "root": "C:\\Users\\NUC\\Desktop\\quarkstudio\\systemqos"
+        },
+        "server": {
+            "workers": 1,
+            "shared": 0,
+            "delay": 10.0,
+            "cached": 5,
+            "review": [
+                0,
+                1,
+                3
+            ],
+            "track": [
+                0,
+                1,
+                3
+            ],
+            "schedule": {
+                "job": {
+                    "hour": "2"
+                }
+            },
+            "filesize": 4000.0
+        },
+        "canvas": {
+            "range": [
+                0.0,
+                8e-06
+            ],
+            "filter": []
+        },
+        "cloud": {
+            "host": "172.16.1.251",
+            "online": false,
+            "station": "Dongling"
+        }
+    }
+}
