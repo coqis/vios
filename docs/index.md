@@ -6,36 +6,34 @@ hide:
 
 <!-- ![SystemQ](image/aniatom.gif){ .center } -->
 
-# Quafu Quantum Computing Cloud(Superconducting)
+# Quafu Superconducting Quantum Computing Cloud
 
 
 ## 1. Introduction
-Welcome to the Quafu quantum cloud computing cluster([https://quafu.baqis.ac.cn/](https://quafu.baqis.ac.cn/)). Quafu is a stable, open-access quantum computing platform that aims to help users develop novel quantum algorithms and applications, thus promoting the practical development of quantum computing technologies. The platform is developed and maintained by teams from the Beijing Academy of Quantum Information Sciences (BAQIS), the Institute of Physics of the Chinese Academy of Sciences (IOPCAS) and Tsinghua University.
-
-
-## 2. Available Resources
+Welcome to the Quafu Superconducting Quantum Computing(Quafu-SQC) cloud([https://quafu-sqc.baqis.ac.cn/](https://quafu-sqc.baqis.ac.cn/)). Quafu-SQC is a stable, open-access quantum computing platform that aims to help users develop novel quantum algorithms and applications, thus promoting the practical development of quantum computing technologies. The platform is developed and maintained by [Superconducting Quantum Computing Group](http://sqc.baqis.ac.cn/) from [Beijing Academy of Quantum Information Sciences](http://baqis.ac.cn/).
 
 <iframe
     width=100% 
+    height=400px
     src="https://quafu-sqc.baqis.ac.cn"  
     frameborder=0  
     allowfullscreen>
 </iframe>
 
-In addition to using Quafu website, advanced users can fully experience the quantum computing platform more freely with `QuarkStudio`(see [Installation](#3-installation)).
+> Users can fully experience the quantum computing resources freely with `QuarkStudio`(see [Installation](#2-installation)).
 
 
-## 3. Installation
+## 2. Installation
 `QuarkStudio` supports all major operating systems, including Windows, MacOS and Linux. To install, a Python(>=3.10) is required and then install latest `QuarkStudio` by pip (in a terminal):
 
 ```bash
 pip install quarkstudio # python>=3.10
 ```
 
-Once `QuarkStudio` is installed, you are ready to submit your quantum circuits **directly** to the backends listed above.
+Now you are ready to submit your quantum circuits **directly** to the backends listed above.
 
 
-## 4. Quick Guide
+## 3. Quick Guide
 To begin with, you need to initialize a task manager
 
 ```python
@@ -46,7 +44,7 @@ tmgr = Task('token')
     A token is required here, which can be applied by click [**SQCLab**](https://quafu-sqc.baqis.ac.cn/) above or sending an email to quafu_ts@baqis.ac.cn. The token is a verification key that guarantees your rights to fully use the platform, so **don't share it with others**. Each token has a expiration time of **30 days**. When it expires, you need to apply a new token from [**SQCLab**](https://quafu-sqc.baqis.ac.cn/). 
 
 
-    Each user can submit 1000 tasks per day since the backend quantum computing systems have a limited processing capacity, which is designed to ensure fair access and optimal performance for all users. The daily limit for users may be adjusted according to the overall load. Your submitted tasks that exceed the daily limit will be queued and processed on the following days. 
+    Each user can submit 100 tasks per day since the backend quantum computing systems have a limited processing capacity, which is designed to ensure fair access and optimal performance for all users. The daily limit for users may be adjusted according to the overall load. Your submitted tasks that exceed the daily limit will be queued and processed on the following days. 
 
     If you have heavy computation resource requirement, please contact us at quafu_ts@baqis.ac.cn for additional collaboration opportunities.
 
@@ -66,7 +64,6 @@ The output may looks like
 {'Dongling': 0, # no task in queue
  'Miaofeng': 0,
  'Baihua': 0,
- 'Baiwang': 0,
  'Yunmeng': 'Offline', # not available
  'Haituo': 1224, # 1224 tasks in queue
  }
@@ -95,9 +92,8 @@ circuit = """
     """
 ```
 
-> We highly recommend users to use qlisp to write the circuits, see [qlisp](https://quarkstudio.readthedocs.io/en/latest/usage/qlisp) for more information.
-
-Then, you can put this circuit in a Python dict to define a task as shown below. The backend can be set by the key `chip`. Besides, you can name this task `MyJob` or whatever you want. You can also choose whether to transpile your circuit or not by the `compile` key. If you want to get the bayesian-corrected evaluations of all bases, you can set the `correct` key to `True`(Bayesian correction is not performed by default, so this option has no effect for now).
+Then, you can put this circuit in a Python dict to define a task as shown below. The backend can be set by the key `chip`. Besides, you can name this task `MyJob` or whatever you want. You can also choose whether to transpile your circuit or not by the `compile` key. 
+<!-- If you want to get the bayesian-corrected evaluations of all bases, you can set the `correct` key to `True`(Bayesian correction is not performed by default, so this option has no effect for now). -->
 
 ```python
 task = {
@@ -105,7 +101,6 @@ task = {
   'name': 'MyJob',  # task name
   'circuit':circuit, # circuit written in OpenQASM2.0
   'compile': True, # transpile to native gate sets if True
-  'correct': False # Bayesian correction for the readout
 }
 ```
 
@@ -200,7 +195,7 @@ By default, the Bayesian corrected result is not returned. Since the inevitable 
 
 
 
-## 5. Technical Support
+## 4. Technical Support
 
 If you encounter any problems, please feel free to contact us and we will provide immediate feedback.
 Contact email: quafu_ts@baqis.ac.cn

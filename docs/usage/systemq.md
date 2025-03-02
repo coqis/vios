@@ -6,11 +6,11 @@ comments: true
 
 
 ### **About SystemQ**
-[**SystemQ**](https://gitee.com/baqis/systemq.git) is designed as a QOS and developed by the [Superconducting Quantum Computing Group](http://sqc.baqis.ac.cn/) at [Beijing Academy of Quantum Information Sciences](http://baqis.ac.cn/). SystemQ mainly consists of three subsystems, namely **systemq**, **waveforms** and **quarkstudio**.
+[**SystemQ**](https://gitee.com/baqis/systemq.git) is designed as a QOS and developed by the [Superconducting Quantum Computing Group](http://sqc.baqis.ac.cn/) from [Beijing Academy of Quantum Information Sciences](http://baqis.ac.cn/). SystemQ mainly consists of three subsystems, namely **systemq**, **waveforms** and **quarkstudio**.
 
 - [`systemq`](https://gitee.com/baqis/systemq.git) is primarily targeted towards end users, offering a range of pre-written functional modules while also enabling users to customize any desired functionalities.
-- [`waveforms`](https://quarkstudio.readthedocs.io/en/latest/usage/waveform/) mainly focus on the first point described in [Introduction to QOS](https://quarkstudio.readthedocs.io/en/latest/usage/#introduction-to-qos).
-- [`quarkstudio`](https://quarkstudio.readthedocs.io/en/latest/usage/quark/) mainly focus on the second, third, and fourth points described in [Introduction to QOS](https://quarkstudio.readthedocs.io/en/latest/usage/#introduction-to-qos)
+- [`waveforms`](../waveform/) mainly focus on the first point described in [Introduction to QOS](../#introduction-to-qos).
+- [`quarkstudio`](../quark/) mainly focus on the second, third, and fourth points described in [Introduction to QOS](../#introduction-to-qos)
 
 
 ### **How to start**
@@ -27,7 +27,7 @@ To use SystemQ, the following basic requirements need to be met.
     |:material-language-python: [python](https://python.org)|>=3.11|
 </div>
 
-Then you can install and start using SystemQ from [**demo**](https://quarkstudio.readthedocs.io/en/latest/usage/code/demo/).
+Then you can install and start using SystemQ from [**demo**](../code/demo/).
 ???+ note "Installation"
     ``` bash
     # clone systemq

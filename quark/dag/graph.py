@@ -28,21 +28,24 @@ from zee import query_dict_from_string, update_dict_by_string
 
 
 class ChipManger(object):
-    """ >>>
-    {'group': {'0': ['Q0', 'Q1'], '1': ['Q5', 'Q8']},
-     'Q0': {'Spectrum': {'status': 'OK',
-                         'lifetime': 200,
-                         'tolerance': 0.01,
-                         'history': []},
-            'Ramsey': {'status': 'OK',
-                       'lifetime': 200,
-                       'tolerance': 0.01,
-                       'history': []}},
-     'C1': {'fidelity': {'status': 'OK',
-                         'lifetime': 200,
-                         'tolerance': 0.01,
-                         'history': []}}
-     }
+    """
+    Example: chip info
+        ``` {.py3 linenums="1"}
+        {'group': {'0': ['Q0', 'Q1'], '1': ['Q5', 'Q8']},
+        'Q0': {'Spectrum': {'status': 'OK',
+                            'lifetime': 200,
+                            'tolerance': 0.01,
+                            'history': []},
+                'Ramsey': {'status': 'OK',
+                        'lifetime': 200,
+                        'tolerance': 0.01,
+                        'history': []}},
+        'C1': {'fidelity': {'status': 'OK',
+                            'lifetime': 200,
+                            'tolerance': 0.01,
+                            'history': []}}
+        }
+        ```
     """
     VT = {'lifetime': 200,
           'tolerance': 0.01,
@@ -79,11 +82,14 @@ class ChipManger(object):
 
 
 class TaskManager(nx.DiGraph):
-    """ >>>
-    {'edges': [('S21', 'Spectrum'), ('Spectrum', 'PowerRabi'), ('Spectrum', 'TimeRabi'),
-               ('PowerRabi', 'Ramsey'), ('TimeRabi', 'Ramsey')],
-     'check': {'period': 60, 'method': 'Ramsey'}
-     }
+    """
+    Example: task info
+        ``` {.py3 linenums="1"}
+        {'edges': [('S21', 'Spectrum'), ('Spectrum', 'PowerRabi'), ('Spectrum', 'TimeRabi'),
+                ('PowerRabi', 'Ramsey'), ('TimeRabi', 'Ramsey')],
+        'check': {'period': 60, 'method': 'Ramsey'}
+        }
+        ```
      """
 
     def __init__(self, task: dict) -> None:
