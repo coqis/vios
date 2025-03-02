@@ -24,7 +24,7 @@ remote
 ```
 
 1. :material-language-python: VirtualDevice
-    [driver template](/modules/quark/driver/VirtualDevice/)
+    [driver template](../../../modules/quark/driver/VirtualDevice/)
 2. :material-code-json: remote
     ```python title="remote.json"
     {
