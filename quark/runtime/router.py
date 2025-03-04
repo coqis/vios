@@ -28,8 +28,11 @@ from pathlib import Path
 import numpy as np
 import requests
 from loguru import logger
+from srpc import connect
 
 from quark.proxy import QuarkProxy
+
+qc = {}
 
 
 def savefig(result):
@@ -73,6 +76,13 @@ def schedule():
     # return [(r'C:\Usersddd\sesam\Desktop\home\dat\baqis\testtask_2023-08-31-12-35-12.hdf5',r'\home\dat\baqis\testtask_2023-08-31-12-35-12.hdf5')]
 
 
+def transfer(tid: int, status: str, result: dict, station: str, left: int, **kwds):
+    if not qc:
+        print('connecting server ...')
+        qc['default'] = connect('QuarkCloud', host=kwds['host'], port=3088)
+    qc['default'].transfer(tid, status, result, station, left)
+
+
 def postprocess(result: dict):
     """Send result back to cloud or whatever you wanna do
 
@@ -106,19 +116,19 @@ def postprocess(result: dict):
 
     # print(result.keys(),result['meta'].keys())
 
-    quafu = result['meta'].get('coqis', {})
+    coqis = result['meta'].get('coqis', {})
     # savefig(result)
-    if not quafu.get('token', '') or not quafu.get('eid', ''):
+    if not coqis.get('eid', ''):  # to sqc
         return QuarkProxy.process(result, False)
 
     res = QuarkProxy.process(result, True)
     rshot = 0
-    post_data = {"task_id": quafu['eid'],
+    post_data = {"task_id": coqis['eid'],
                  "status": res['status'].lower(),
                  "raw": "",
                  "res": "",
                  'transpiled_circuit': res['transpiled'],
-                 "server": quafu['systemid']}
+                 "server": coqis['systemid']}
 
     if res['status'].lower() == 'finished':
         rshot = sum(res['count'].values())
@@ -129,7 +139,7 @@ def postprocess(result: dict):
     try:
         resp = requests.post(url=f"http://124.70.54.59/qbackend/scq_result/",
                              data=post_data,
-                             headers={'api_token': quafu['token']})
+                             headers={'api_token': coqis['token']})
         logger.info(f'Back to quafu: {resp.text} {rshot}')
     except Exception as e:
         logger.error(f'Failed to post result: {e}')

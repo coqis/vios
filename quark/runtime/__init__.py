@@ -42,7 +42,7 @@ from .assembler import MAPPING, assemble, ccompile, decode, initialize
 from .calculator import calculate
 from .device import read, write
 from .processor import process
-from .router import postprocess, schedule
+from .router import postprocess, schedule, transfer
 
 loads = dill.loads
 dumps = dill.dumps
