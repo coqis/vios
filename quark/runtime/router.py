@@ -28,7 +28,7 @@ from pathlib import Path
 import numpy as np
 import requests
 from loguru import logger
-from srpc import connect
+from srpc import dumps
 
 from quark.proxy import QuarkProxy
 
@@ -77,10 +77,21 @@ def schedule():
 
 
 def transfer(tid: int, status: str, result: dict, station: str, left: int, **kwds):
-    if not qc:
-        print('connecting server ...')
-        qc['default'] = connect('QuarkCloud', host=kwds['host'], port=3088)
-    qc['default'].transfer(tid, status, result, station, left)
+
+    # result['count'] = np.random.randn(1024)
+    # result['token'] = '1E5TIgrYjr1O1qpR[VtIwzpG`NzgXEUZNHr{5Ck6UVs/Rg2lEO{lEP{5TNxdUO5RkN1dUN7JDd5WnJtJTNzpEP1p{NzBDPy1jNx1TOzBkNjpkJ1GXbjxjJvOnMkGnM{mXdiKHRkG4djpkJzW3d2Kzf'
+
+    res = requests.post('https://quafu-sqc.baqis.ac.cn/task/transfer/',
+                        data=json.dumps({'tid': tid,
+                                         'status': status,
+                                         'result': dumps(result),
+                                         'station': station,
+                                         'left': left
+                                         }),
+                        headers={'token': result['token']})
+    if kwds.get('debug', False):
+        print(tid, status, result, station, left)
+        print(json.loads(res.content.decode()))
 
 
 def postprocess(result: dict):
