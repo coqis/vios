@@ -10,7 +10,7 @@
 ### :material-server: ***QuarkServer***
 <!-- !!! info "cfg表及kernel配置" -->
 
-- Create a folder named `home/cfg` on the desktop and place the cfg file(e.g., [checkpoint.json](../code/checkpoint.json)) in it. 
+- Create folder **~/Desktop/home/cfg** and place the cfg file(e.g., [checkpoint.json](../code/checkpoint.json)) in it. 
 
 - Run `quark server` in a terminal and you'll see the following information if everything is OK![alt text](image/server.png){.center}
 

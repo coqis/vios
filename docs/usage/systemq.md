@@ -27,7 +27,7 @@ To use SystemQ, the following basic requirements need to be met.
     |:material-language-python: [python](https://python.org)|>=3.11|
 </div>
 
-Then you can install and start using SystemQ from [**demo**](../code/demo/).
+Then you can install and start using SystemQ from [**tutorial**](../code/tutorial/).
 ???+ note "Installation"
     ``` bash
     # clone systemq
