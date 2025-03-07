@@ -222,7 +222,7 @@ class Task(object):
 
     @cached_property
     def rid(self):
-        from .app._db import get_record_by_tid
+        from quark.app._db import get_record_by_tid
         return get_record_by_tid(self.tid)[0]
 
     def __repr__(self):
@@ -432,7 +432,7 @@ class Task(object):
 class QuarkProxy(object):
 
     def __init__(self) -> None:
-        from .app import login
+        from quark.app import login
 
         self.server = login()
         setlog()
@@ -440,13 +440,13 @@ class QuarkProxy(object):
         try:
             from home.demo.run import dag
 
-            from .dag import Scheduler
+            from quark.dag import Scheduler
             self.scheduler = Scheduler(dag)
         except Exception as e:
             logger.error(f'Failed to start Scheduler: {e}')
 
     def submit(self, task: dict, block: bool = False):
-        from .app import submit
+        from quark.app import submit
 
         # by server
         # logger.info(f'task will be executed on local machine: {chip}!')
@@ -481,7 +481,7 @@ class QuarkProxy(object):
         pass
 
     def result(self, tid: int, raw: bool = False):
-        from .app import get_data_by_tid
+        from quark.app import get_data_by_tid
         try:
             result = get_data_by_tid(tid, 'count')
             return result if raw else self.process(result)
