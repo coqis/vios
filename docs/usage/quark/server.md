@@ -14,7 +14,7 @@
 
 - Run `quark server` in a terminal and you'll see the following information if everything is OK![alt text](image/server.png){.center}
 
-- Once the `QuarkServer` is ready, run `quark studio` in another termnal. Click `Signup` and fill the username(`baqis` is recommended) and system name(the cfg file name `checkpoint`) in the corresponding blanks and click `sign up`.![alt text](image/signup.png){.center}
+- Once the `QuarkServer` is ready, run `quark studio` in another termnal. Click `Signup` and fill the username and system name(i.e., the cfg file name `checkpoint`) in the corresponding blanks and click `sign up`.![alt text](image/signup.png){.center}
     :material-information: equaivalent operations in Python code
     ```python
     from quark.app import signup

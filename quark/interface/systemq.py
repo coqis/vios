@@ -312,7 +312,7 @@ class Workflow(object):
                                    waveform_length=kwds.get('waveform_length', 98e-6))
 
         for cmd in cmds:
-            ctype = type(cmd).__name__  # WRITE,TRIG,READ
+            ctype = type(cmd).__name__  # WRITE, READ
             if ctype == 'WRITE':
                 step = 'main'
             else:
