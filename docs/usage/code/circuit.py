@@ -23,7 +23,7 @@ def circuit(qubits: tuple[str], freq: float, amps: float, b, c=3, ctx=None):
     return [(('Measure', i), q) for i, q in enumerate(qubits)]
 
 
-def S21(qubits: list[str], ctx=None) -> dict:
+def S21(qubits: list[str], ctx=None) -> list:
     cc = [(('Measure', i, ), q) for i, q in enumerate(qubits)]
     return cc
 
@@ -48,7 +48,7 @@ def TimeRabi(qubits: tuple[str], act_qubits: tuple[str] = None, ctx=None):
     return cc
 
 
-def Scatter(qubits: list[str], state: str = '0', ctx=None) -> dict:
+def Scatter(qubits: list[str], state: str = '0', ctx=None) -> list:
     state2gate = {'0': ['I'],
                   '1': [('R', 0), ('R', 0)]}
 
