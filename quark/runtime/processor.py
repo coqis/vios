@@ -79,14 +79,6 @@ def process(raw_data, **kwds):
             for k, v in data.items():
                 if kwds['signal'] in k:
                     result[kwds['signal']] = v
-            # if 'READ' in raw_data:
-            #     print(raw_data)
-            #     nadata = result['data'] = raw_data['READ']['NA']
-            #     if 'CH1.Trace' in nadata:
-            #         result['data'] = raw_data['READ']['NA'].pop('CH1.Trace')
-            #     elif 'CH1.S' in nadata:
-            #         result['data'] = raw_data['READ']['NA'].pop('CH1.S')
-            # result['extra'] = raw_data
         else:
             result = Workflow.analyze(raw_data, dataMap)
 
@@ -101,6 +93,7 @@ def process(raw_data, **kwds):
                     result[k] = np.zeros((min(2**nq, shots), nq + 1), int) - 1
                     result[k][:nb] = np.hstack((base, count[:, None]))
                 else:
+                    v = [v] if isinstance(v, (float, int)) else v
                     result[k] = np.asarray(v)
     except Exception as e:
         logger.error(
