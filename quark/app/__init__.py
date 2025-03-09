@@ -68,11 +68,34 @@ class Super(object):
         # if hasattr(self, 'ping'):
         #     return
 
-        for mth in ['ping', 'start', 'create', 'remove', 'query', 'write', 'read', 'snapshot']:
+        for mth in ['ping', 'start', 'query', 'write', 'read', 'snapshot']:
             setattr(self, mth, getattr(self._s, mth))
 
-        for name in ['signup', 'update']:
+        for name in ['signup']:
             setattr(self, name, globals()[name])
+
+    def update(self, path: str, value, failed: list = []):
+        ss = self.ss()  # login(verbose=False)
+        rs: str = ss.update(path, value)
+        if rs.startswith('Failed'):
+            if 'root' in rs:
+                ss.create(path, {})
+            else:
+                path, _f = path.rsplit('.', 1)
+                failed.append((_f, value))
+                self.update(path, {}, failed)
+
+        while failed:
+            _f, v = failed.pop()
+            path = f'{path}.{_f}'
+            ss.update(path, v)
+
+    def delete(self, path: str):
+        ss = self.ss()
+        if path.count('.') > 0:
+            ss.delete(path)
+        else:
+            ss.remove(path)
 
 
 _sp = {}  # defaultdict(lambda: connect('QuarkServer', host, port))
@@ -183,23 +206,6 @@ def submit(task: dict, block: bool = False, **kwds):
     t.server = ss
     t.run()
     return t
-
-
-def update(path: str, value, failed: list = []):
-    ss = s.ss()  # login(verbose=False)
-    rs: str = ss.update(path, value)
-    if rs.startswith('Failed'):
-        if 'root' in rs:
-            ss.create(path, {})
-        else:
-            path, _f = path.rsplit('.', 1)
-            failed.append((_f, value))
-            update(path, {}, failed)
-
-    while failed:
-        _f, v = failed.pop()
-        path = f'{path}.{_f}'
-        ss.update(path, v)
 
 
 def rollback(rid: int = 0, tid: int = 0):
