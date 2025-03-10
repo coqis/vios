@@ -336,6 +336,7 @@ class Workflow(object):
             func = value
 
         delay = 0
+        offset = 0
 
         # sm, _value = loadv(func) # _value[:] = _value*10
 
@@ -346,6 +347,7 @@ class Workflow(object):
                 ch = kwds['target'].split('.')[-1]
                 cali = {} if kwds['sid'] < 0 else kwds['calibration'][ch]
                 delay = cali.get('delay', 0)
+                offset = kwds['setting'].get('OFFSET', 0)
                 pulse = sample_waveform(func,
                                         cali,
                                         sample_rate=kwds['srate'],
@@ -369,7 +371,7 @@ class Workflow(object):
         else:
             pulse = func
 
-        return pulse, delay
+        return pulse, delay, offset
 
     @classmethod
     def analyze(cls, data: dict, datamap: dict):

@@ -74,7 +74,8 @@ def ccompile(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
     # merge loop body with compiled result
     for step, _cmds in compiled.items():
         if step in instruction:
-            instruction[step].extend(_cmds)
+            _cmds.extend(instruction[step])
+            instruction[step] = _cmds  # .extend(_cmds)
         else:
             instruction[step] = _cmds
 

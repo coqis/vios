@@ -53,13 +53,14 @@ def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
 
     sampled = target.startswith(tuple(kwds.get('filter', ['zzzzz'])))
 
-    cmd[1], delay = Workflow.calculate(value, **(kwds | {'sampled': sampled}))
+    cmd[1], delay, offset = Workflow.calculate(
+        value, **(kwds | {'sampled': sampled}))
 
     cmd[-1] = {'sid': kwds['sid'], 'target': kwds['target'], 'srate': kwds['srate'],
                'track': kwds['track'], 'shared': kwds['shared']}
 
     try:
-        line = sample(target, cmd, canvas, delay)
+        line = sample(target, cmd, canvas, delay, offset)
     except Exception as e:
         logger.error(
             f"{'>' * 30}'  failed to calculate waveform', {e}, {type(e).__name__}")
@@ -67,7 +68,7 @@ def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
     return (step, target, cmd), line
 
 
-def sample(target: str, cmd: dict, canvas: dict = {}, delay: float = 0.0) -> dict:
+def sample(target: str, cmd: dict, canvas: dict = {}, delay: float = 0.0, offset: float = 0.0) -> dict:
     """sample waveforms needed to be shown in the `QuarkCanvas`
 
     Args:
@@ -75,6 +76,7 @@ def sample(target: str, cmd: dict, canvas: dict = {}, delay: float = 0.0) -> dic
         cmd (dict): see calculator
         canvas (dict, optional): from **etc.canvas**. Defaults to {}.
         delay (float, optional): time delay for the channel. Defaults to 0.0.
+        offset (float, optional): offset added to the channel. Defaults to 0.0.
 
     Returns:
         dict: _description_
@@ -92,7 +94,7 @@ def sample(target: str, cmd: dict, canvas: dict = {}, delay: float = 0.0) -> dic
         t1, t2 = canvas['range']
         xr = slice(int(t1 * srate), int(t2 * srate))
 
-        val = Pulse.sample(cmd[1])
+        val = Pulse.sample(cmd[1]) + offset
 
         xt = (np.arange(len(val)) / srate)[xr] - delay
         yt = val[xr]
