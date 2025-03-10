@@ -272,6 +272,7 @@ def preprocess(sid: int, instruction: dict[str, dict[str, list[str, Any, str, di
                 if context:
                     kwds['LEN'] = context['waveform']['LEN']
                     kwds['calibration'] = context['calibration']
+                    kwds['setting'] = context['setting']
 
                 # if isinstance(cmd[1], Waveform):
                 #     cmd[1].sample_rate = kwds['srate']

@@ -80,6 +80,10 @@ class Recipe(object):
                 self.__circuit = cirq
             else:
                 raise TypeError('invalid circuit: list[list] needed!')
+        elif isinstance(cirq, dict):
+            self.__circuit = {'name': cirq['name'],
+                              'code': cirq['code'],
+                              'module': '__user__'}
         elif callable(cirq):
             self.__circuit = {'name': cirq.__name__,
                               'code': inspect.getsource(cirq),
