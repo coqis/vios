@@ -84,7 +84,9 @@ def sample(target: str, cmd: dict, canvas: dict = {}, delay: float = 0.0, offset
     if not canvas.get('filter', []):
         return {}
 
-    # or cmd[-1]['sid'] < 0:
+    if not canvas.get('reset', False) and cmd[-1]['sid'] < 0:
+        return {}
+
     if cmd[-1]['target'].split('.')[0] not in canvas['filter']:
         return {}
 

@@ -79,7 +79,7 @@ class Recipe(object):
             if isinstance(cirq[0], list):
                 self.__circuit = cirq
             else:
-                raise TypeError('invalid circuit: list[list] needed!')
+                self.__circuit = [cirq]
         elif isinstance(cirq, dict):
             self.__circuit = {'name': cirq['name'],
                               'code': cirq['code'],
