@@ -20,14 +20,14 @@ To use SystemQ, the following basic requirements need to be met.
 <div class="result" markdown>
 ???+ warning "Requirements"
     <!-- ![SystemQ](image/aniatom.gif){ align=right width="150"} -->
+    <!-- |:material-git: [git](https://git-scm.com/)|~| -->
 
     |name|version|
     |---|---|
-    |:material-git: [git](https://git-scm.com/)|~|
     |:material-language-python: [python](https://python.org)|>=3.11|
 </div>
 
-Then you can install and start using SystemQ from [**tutorial**](../code/tutorial/).
+First, download [**SystemQ**](https://gitee.com/baqis/systemq.git), and it is highly recommended to use :material-git:[git](https://git-scm.com/). Then you can install and start using SystemQ from [**tutorial**](../code/tutorial/).
 ???+ note "Installation"
     ``` bash
     # clone systemq

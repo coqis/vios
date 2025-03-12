@@ -61,6 +61,9 @@ class Recipe(object):
         self.initcmd = [(t, v, 'au') for t, v in Recipe.initialize(shots)]
         # [('AWG.CH1.Waveform', 'zero()', 'au')]
         self.postcmd = [(t, v, 'au') for t, v in Recipe.finalize(shots)]
+
+        self.verbose = False
+
         self.__circuit: list[list] = []  # qlisp线路
 
         self.__rules: list[str] = []  # 变量依赖关系列表
@@ -187,6 +190,7 @@ class Recipe(object):
                                    'signal': self.signal,
                                    'lib': self.lib,
                                    'align_right': self.align_right,
+                                   'verbose': self.verbose,
                                    'precompile': Recipe.precompile(self.shots),
                                    'waveform_length': self.waveform_length,
                                    'shape': [len(v[0][1]) for v in self.__loops.values()],

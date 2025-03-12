@@ -81,8 +81,8 @@ def sample(target: str, cmd: dict, canvas: dict = {}, delay: float = 0.0, offset
     Returns:
         dict: _description_
     """
-    if not canvas.get('filter', []):
-        return {}
+    # if not canvas.get('filter', []):
+    #     return {}
 
     if not canvas.get('reset', False) and cmd[-1]['sid'] < 0:
         return {}

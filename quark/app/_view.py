@@ -274,7 +274,7 @@ except Exception as e:
 
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-def demo():
+def demo(dim: int = 1):
     """demo for plot
 
     Example: iq scatter
@@ -303,7 +303,7 @@ def demo():
     viewer = _vs['studio']
 
     n = 3  # number of subplots
-    # _vs.clear() # clear canvas
+    viewer.clear()  # clear canvas
     for i in range(10):  # step number
         time.sleep(.2)
         try:
@@ -312,16 +312,19 @@ def demo():
                 cell = {}
                 for j in range(1):
                     line = {}
-                    line['xdata'] = np.arange(i, i + 1) * 1e8
-                    line['ydata'] = np.random.random(1) * 1e8
+                    if dim == 1:
+                        line['xdata'] = np.arange(i, i + 1) * 1e8
+                        line['ydata'] = np.random.random(1) * 1e8
+                        line['linewidth'] = 2
+                        line['marker'] = 'o'
+                        line['fadecolor'] = (255, 0, 255)
 
-                    # line['xdata'] = np.arange(-9,9)*1e-6
-                    # line['ydata'] = np.arange(-10,10)*1e-8
-                    # line['zdata'] = np.random.random((18,20))
+                    if dim == 2:
+                        if i == 0:
+                            line['xdata'] = np.arange(-9, 9) * 1e-6
+                            line['ydata'] = np.arange(-10, 10) * 1e-8
+                        line['zdata'] = np.random.random((36,))
 
-                    line['linewidth'] = 2
-                    line['marker'] = 'o'
-                    line['fadecolor'] = (255, 0, 255)
                     line['title'] = f'aabb{r}'
                     line['legend'] = 'test'
                     line['xlabel'] = f'add'
@@ -335,4 +338,4 @@ def demo():
             else:
                 viewer.append(data)
         except Exception as e:
-            logger.error(e)
+            print(e)

@@ -64,10 +64,11 @@ def process(raw_data, **kwds):
         }
         ```
     """
-    # print('ddddddddddoooooooooooooooooooooo', kwds)
-    # print("=============================================", raw_data)
+    dataMap = kwds.pop('dataMap', {'arch': 'baqis'})
+    if kwds.get('verbose', False):
+        print('#' * 48, dataMap, '#' * 48, sep='\r\n')
+        print('-' * 48, raw_data, '-' * 48, sep='\r\n')
 
-    dataMap = kwds.get('dataMap', {'arch': 'baqis'})
     result = {}
 
     try:

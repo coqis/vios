@@ -65,10 +65,7 @@ class Super(object):
 
         self._s = login(user, host)
 
-        # if hasattr(self, 'ping'):
-        #     return
-
-        for mth in ['ping', 'start', 'query', 'write', 'read', 'snapshot']:
+        for mth in ['ping', 'start', 'query', 'write', 'read', 'snapshot', 'getid', 'cancel', 'review']:
             setattr(self, mth, getattr(self._s, mth))
 
         for name in ['signup']:
