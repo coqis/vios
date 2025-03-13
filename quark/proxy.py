@@ -298,11 +298,13 @@ class Task(object):
         if show:
             for k, v in r.items():
                 if k == 'exec':
-                    msg = 'error traceback\r\n'
-                    msg += '\r\n'.join(
-                        [f'--->{sk}: {sv.replace("\n", "\n    ")}' for sk, sv in v.items()])
+                    fv = ['error traceback']
+                    for sk, sv in v.items():
+                        _sv = sv.replace("\n", "\n    ")
+                        fv.append(f'--->{sk}: {_sv}')
+                    msg = '\r\n'.join(fv)
                 else:
-                    msg = v
+                    msg = v.replace("\n", "\n    ")
                 print(f'{k}: {msg}')
         return r
 

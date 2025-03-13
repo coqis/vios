@@ -83,6 +83,8 @@ def sample(target: str, cmd: dict, canvas: dict = {}, delay: float = 0.0, offset
     """
     # if not canvas.get('filter', []):
     #     return {}
+    if cmd[-1]['sid'] not in canvas.get('step', np.arange(1000000)):
+        return {}
 
     if not canvas.get('reset', False) and cmd[-1]['sid'] < 0:
         return {}
