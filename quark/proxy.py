@@ -297,13 +297,15 @@ class Task(object):
         r: dict = self.server.report(self.tid)
         if show:
             for k, v in r.items():
+                if k == 'size':
+                    continue
                 if k == 'exec':
                     fv = ['error traceback']
                     for sk, sv in v.items():
                         _sv = sv.replace("\n", "\n    ")
                         fv.append(f'--->{sk}: {_sv}')
                     msg = '\r\n'.join(fv)
-                else:
+                elif k == 'cirq':
                     msg = v.replace("\n", "\n    ")
                 print(f'{k}: {msg}')
         return r
