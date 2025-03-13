@@ -65,11 +65,14 @@ class Super(object):
 
         self._s = login(user, host)
 
-        for mth in ['ping', 'start', 'query', 'write', 'read', 'snapshot', 'getid', 'cancel', 'review']:
+        for mth in ['start', 'query', 'write', 'read', 'snapshot', 'getid', 'cancel', 'review']:
             setattr(self, mth, getattr(self._s, mth))
 
         for name in ['signup']:
             setattr(self, name, globals()[name])
+
+    def ping(self):
+        return ping(self.ss())
 
     def update(self, path: str, value, failed: list = []):
         ss = self.ss()  # login(verbose=False)
@@ -98,6 +101,10 @@ class Super(object):
 _sp = {}  # defaultdict(lambda: connect('QuarkServer', host, port))
 
 s = Super()
+
+
+def ping(ss):
+    return ss.ping('hello') == 'hello'
 
 
 def login(user: str = 'baqis', host: str = '127.0.0.1', verbose: bool = True):
@@ -199,7 +206,7 @@ def submit(task: dict, block: bool = False, **kwds):
 
     t = Task(task,
              timeout=1e9 if block else None,
-             plot=plot if kwds.get('plot', False) else False)
+             plot=kwds.get('plot', False))
     t.server = ss
     t.run()
     return t

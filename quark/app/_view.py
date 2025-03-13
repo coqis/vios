@@ -26,6 +26,7 @@ import numpy as np
 from loguru import logger
 from srpc import connect
 
+from quark.app import ping
 from quark.proxy import Task
 
 _vs = {'viewer': connect('QuarkViewer', port=2086),
@@ -53,6 +54,10 @@ def plot(task: Task, append: bool = False, backend: str = 'viewer'):
     viewer = _vs[backend]
     if backend == 'studio':
         viewer.clear()
+
+    if not ping(viewer):
+        task.plot = False
+        return
 
     if 'population' in str(task.meta['other']['signal']):
         signal = 'population'

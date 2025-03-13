@@ -92,13 +92,16 @@ def sample(target: str, cmd: dict, canvas: dict = {}, delay: float = 0.0, offset
     if cmd[-1]['target'].split('.')[0] not in canvas['filter']:
         return {}
 
-    if target.endswith('Waveform'):
+    if target.endswith(('Waveform', 'Offset')):
 
         srate = cmd[-1]['srate']
         t1, t2 = canvas['range']
         xr = slice(int(t1 * srate), int(t2 * srate))
 
-        val = Pulse.sample(cmd[1]) + offset
+        if target.endswith('Waveform'):
+            val = Pulse.sample(cmd[1])  # + offset
+        else:
+            val = np.zeros(xr.stop - xr.start) + cmd[1]
 
         xt = (np.arange(len(val)) / srate)[xr] - delay
         yt = val[xr]

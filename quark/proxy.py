@@ -337,9 +337,9 @@ class Task(object):
         # data.clear()
         self.process(data)
 
-        if callable(self.plot):
-            self.plot(self, not meta)
-            # self.plot(not meta)
+        if self.plot:
+            from quark.app._view import plot
+            plot(self, not meta)
 
         return self.data
 
