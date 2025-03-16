@@ -35,8 +35,10 @@ class Recipe(object):
     precompile = lambda shots: []  # 每步开始前初始化
     finalize = lambda shots: []  # 任务结束后复位
 
+    align_right: bool = False
+    waveform_length: float = 98e-6
+
     def __init__(self, name: str, shots: int = 1024, signal: str = 'iq_avg',
-                 align_right: bool = False, waveform_length: float = 98e-6,
                  lib: str = '', filename: str = 'baiqs', priority: int = 0):
         """初始化任务描述
 
@@ -44,14 +46,10 @@ class Recipe(object):
             name (str, optional): 实验名称, 如 S21. Defaults to ''.
             shots (int, optional): 触发次数, 1024的整数倍. Defaults to 1024.
             signal (str, optional): 采集信号. Defaults to 'iq_avg'.
-            align_right (bool, optional): 波形是否右对齐. Defaults to False.
-            waveform_length (float, optional): 波形长度. Defaults to 98e-6.
         """
         self.name = name
         self.shots = shots
         self.signal = signal
-        self.align_right = align_right
-        self.waveform_length = waveform_length
         self.lib = lib
 
         self.filename = filename  # 数据存储文件名, 位于桌面/home/dat文件夹下

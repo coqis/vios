@@ -12,9 +12,9 @@
 
 **QuarkRemote** runs on the device's built-in operating system(often windows or linux) and mainly implements functions such as device control and remote software updates. Below is a simple user manual:
 
-Clone the [`remote`](https://gitee.com/baqis/remote.git) wherever you want,
+Clone the [`remote`](https://gitee.com/baqis/driver.git) wherever you want,
 ``` bash title="remote folder"
-remote
+driver
 ├── dev
 │   ├── VirtualDevice.py # (1)!
 │   └── __init__.py
@@ -50,11 +50,11 @@ remote
         requirements = f.read()
 
     setup(
-        name="remote",
+        name="driver",
         version='1.0.0',
         author="baqis",
         license="MIT",
-        description="Remote Driver",
+        description="driver",
         install_requires=requirements,
         python_requires='>=3.10.0'
     )

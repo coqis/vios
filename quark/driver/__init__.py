@@ -79,42 +79,33 @@ except Exception as e:
 
 mdev = '''
 ```python
-┌─────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│QuarkServer: https://quarkstudio.readthedocs.io/en/latest/usage/quark/server/#what-is-dev                │
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│dev(QuarkServer)                                                                                         │
-├─────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│{'awg':{ # alias of the device                                                                           │
-│        "addr": "192.168.3.48", # IP address of the device                                               │
-│        "name": "VirtualDevice", # filename of the driver                                                │
-│        "srate": 1000000000.0, # sampling rate(defined by the srate attribute in the driver class)       │
-│        "type": "driver", # connection type, driver or remote                                            │
-│        "host": "useless", # IP address of the host computer(required only if the type is remote)        │
-│        "port": "useless" # service port(required only if the type is remote)                            │
-│        }                                                                                                │
-│}                                                                                                        │
-└─────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────┬────────────────────────────────────────────────┐
+│dev in QuarkServer                              │ dev in QuarkRemote                             │
+├────────────────────────────────────────────────┼────────────────────────────────────────────────┤
+│{'awg':{                                        │ driver # folder structure on device            │
+│        "addr": "192.168.3.48",                 │ ├── dev                         <─────┐        │
+│        "name": "VirtualDevice", <─────────────>│ │   ├── VirtualDevice.py        <─────┼──┐     │
+│        "srate": 1000000000.0,                  │ │   └── __init__.py                   │  │     │
+│        "type": "driver"                        │ ├── remote.json                       │  │     │
+│        }                                       │ ├── requirements.txt                  │  │     │
+│}                                               │ └── setup.py                          │  │     │
+│                                                │                                       │  │     │
+├────────────────────────────────────────────────┤ # contents of remote.json ────────────┼──┼─────┤
+│{'awg':{ <───────────────────────────┐          │{"path": "dev",                  <─────┘  │     │
+│        "host": "192.168.1.42",  <───┼─────────>│ "host": "192.168.1.42"',                 │     │
+│        "port": 40052,           <─┐ └─────────>│ "awg":{                                  │     │
+│        "srate": 1000000000.0,     │            │        "addr": "192.168.3.48",           │     │
+│        "type": "remote"           │            │        "name": "VirtualDevice", <────────┘     │
+│        }                          └───────────>│        "port": 40052                           │
+│}                                               │        }                                       │
+│                                                │ "adc":{"addr": "", "name": "", "port": 40053}  │
+│                                                │ }                                              │
+└────────────────────────────────────────────────┴────────────────────────────────────────────────┘
 ```
-```python
-┌─────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│QuarkRemote: see https://quarkstudio.readthedocs.io/en/latest/usage/quark/remote/#quarkremote            │ 
-├───────────────────────────────────────────┬─────────────────────────────────────────────────────────────┤
-│dev(QuarkServer)                           │remote.json(QuarkRemote)                                     │
-├───────────────────────────────────────────┼─────────────────────────────────────────────────────────────┤
-│{'awg':{                                   │{"path": "dev", # driver path                                │
-│        "addr": "useless",                 │ "host": "192.168.1.42"', # IP address of the host computer  │
-│        "name": "useless",                 │ "awg":{ # alias of the device                               │
-│        "srate": 1000000000.0,             │         "addr": "192.168.3.48", # IP address of the device  │
-│        "type": "remote",                  │         "name": "VirtualDevice", # filename of the driver   │
-│        "host": "192.168.1.42",            │         "port": 40052, # service port                       │
-│        "port": 40052                      │        }                                                    │
-│        }                                  │ "adc":{...}                                                 │
-│}                                          │ }                                                           │
-└───────────────────────────────────────────┴─────────────────────────────────────────────────────────────┘
-```
-- > ***If you don't know the current version of Python, read the above***!!!
-- > ***If you don't know where systemq is installed, read the above***!!!
-- > ***If you don't know how to set up the instrument, read the above***!!!
+- > ***For more details see [Quark](https://quarkstudio.readthedocs.io/en/latest/usage/quark/)!!!***
+- > ***If you don't know the current version of Python, read the above!!!***
+- > ***If you don't know where systemq is installed, read the above!!!***
+- > ***If you don't know how to set up the instrument, read the above!!!***
 '''
 
 
