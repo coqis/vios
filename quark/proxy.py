@@ -26,13 +26,17 @@ Abstract: **about proxy**
 """
 
 
+import ast
 import asyncio
 import inspect
 import json
 import os
+import shutil
 import string
+import subprocess
 import sys
 import time
+import zipfile
 from collections import defaultdict
 from functools import cached_property
 from multiprocessing.shared_memory import SharedMemory
@@ -40,6 +44,7 @@ from pathlib import Path
 from threading import current_thread
 
 import numpy as np
+import requests
 from loguru import logger
 
 QUARK = Path.home() / 'quark'
@@ -58,6 +63,47 @@ except Exception as e:
     logger.critical('Restart QuarkServer Again!!!')
     raise KeyboardInterrupt
     startup = {}
+
+
+def initd(url: str = 'http://127.0.0.1:8000/usage/systemq.zip'):
+
+    resp = requests.get(url)
+
+    systemq = Path.home() / 'Desktop/home/systemq.zip'
+
+    with open(systemq, 'wb') as f:
+        f.write(resp.content)
+        print(f'systemq saved to {systemq.parent}!')
+
+        with zipfile.ZipFile(systemq) as f:
+            for zf in f.filelist:
+                if not zf.filename.startswith(('__MAC', 'dev/__init__')):
+                    # print(zf.filename)
+                    f.extract(zf, systemq.parent)
+
+    try:
+        shutil.move(systemq.parent / 'systemq/dev', systemq.parent)
+        shutil.move(systemq.parent / 'systemq/lib', systemq.parent)
+        shutil.rmtree(systemq.parent/'systemq')
+    except shutil.Error as e:
+        print(e)
+        return
+
+    return
+
+    os.chdir(systemq.parent)
+    while True:
+        status = subprocess.run(f'{sys.executable} -m pip install -e.'.split(' '),
+                                shell=False)  # ,
+        # stdout=subprocess.PIPE,
+        # stderr=subprocess.PIPE)
+        if status.returncode != 0:
+            time.sleep(1)
+            print('trying again in 1s ...')
+            continue
+        else:
+            print(f"systemq successfully installed!")
+            break
 
 
 def setlog(prefix: str = ''):
