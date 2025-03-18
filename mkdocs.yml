@@ -15,20 +15,19 @@ nav:
     # - User Guide: usage/cloud.md
     # - demo: usage/demo.ipynb
   - Experiment:
-    - QOS: usage/index.md
-    - systemq: usage/systemq.md
+    - index: usage/index.md
     # - user guide: markdown/qos_tools.md
     # - bayes: markdown/bayes.md
     - quarkstudio: 
-      - quarkstudio: usage/quark/index.md
+      # - index: usage/quark/index.md
       - server: usage/quark/server.md
       - studio: usage/quark/studio.md
       - canvas: usage/quark/canvas.md
       - remote: usage/quark/remote.md
-    - quarkcircuit: usage/quark/example.ipynb
-    - waveform:
-      - qlisp:  usage/waveform/index.md
-      - waveform:  usage/waveform/waveform.md
+      - circuit: usage/code/tanspiler.ipynb
+    - waveform: usage/waveform/waveform.md
+      # - index:  usage/waveform/index.md
+      # - waveform:  usage/waveform/waveform.md
       # - compiler:  usage/waveform/compiler.md
     # - scanner: usage/scanner.md
     # - readout: usage/readout correction.md
