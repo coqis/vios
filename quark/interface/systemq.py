@@ -298,7 +298,7 @@ class Workflow(object):
         #     compiled = {'main': set_all_channels(ctx)}
         # else:
         #     compiled = {}
-        compiled = {'main': [('WRITE', *cmd, 'au')
+        compiled = {'main': [('WRITE', *cmd)
                              for cmd in kwds.get('precompile', [])]}
 
         _, (cmds, dmap) = qcompile(circuit,

@@ -82,7 +82,7 @@ Then you can install `quarkstudio` and start using from the beginner's [**tutori
     # install quarkstudio
     pip install quarkstudio[full]
 
-    # download drivers and libraries and initialization
+    # download drivers and libraries and initialize quark
     quark init
 
     # update if needed
