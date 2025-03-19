@@ -69,10 +69,10 @@ The following requirements must be met before starting to use:
 ???+ warning "Requirements"
     <!-- ![SystemQ](image/aniatom.gif){ align=right width="150"} -->
 
-    |name|version|
-    |---|---|
-    |:material-git: [git](https://git-scm.com/)|~|
-    |:material-language-python: [python](https://python.org)|>=3.11|
+    |name|version|check|
+    |---|---|---|
+    |:material-git: [git](https://git-scm.com/)|~|`git -v`|
+    |:material-language-python: [python](https://python.org)|>=3.11|`python -V`|
 </div>
 
 <!-- First, download [**SystemQ**](https://gitee.com/baqis/systemq.git), and it is highly recommended to use :material-git:[git](https://git-scm.com/).  -->
