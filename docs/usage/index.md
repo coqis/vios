@@ -90,8 +90,8 @@ Then you can install `quarkstudio` and start using from the beginner's [**tutori
     quark update --studio
     ```
 
-???+ warning "quark"
-    **If you encounter errors like "command not found" or similar, make sure the Python Scripts directory is added to the environment variable!**
+???+ warning "command not found"
+    **If you encounter errors like "command not found" or similar, make sure the git or Python Scripts directory is added to the environment variable!**
     <!-- **Make sure that systemq has been installed succesfully(run `pip show systemq` to check)** -->
 
 
