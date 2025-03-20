@@ -31,9 +31,9 @@ class Recipe(object):
     """
 
     # --ignore=E731
-    initialize = lambda shots: []  # 任务开始前初始化
-    precompile = lambda shots: []  # 每步开始前初始化
-    finalize = lambda shots: []  # 任务结束后复位
+    before_the_task: list[tuple] = []  # 任务开始前初始化
+    before_compiling: list[tuple] = []  # 每步开始前初始化
+    after_the_task: list[tuple] = []  # 任务结束后复位
 
     align_right: bool = False
     waveform_length: float = 98e-6
@@ -56,14 +56,14 @@ class Recipe(object):
         self.priority = priority  # 任务排队用, 越小优先级越高
 
         # [('AWG.CH1.Waveform', 'zero()', 'au')]
-        self.initcmd = [(t, v, 'au') for t, v in Recipe.initialize(shots)]
-        # [('AWG.CH1.Waveform', 'zero()', 'au')]
-        self.postcmd = [(t, v, 'au') for t, v in Recipe.finalize(shots)]
-        self.prestep = [(t, v, 'au') for t, v in Recipe.precompile(shots)]
+        self.initcmd = [(t, v, 'au') for t, v in Recipe.before_the_task]
+        self.postcmd = [(t, v, 'au') for t, v in Recipe.after_the_task]
+        self.prestep = [(t, v, 'au') for t, v in Recipe.before_compiling]
 
         self.verbose = False
 
         self.__circuit: list[list] = []  # qlisp线路
+        self.__setting: list[tuple] = []  # 临时设置
 
         self.__rules: list[str] = []  # 变量依赖关系列表
         self.__loops: dict[str, list] = {}  # 变量列表
@@ -96,6 +96,15 @@ class Recipe(object):
                 self.__circuit['file'] = ''
         else:
             raise TypeError(f'invalid circuit: list[list] or function needed!')
+
+    @property
+    def setting(self):
+        return self.__setting
+
+    @setting.setter
+    def setting(self, cmds: list[tuple]):
+        for cmd, val in cmds:
+            self[cmd] = val
 
     def __getitem__(self, key: str):
         try:
