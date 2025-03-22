@@ -35,6 +35,7 @@ class Recipe(object):
     before_compiling: list[tuple] = []  # 每步开始前初始化
     after_the_task: list[tuple] = []  # 任务结束后复位
 
+    arch: str = 'baqis'
     align_right: bool = False
     waveform_length: float = 98e-6
 
@@ -197,6 +198,7 @@ class Recipe(object):
                          'other': {'shots': self.shots,
                                    'signal': self.signal,
                                    'lib': self.lib,
+                                   'arch': self.arch,
                                    'align_right': self.align_right,
                                    'verbose': self.verbose,
                                    'precompile': self.prestep,

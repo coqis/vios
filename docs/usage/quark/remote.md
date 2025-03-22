@@ -60,7 +60,7 @@ driver
     )
     ```
 
-Run `pip install -e.` in the `remote` folder (run `pip show remote` to check) and `quark remote remote.json` to start the remote service. 
+Run `pip install -e.` in the `driver` folder (run `pip show driver` to check) and `quark remote remote.json` to start the remote service. 
 
 To connect the device `ADC` on another computer within the same local area network (LAN), please refer to the following example
 ???+ Example "connect to a remote device"

@@ -26,7 +26,6 @@
 
 from copy import deepcopy
 from importlib import import_module, reload
-from itertools import permutations
 
 import numpy as np
 from loguru import logger
@@ -34,51 +33,18 @@ from loguru import logger
 try:
     # lib: systemq
     try:
-        from lib import stdlib
+        from lib import (DictDriver, QuarkLocalConfig, Signal, get_arch,
+                         qcompile, sample_waveform, stdlib)
     except ImportError as e:
-        from systemq.lib import stdlib
+        from systemq.lib import (DictDriver, QuarkLocalConfig, Signal,
+                                 get_arch, qcompile, sample_waveform, stdlib)
 except Exception as e:
     logger.critical('systemq may not be installed', e)
     raise e
 
 
-try:
-    # latest waveforms/qlisp/qlispc
-    from qlispc import Signal, get_arch, register_arch
-    from qlispc.arch.baqis import baqisArchitecture
-    from qlispc.arch.baqis.config import QuarkLocalConfig
-    from qlispc.kernel_utils import qcompile, sample_waveform
-except ImportError as e:
-    # waveform==1.7.7
-    from lib.arch.baqis import baqisArchitecture
-    from lib.arch.baqis_config import QuarkLocalConfig
-    from qlisp import Signal, get_arch, register_arch
-    from qlisp.kernel_utils import qcompile, sample_waveform
-
-try:
-    from systemq.lib.arch.baqis_config import get_all_channels
-
-    def set_all_channels(ctx: 'Context'):
-        return [('WRITE', *cmd, 'au') for cmd in get_all_channels(ctx.export())]
-except ImportError as e:
-    from qlispc.kernel_utils import get_all_channels
-
-    # from qlisp.kernel_utils import get_all_channels
-
-    def set_all_channels(ctx: 'Context'):
-        return [('WRITE', target, 'zero()', '') for target in get_all_channels(ctx)]
-
-
 # waveforms.math: waveforms or waveform-math
 from waveforms import Waveform, WaveVStack, square, wave_eval
-
-
-try:
-    from waveforms.namespace import DictDriver
-except ImportError as e:
-    from qlispc.namespace import DictDriver
-
-register_arch(baqisArchitecture)
 
 
 def _form_signal(sig):
@@ -134,8 +100,6 @@ class Context(QuarkLocalConfig):
         self.bypass = {}
         self._keys = []
 
-        self.__skip = ['Barrier', 'Delay', 'setBias', 'Pulse']
-
     def reset(self, snapshot):
         self._getGateConfig.cache_clear()
         if isinstance(snapshot, dict):
@@ -151,37 +115,6 @@ class Context(QuarkLocalConfig):
             return self.snapshot().todict()
         except Exception as e:
             return self.snapshot().dct
-
-    def getGate(self, name, *qubits):
-        # ------------------------- added -------------------------
-        if name in self.__skip:
-            raise Exception(f"gate {name} of {qubits} not calibrated.")
-
-        if len(qubits) > 1:
-            order_senstive = self.query(f"gate.{name}.__order_senstive__")
-        else:
-            order_senstive = False
-        # ------------------------- added -------------------------
-
-        if order_senstive is None:
-            order_senstive = True
-        if len(qubits) == 1 or order_senstive:
-            ret = self.query(f"gate.{name}.{'_'.join(qubits)}")
-            if isinstance(ret, dict):
-                ret['qubits'] = tuple(qubits)
-                return ret
-            else:
-                raise Exception(f"gate {name} of {qubits} not calibrated.")
-        else:
-            for qlist in permutations(qubits):
-                try:
-                    ret = self.query(f"gate.{name}.{'_'.join(qlist)}")
-                    if isinstance(ret, dict):
-                        ret['qubits'] = tuple(qlist)
-                        return ret
-                except:
-                    break
-            raise Exception(f"gate {name} of {qubits} not calibrated.")
 
 
 class Pulse(object):
@@ -294,10 +227,6 @@ class Workflow(object):
         ctx._getGateConfig.cache_clear()
         ctx.snapshot().cache = kwds.pop('cache', {})
 
-        # if kwds.get('fillzero', False):  # whether to initialize all channels to zero()
-        #     compiled = {'main': set_all_channels(ctx)}
-        # else:
-        #     compiled = {}
         compiled = {'main': [('WRITE', *cmd)
                              for cmd in kwds.get('precompile', [])]}
 
