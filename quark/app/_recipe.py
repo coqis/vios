@@ -35,12 +35,13 @@ class Recipe(object):
     before_compiling: list[tuple] = []  # 每步开始前初始化
     after_the_task: list[tuple] = []  # 任务结束后复位
 
+    lib: str = 'lib.gates.u3'
     arch: str = 'baqis'
     align_right: bool = False
     waveform_length: float = 98e-6
 
     def __init__(self, name: str, shots: int = 1024, signal: str = 'iq_avg',
-                 lib: str = '', filename: str = 'baiqs', priority: int = 0):
+                 filename: str = 'baqis', priority: int = 0):
         """初始化任务描述
 
         Args:
@@ -51,7 +52,6 @@ class Recipe(object):
         self.name = name
         self.shots = shots
         self.signal = signal
-        self.lib = lib
 
         self.filename = filename  # 数据存储文件名, 位于桌面/home/dat文件夹下
         self.priority = priority  # 任务排队用, 越小优先级越高

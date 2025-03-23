@@ -26,6 +26,7 @@
 
 from copy import deepcopy
 from importlib import import_module, reload
+from itertools import permutations
 
 import numpy as np
 from loguru import logger
@@ -33,13 +34,30 @@ from loguru import logger
 try:
     # lib: systemq
     try:
-        from lib import (DictDriver, QuarkLocalConfig, Signal, get_arch,
-                         qcompile, sample_waveform, stdlib)
+        from lib import stdlib
     except ImportError as e:
-        from systemq.lib import (DictDriver, QuarkLocalConfig, Signal,
-                                 get_arch, qcompile, sample_waveform, stdlib)
+        from systemq.lib import stdlib
 except Exception as e:
     logger.critical('systemq may not be installed', e)
+    raise e
+
+
+try:
+    # qlispc
+    try:
+        from lib import (DictDriver, QuarkLocalConfig, Signal, get_arch,
+                         qcompile, sample_waveform)
+    except ImportError as e:
+        try:
+            from systemq.lib import (DictDriver, QuarkLocalConfig, Signal,
+                                     get_arch, qcompile, sample_waveform)
+        except ImportError as e:
+            from qlispc import Signal, get_arch
+            from qlispc.arch.baqis.config import QuarkLocalConfig
+            from qlispc.kernel_utils import qcompile, sample_waveform
+            from qlispc.namespace import DictDriver
+except Exception as e:
+    logger.critical('qlispc error', e)
     raise e
 
 
@@ -100,6 +118,8 @@ class Context(QuarkLocalConfig):
         self.bypass = {}
         self._keys = []
 
+        self.__skip = ['Barrier', 'Delay', 'setBias', 'Pulse']
+
     def reset(self, snapshot):
         self._getGateConfig.cache_clear()
         if isinstance(snapshot, dict):
@@ -115,6 +135,37 @@ class Context(QuarkLocalConfig):
             return self.snapshot().todict()
         except Exception as e:
             return self.snapshot().dct
+
+    def getGate(self, name, *qubits):
+        # ------------------------- added -------------------------
+        if name in self.__skip:
+            raise Exception(f"gate {name} of {qubits} not calibrated.")
+
+        if len(qubits) > 1:
+            order_senstive = self.query(f"gate.{name}.__order_senstive__")
+        else:
+            order_senstive = False
+        # ------------------------- added -------------------------
+
+        if order_senstive is None:
+            order_senstive = True
+        if len(qubits) == 1 or order_senstive:
+            ret = self.query(f"gate.{name}.{'_'.join(qubits)}")
+            if isinstance(ret, dict):
+                ret['qubits'] = tuple(qubits)
+                return ret
+            else:
+                raise Exception(f"gate {name} of {qubits} not calibrated.")
+        else:
+            for qlist in permutations(qubits):
+                try:
+                    ret = self.query(f"gate.{name}.{'_'.join(qlist)}")
+                    if isinstance(ret, dict):
+                        ret['qubits'] = tuple(qlist)
+                        return ret
+                except:
+                    break
+            raise Exception(f"gate {name} of {qubits} not calibrated.")
 
 
 class Pulse(object):
