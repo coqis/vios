@@ -28,9 +28,10 @@ import numpy as np
 from loguru import logger
 from srpc import loads
 
-from quark.proxy import QUARK
+from quark.proxy import startup
 
-sql = sqlite3.connect(QUARK / 'checkpoint.db', check_same_thread=False)
+sql = sqlite3.connect(Path(startup['quarkserver']['home']) / 'checkpoint.db',
+                      check_same_thread=False)
 
 
 def get_dataset_by_tid(tid: int, task: bool = False):
