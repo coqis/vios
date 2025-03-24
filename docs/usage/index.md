@@ -64,7 +64,7 @@ A **Quantum Operating System(QOS)** is an advanced software framework designed t
 <!-- ### **How to start** -->
 <!-- For instructions on how to use SystemQ, please refer to [Usage](https://quarkstudio.readthedocs.io/en/latest/usage/) -->
 
-The following requirements must be met before starting to use:
+The following requirements ***MUST*** be met before starting to use:
 <div class="result" markdown>
 ???+ warning "Requirements"
     <!-- ![SystemQ](image/aniatom.gif){ align=right width="150"} -->
@@ -72,7 +72,7 @@ The following requirements must be met before starting to use:
     |name|version|check|
     |---|---|---|
     |:material-git: [git](https://git-scm.com/)|~|`git -v`|
-    |:material-language-python: [python](https://python.org)|>=3.11|`python -V`|
+    |:material-language-python: [python](https://python.org)|3.12|`python -V`|
 </div>
 
 <!-- First, download [**SystemQ**](https://gitee.com/baqis/systemq.git), and it is highly recommended to use :material-git:[git](https://git-scm.com/).  -->
@@ -80,12 +80,15 @@ Then you can install `quarkstudio` and start using from the beginner's [**tutori
 ???+ note "Installation"
     ``` bash
     # install quarkstudio
-    pip install quarkstudio[full]
+    pip install -U quarkstudio
+    # or force reinstall to fix issues
+    pip install -U quarkstudio --force-reinstall
 
-    # download drivers and libraries and initialize quark
+    # download drivers and libraries to `~/Desktop/home`
+    # and install the required dependencies
     quark init
 
-    # update if needed
+    # update server and studio
     quark update --server
     quark update --studio
     ```
