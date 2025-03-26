@@ -18,35 +18,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 r"""
-The quark.circuit module provides tools for constructing, visualizing, and transpiling quantum circuits.
+This module contains the TranspilerPass class, an abstract base class for defining transpiler passes that transform or optimize quantum circuits. Subclasses must implement the run method to process QuantumCircuit objects.
 """
 
-from .quantumcircuit import (
-    QuantumCircuit,
-    generate_ghz_state,
-    )
-from .quantumcircuit_helpers import (
-    one_qubit_gates_available,
-    two_qubit_gates_available,
-    one_qubit_parameter_gates_available,
-    two_qubit_parameter_gates_available,
-    functional_gates_available,
-    )
-from .utils import (zyz_decompose,
-                    u3_decompose,
-                    kak_decompose,
-                    generate_random_unitary_matrix,
-                    glob_phase,
-                    remove_glob_phase,
-                    is_equiv_unitary,
-                    )
-from .matrix import *
-from .transpiler import Transpiler
-from .dag import dag2qc,qc2dag,draw_dag
-from .backend import Backend
-from .decompose import ThreeQubitGateDecompose
-from .layout import Layout
-from .routing import SabreRouting
-from .translate import TranslateToBasisGates
-from .optimize import GateCompressor
-from .test_transpiler import call_quark_transpiler
+from abc import ABC, abstractmethod
+from .quantumcircuit import QuantumCircuit
+
+# 抽象基类
+class TranspilerPass(ABC):
+    """Abstract base class for defining transpiler passes that transform or optimize quantum circuits.
+    """
+    def __init__(self):
+        pass
+
+    @abstractmethod
+    def run(self, qc:QuantumCircuit):
+        """Execute the transpiler pass on a quantum circuit.
+
+        Args:
+            qc (QuantumCircuit): The quantum circuit to be processed by this transpiler pass.
+        """
+        pass

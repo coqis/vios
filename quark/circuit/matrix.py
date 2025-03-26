@@ -17,7 +17,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-r"""The matrices corresponding to single-qubit and two-qubit gates."""
+r"""The matrices corresponding to single-qubit, two-qubit and three-qubit gates."""
 
 import numpy as np
 
@@ -126,6 +126,71 @@ cz_mat = np.array(
         [0.0, 1.0, 0.0, 0.0],
         [0.0, 0.0, 1.0, 0.0],
         [0.0, 0.0, 0.0, -1.0],
+    ],dtype=complex,
+)
+
+ccz_mat = np.array(
+    [
+        [1, 0, 0, 0, 0, 0, 0, 0 ],
+        [0, 1, 0, 0, 0, 0, 0, 0 ],
+        [0, 0, 1, 0, 0, 0, 0, 0 ],
+        [0, 0, 0, 1, 0, 0, 0, 0 ],
+        [0, 0, 0, 0, 1, 0, 0, 0 ],
+        [0, 0, 0, 0, 0, 1, 0, 0 ],
+        [0, 0, 0, 0, 0, 0, 1, 0 ],
+        [0, 0, 0, 0, 0, 0, 0, -1],
+    ],dtype=complex,
+)
+
+ccx_mat = np.array(
+    [
+        [1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0],
+    ],dtype=complex,
+)
+
+cxc_mat = np.array(
+    [
+        [1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 0, 0, 1, 0],
+    ],dtype=complex,
+)
+
+cswap_mat = np.array(
+    [
+        [1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0, 1],
+    ],dtype=complex,
+)
+
+swapc_mat = np.array(
+    [
+        [1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 1],
     ],dtype=complex,
 )
 
@@ -255,8 +320,8 @@ gate_matrix_dict = {
     'id':id_mat, 'x':x_mat, 'y':y_mat, 'z':z_mat, 'h':h_mat,
     's':s_mat, 'sdg':sdg_mat, 't':t_mat, 'tdg':tdg_mat, 'sx':sx_mat, 'sxdg':sxdg_mat,
     'swap':swap_mat, 'iswap':iswap_mat,
-    'cx':cx_mat, 'cnot':cx_mat, 'cy':cy_mat, 'yc':yc_mat,'cz':cz_mat,
+    'cx':cx_mat, 'cnot':cx_mat, 'cy':cy_mat, 'cz':cz_mat,
     'rx':rx_mat, 'ry':ry_mat, 'rz':rz_mat,
     'p':p_mat, 'u':u_mat,'r':r_mat,
-    'rxx':rxx_mat,'ryy':ryy_mat,'rzz':rzz_mat,
+    'rxx':rxx_mat,'ryy':ryy_mat,'rzz':rzz_mat,'ccz':ccz_mat,'ccx':ccx_mat,'cswap':cswap_mat,
     }

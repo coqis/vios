@@ -31,11 +31,13 @@ one_qubit_gates_available = {
 two_qubit_gates_available = {
     'cx':'●X', 'cnot':'●X', 'cy':'●Y', 'cz':'●Z', 'swap':'XX', 'iswap':'✶✶',
     }
-one_qubit_parameter_gates_available = {'rx':'Rx', 'ry':'Ry', 'rz':'Rz', 'p':'P', 'u':'U','r':'R'}
+three_qubit_gates_available = {'ccz':'●●●','ccx':'●●X','cswap':'●XX'}
+one_qubit_parameter_gates_available = {'rx':'Rx', 'ry':'Ry', 'rz':'Rz', 'p':'P', 'u':'U', 'u3':'U', 'r':'R'}
 two_qubit_parameter_gates_available = {'rxx':'Rxx', 'ryy':'Ryy', 'rzz':'Rzz',}
 functional_gates_available = {'barrier':'░', 'measure':'M', 'reset':'|0>','delay':'Delay'}
 
 def convert_gate_info_to_dag_info(nqubits:int,qubits:list,gates:list,show_qubits:bool=True) -> tuple[list,list]:
+    #print('check',nqubits,qubits)
     qubit_dic = [None for _ in range(nqubits)]
     node_list = []
     edge_list = []
@@ -63,6 +65,9 @@ def convert_gate_info_to_dag_info(nqubits:int,qubits:list,gates:list,show_qubits
             qubits = [gate_info[1]]
             node_info = (gate+'_'+str(idx)+'_'+str(qubits),{'qubits':qubits})
         elif gate in two_qubit_gates_available.keys():
+            qubits = list(gate_info[1:])
+            node_info = (gate+'_'+str(idx)+'_'+str(qubits),{'qubits':qubits})
+        elif gate in three_qubit_gates_available.keys():
             qubits = list(gate_info[1:])
             node_info = (gate+'_'+str(idx)+'_'+str(qubits),{'qubits':qubits})
         elif gate in one_qubit_parameter_gates_available.keys():
@@ -103,19 +108,53 @@ def convert_gate_info_to_dag_info(nqubits:int,qubits:list,gates:list,show_qubits
         if gate in two_qubit_gates_available.keys() or gate in two_qubit_parameter_gates_available.keys():
             if qubit_dic[qubits[0]] == qubit_dic[qubits[1]]:
                 if qubit_dic[qubits[0]] is not None:
-                    edge_info = (qubit_dic[qubits[0]],node_info[0],{"qubit": f'q{qubits[0]}q{qubits[1]}'})
+                    edge_info = (qubit_dic[qubits[0]],node_info[0],{"qubit":list(sorted(qubits))})
                     edge_list.append(edge_info)
             else:
                 for qubit in qubits:
                     if qubit_dic[qubit] is not None:
-                        edge_info = (qubit_dic[qubit],node_info[0],{"qubit" : f'q{qubit}'})
+                        edge_info = (qubit_dic[qubit],node_info[0],{"qubit" : [qubit]})
                         edge_list.append(edge_info)  
+        elif gate in three_qubit_gates_available.keys():
+            # 三个比特对应的node相同，两个比特对应的node相同（包括三种情况），三个比特对应的node不同
+            pre_node_list = [qubit_dic[qubits[0]],qubit_dic[qubits[1]],qubit_dic[qubits[2]]]
+            if len(set(pre_node_list)) == 3:
+                for qubit in qubits:
+                    if qubit_dic[qubit] is not None:
+                        edge_info = (qubit_dic[qubit],node_info[0],{"qubit" : [qubit]})
+                        edge_list.append(edge_info)
+            elif len(set(pre_node_list)) == 2:
+                if qubit_dic[qubits[0]] == qubit_dic[qubits[1]]:
+                    if qubit_dic[qubits[0]] is not None:
+                        edge_info = (qubit_dic[qubits[0]],node_info[0],{"qubit":list(sorted([qubits[0],qubits[1]]))})
+                        edge_list.append(edge_info)
+                    if qubit_dic[qubits[2]] is not None:
+                        edge_info = (qubit_dic[qubits[2]],node_info[0],{"qubit":[qubits[2]]})
+                        edge_list.append(edge_info)
+                elif qubit_dic[qubits[0]] == qubit_dic[qubits[2]]:
+                    if qubit_dic[qubits[0]] is not None:
+                        edge_info = (qubit_dic[qubits[0]],node_info[0],{"qubit":list(sorted([qubits[0],qubits[2]]))})
+                        edge_list.append(edge_info)
+                    if qubit_dic[qubits[1]] is not None:
+                        edge_info = (qubit_dic[qubits[1]],node_info[0],{"qubit":[qubits[1]]})
+                        edge_list.append(edge_info)
+                elif qubit_dic[qubits[1]] == qubit_dic[qubits[2]]:
+                    if qubit_dic[qubits[1]] is not None:
+                        edge_info = (qubit_dic[qubits[1]],node_info[0],{"qubit":list(sorted([qubits[1],qubits[2]]))})
+                        edge_list.append(edge_info)
+                    if qubit_dic[qubits[0]] is not None:
+                        edge_info = (qubit_dic[qubits[0]],node_info[0],{"qubit":[qubits[0]]})
+                        edge_list.append(edge_info)   
+            elif len(set(pre_node_list)) == 1:
+                if qubit_dic[qubits[0]] is not None:
+                    edge_info = (qubit_dic[qubits[0]],node_info[0],{"qubit":list(sorted(qubits))})
+                    edge_list.append(edge_info) 
         elif gate in ['barrier','delay']:
             temp = [[],[]]
             for qubit in qubits:
                 if qubit_dic[qubit] is not None:
                     edge_info_0 = (qubit_dic[qubit],node_info[0])
-                    edge_info_1 = f'q{qubit}'
+                    edge_info_1 = [qubit]
                     if edge_info_0 in temp[0]:
                         idx = temp[0].index(edge_info_0)
                         temp[1][idx] += edge_info_1
@@ -123,21 +162,17 @@ def convert_gate_info_to_dag_info(nqubits:int,qubits:list,gates:list,show_qubits
                         temp[0].append(edge_info_0)
                         temp[1].append(edge_info_1)
             for idx, edge in enumerate(temp[0]):
-                edge_info = (edge[0],edge[1],{"qubit":temp[1][idx]})
+                edge_info = (edge[0],edge[1],{"qubit":list(sorted(temp[1][idx]))})
                 edge_list.append(edge_info)
-                    #edge_info = (qubit_dic[qubit],node_info[0],{"qubit" : f'q{qubit}'})
-                    #edge_list.append(edge_info)
         else:
            #print(gate_info,qubits[0])
             assert(len(qubits) == 1)
             if qubit_dic[qubits[0]] is not None:
-                edge_info = (qubit_dic[qubits[0]],node_info[0],{"qubit" : f'q{qubits[0]}'})
+                edge_info = (qubit_dic[qubits[0]],node_info[0],{"qubit" : [qubits[0]]})
                 edge_list.append(edge_info)
                 
         for qubit in qubits:
             qubit_dic[qubit] = node_info[0]
-    #print(node_list)
-    
     return np.array(node_list), np.array(edge_list)
 
 def is_multiple_of_pi(n, tolerance: float = 1e-9) -> str:
@@ -166,7 +201,7 @@ def is_multiple_of_pi(n, tolerance: float = 1e-9) -> str:
         return str(round(n,3))
     
 def parse_expression(expr):
-    return eval(expr, {"pi": np.pi, "np": np})
+    return float(eval(expr, {"pi": np.pi, "np": np}))
 
 def parse_openqasm2_to_gates(openqasm2_str) -> None:
     r"""
@@ -176,7 +211,8 @@ def parse_openqasm2_to_gates(openqasm2_str) -> None:
     new = []
     qubit_used = []
     cbit_used = []
-    for line in openqasm2_str.splitlines():
+    clean_qasm = openqasm2_str.strip() 
+    for line in clean_qasm.splitlines():
         if line == '':
             continue
         elif set(line) == {'\t'}: # check tab
@@ -190,11 +226,16 @@ def parse_openqasm2_to_gates(openqasm2_str) -> None:
             new.append((gate,position[0],position[1]))
             qubit_used.append(position[0])
             qubit_used.append(position[1])
+        elif gate in three_qubit_gates_available.keys():
+            new.append((gate,position[0],position[1],position[2]))
+            qubit_used.append(position[0])
+            qubit_used.append(position[1])
+            qubit_used.append(position[2])            
         elif gate in one_qubit_parameter_gates_available.keys():
-            if gate == 'u':
+            if gate == 'u' or gate == 'u3':
                 params_str = re.search(r'\(([^)]+)\)', line).group(1).split(',')
                 params = [parse_expression(i) for i in params_str]
-                new.append((gate, params[0], params[1], params[2], position[-1]))
+                new.append(('u', params[0], params[1], params[2], position[-1]))
                 qubit_used.append(position[-1])
             elif gate == 'r':
                 params_str = re.search(r'\(([^)]+)\)', line).group(1).split(',')
@@ -205,7 +246,7 @@ def parse_openqasm2_to_gates(openqasm2_str) -> None:
                 param_str = re.search(r'\(([^)]+)\)', line).group(1)
                 param = parse_expression(param_str)
                 new.append((gate, param, position[-1]))
-                qubit_used.append(position[-1])
+                qubit_used.append(position[-1])           
         elif gate in two_qubit_parameter_gates_available.keys():
             param_str = re.search(r'\(([^)]+)\)', line).group(1)
             param = parse_expression(param_str)
@@ -229,7 +270,7 @@ def parse_openqasm2_to_gates(openqasm2_str) -> None:
         elif gate in ['OPENQASM','include','opaque','gate','qreg','creg','//']:
             continue
         else:
-            raise(ValueError(f"Sorry, an unrecognized OpenQASM 2.0 syntax was detected by quarkcircuit. Please contact the developer for assistance.{gate}"))
+            raise(ValueError(f"Sorry, an unrecognized OpenQASM 2.0 syntax {gate} was detected by quarkcircuit. Please contact the developer for assistance."))
     return new,set(qubit_used),set(cbit_used)
 
 def parse_qlisp_to_gates(qlisp: list) -> tuple[list, list, list]:
@@ -309,6 +350,14 @@ def parse_qlisp_to_gates(qlisp: list) -> tuple[list, list, list]:
             new.append((gate.lower(), qubit1, qubit2))
             qubit_used.append(qubit1)
             qubit_used.append(qubit2)
+        elif gate in ['CCZ','CCX','CSWAP']:
+            qubit1 = int(gate_info[1][0].split('Q')[1])
+            qubit2 = int(gate_info[1][1].split('Q')[1])
+            qubit3 = int(gate_info[1][2].split('Q')[1])
+            new.append((gate.lower(), qubit1, qubit2, qubit3))
+            qubit_used.append(qubit1)
+            qubit_used.append(qubit2) 
+            qubit_used.append(qubit3)            
         elif gate in ['iSWAP']:
             qubit1 = int(gate_info[1][0].split('Q')[1])
             qubit2 = int(gate_info[1][1].split('Q')[1])
@@ -342,7 +391,7 @@ def parse_qlisp_to_gates(qlisp: list) -> tuple[list, list, list]:
     
     return new, set(qubit_used), set(cbit_used)
 
-def initialize_lines(nqubits:int,ncbits:int,gates:list,physical_qubits_espression:bool) -> tuple[list, list]:
+def initialize_lines(nqubits:int,ncbits:int,gates:list) -> tuple[list, list]:
     r"""
     Initialize a blank circuit.
 
@@ -354,10 +403,7 @@ def initialize_lines(nqubits:int,ncbits:int,gates:list,physical_qubits_espressio
     nlines = 2 * nqubits + 1 + len(str(ncbits))
     gates_element = list('─ ' * nqubits) + ['═'] + [' '] * len(str(ncbits))
     gates_initial = copy.deepcopy(gates_element)
-    if physical_qubits_espression:
-        qubits_expression = 'Q'
-    else:
-        qubits_expression = 'q'
+    qubits_expression = 'q'
     for i in range(nlines):
         if i in range(0, 2 * nqubits, 2):
             qi = i // 2
@@ -382,7 +428,7 @@ def initialize_lines(nqubits:int,ncbits:int,gates:list,physical_qubits_espressio
     gates_layerd = [gates_initial] + [copy.deepcopy(gates_element) for _ in range(n)]
     return gates_element,gates_layerd
 
-def generate_gates_layerd(nqubits:int,ncbits:int,gates:list,physical_qubits_espression:bool,params_value:dict) -> list:
+def generate_gates_layerd(nqubits:int,ncbits:int,gates:list,params_value:dict) -> list:
     r"""Assign gates to their respective layers loosely.
 
     Returns:
@@ -390,7 +436,7 @@ def generate_gates_layerd(nqubits:int,ncbits:int,gates:list,physical_qubits_espr
     """
     lines_use = []
     # according plot layer distributed gates
-    gates_element,gates_layerd = initialize_lines(nqubits,ncbits,gates,physical_qubits_espression)
+    gates_element,gates_layerd = initialize_lines(nqubits,ncbits,gates)
     for gate_info in gates:
         gate = gate_info[0]
         if gate in one_qubit_gates_available.keys():
@@ -406,22 +452,34 @@ def generate_gates_layerd(nqubits:int,ncbits:int,gates:list,physical_qubits_espr
             pos1 = max(gate_info[1],gate_info[2])
             for idx in range(len(gates_layerd)-1,-1,-1):
                 if gates_layerd[idx][2*pos0:2*pos1+1] != list('─ ')*(pos1-pos0)+['─']:
-                #if (gates_layerd[idx][2*pos0],gates_layerd[idx][2*pos1]) not in [('─','│'),('│','─',),('─','─')] :
-                    if pos0 == gate_info[1]: # control qubit
-                        gates_layerd[idx+1][2*pos0] = two_qubit_gates_available[gate][0]
-                        gates_layerd[idx+1][2*pos1] = two_qubit_gates_available[gate][-1]
-                        lines_use.append(2*pos0)
-                        lines_use.append(2*pos0 + 1)
-                        lines_use.append(2*pos1)
-                        lines_use.append(2*pos1 + 1)
-                    elif pos0 == gate_info[2]:
-                        gates_layerd[idx+1][2*pos0] = two_qubit_gates_available[gate][-1]
-                        gates_layerd[idx+1][2*pos1] = two_qubit_gates_available[gate][0]
-                        lines_use.append(2*pos0)
-                        lines_use.append(2*pos0 + 1)
-                        lines_use.append(2*pos1)
-                        lines_use.append(2*pos1 + 1)
+                    gates_layerd[idx+1][2*gate_info[1]] = two_qubit_gates_available[gate][0]
+                    gates_layerd[idx+1][2*gate_info[2]] = two_qubit_gates_available[gate][-1]
+                    lines_use.append(2*pos0)
+                    lines_use.append(2*pos0+1)
+                    lines_use.append(2*pos1)
+                    lines_use.append(2*pos1+1)
                     for i in range(2*pos0+1,2*pos1):
+                        gates_layerd[idx+1][i] = '│'
+                    break
+        elif gate in three_qubit_gates_available.keys():
+            sorted_qubits = sorted([gate_info[1],gate_info[2],gate_info[3]])
+            pos0 = sorted_qubits[0]
+            pos1 = sorted_qubits[1]
+            pos2 = sorted_qubits[2]
+            for idx in range(len(gates_layerd)-1,-1,-1):
+                if gates_layerd[idx][2*pos0:2*pos2+1] != list('─ ')*(pos2-pos0)+['─']:
+                    gates_layerd[idx+1][2*gate_info[1]] = three_qubit_gates_available[gate][0]
+                    gates_layerd[idx+1][2*gate_info[2]] = three_qubit_gates_available[gate][1]
+                    gates_layerd[idx+1][2*gate_info[3]] = three_qubit_gates_available[gate][2]
+                    lines_use.append(2*pos0)
+                    lines_use.append(2*pos0+1)
+                    lines_use.append(2*pos1)
+                    lines_use.append(2*pos1+1)
+                    lines_use.append(2*pos2)
+                    lines_use.append(2*pos2+1)
+                    for i in range(2*pos0+1,2*pos1):
+                        gates_layerd[idx+1][i] = '│'
+                    for i in range(2*pos1+1,2*pos2):
                         gates_layerd[idx+1][i] = '│'
                     break
         elif gate in two_qubit_parameter_gates_available.keys():
@@ -571,7 +629,7 @@ def generate_gates_layerd(nqubits:int,ncbits:int,gates:list,physical_qubits_espr
                 e_ = [gates_layerd[idx][2*i] for i in poslst0]
                 if all(e == '─' for e in e_) is False:
                     for i in poslst:
-                        gates_layerd[idx+1][i] = functional_gates_available[gate]+f'({gate_info[1]:.1e}ns)'
+                        gates_layerd[idx+1][i] = functional_gates_available[gate]+f'({gate_info[1]:.1e}s)'
                     break
         elif gate in ['measure']:
             for j in range(len(gate_info[1])):
@@ -593,13 +651,13 @@ def generate_gates_layerd(nqubits:int,ncbits:int,gates:list,physical_qubits_espr
             break
     return gates_layerd[:cut],lines_use
         
-def format_gates_layerd(nqubits:int,ncbits:int,gates:list,physical_qubits_espression:bool,params_value:dict) -> list:
+def format_gates_layerd(nqubits:int,ncbits:int,gates:list,params_value:dict) -> list:
     r"""Unify the width of each layer's gate strings
 
      Returns:
         list: A new list of gates element list.
     """
-    gates_layerd,lines_use = generate_gates_layerd(nqubits,ncbits,gates,physical_qubits_espression,params_value)
+    gates_layerd,lines_use = generate_gates_layerd(nqubits,ncbits,gates,params_value)
     gates_layerd_format = [gates_layerd[0]]
     for lst in gates_layerd[1:]:
         max_length = max(len(item) for item in lst)
@@ -629,14 +687,14 @@ def format_gates_layerd(nqubits:int,ncbits:int,gates:list,physical_qubits_espres
             gates_layerd_format.append(lst)
     return gates_layerd_format,lines_use
     
-def add_gates_to_lines(nqubits:int,ncbits:int,gates:list,physical_qubits_espression:bool,params_value:dict, width: int = 4) -> list:
+def add_gates_to_lines(nqubits:int,ncbits:int,gates:list,params_value:dict, width: int = 4) -> list:
     r"""Add gates to lines.
     Args:
         width (int, optional): The width between gates. Defaults to 4.
     Returns:
         list: A list of lines.
     """
-    gates_layerd_format,lines_use = format_gates_layerd(nqubits,ncbits,gates,physical_qubits_espression,params_value)
+    gates_layerd_format,lines_use = format_gates_layerd(nqubits,ncbits,gates,params_value)
     nl = len(gates_layerd_format[0])
     lines1 = [str() for _ in range(nl)]
     for i in range(nl):

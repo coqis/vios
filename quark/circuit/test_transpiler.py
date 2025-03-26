@@ -1,16 +1,30 @@
 import networkx as nx
-import json
+import json,copy
 from .quantumcircuit import QuantumCircuit
 from .quantumcircuit_helpers import one_qubit_gates_available,one_qubit_parameter_gates_available
-from .transpiler import Transpiler
 from .backend import Backend
+from .layout import Layout
+from .routing import SabreRouting
+from .translate import TranslateToBasisGates
+from .optimize import GateCompressor
+
 from .dag import qc2dag
 from pathlib import Path
 
 def call_quark_transpiler(qc:QuantumCircuit|list|str,chip_name:str,compile:bool, options:dict,dev=False,return_qlisp=True):
-    if chip_name != 'Baihua':
-        chip_name += '1'
+    """ Transpiler for quantum cloud.
 
+    Args:
+        qc (QuantumCircuit | list | str): _description_
+        chip_name (str): _description_
+        compile (bool): _description_
+        options (dict): _description_
+        dev (bool, optional): _description_. Defaults to False.
+        return_qlisp (bool, optional): _description_. Defaults to True.
+
+    Returns:
+        _type_: _description_
+    """
     if dev:
         with open(Path.home()/f'Desktop/home/test/{chip_name}1.json') as f:
             chip_info =  json.loads(f.read())
@@ -37,7 +51,8 @@ def call_quark_transpiler(qc:QuantumCircuit|list|str,chip_name:str,compile:bool,
         if 'measure' in node:
             n_measure += 1
             if dag.out_degree(node) > 0:
-                raise(ValueError(f'There are gate {gate_info[0]} after the measurement gate.'))
+                gate = node.split('_')[0]
+                raise(ValueError(f'There are gate {gate} after the measurement gate.'))
             for predecessor in dag.predecessors(node):
                 if 'barrier' not in predecessor:
                     insert_barrier = True
@@ -69,14 +84,25 @@ def call_quark_transpiler(qc:QuantumCircuit|list|str,chip_name:str,compile:bool,
             
     # compile
     if compile:
-        set_use_priority = options.get('use_priority',True)
-        set_initial_mapping = options.get('initial_mapping',{'key':'fidelity_var','topology':'linear1'})
+        # 'options':{"target_qubits":[],"optimze_level":1}
+        set_target_qubits = options.get('target_qubits',[])
         set_optimize_level = options.get('optimize_level',1)
-        quarkQC_compiled = Transpiler(quarkQC,chip_backend).run(
-            use_priority = set_use_priority,
-            initial_mapping = set_initial_mapping,
-            optimize_level = set_optimize_level,
-            )
+        subgraph = Layout(len(quarkQC.qubits),chip_backend).select_layout(target_qubits=set_target_qubits,
+                                                                          use_chip_priority=True,
+                                                                          select_criteria={ 'key': 'fidelity_var','topology': 'linear1' })
+        if set_optimize_level == 0:
+            quarkQC_compiled= SabreRouting(subgraph,initial_mapping='trivial',do_random_choice=False,iterations=1).run(quarkQC) 
+        elif set_optimize_level == 1:
+            quarkQC_compiled = SabreRouting(subgraph,initial_mapping='trivial',do_random_choice=False,iterations=5).run(quarkQC) 
+        else:
+            raise(ValueError('More optimize_level is not support now!'))
+        
+        quarkQC_half_compiled = copy.deepcopy(quarkQC_compiled)
+        quarkQC_half_compiled = TranslateToBasisGates(convert_single_qubit_gate_to_u=False,two_qubit_gate_basis='cx').run(quarkQC_half_compiled)
+        quarkQC_half_compiled = GateCompressor().run(quarkQC_half_compiled) 
+
+        quarkQC_compiled = TranslateToBasisGates(convert_single_qubit_gate_to_u=True,two_qubit_gate_basis='cz').run(quarkQC_compiled)
+        quarkQC_compiled = GateCompressor().run(quarkQC_compiled) 
     else:
         gates_availale = list(one_qubit_gates_available.keys()) \
             + list(one_qubit_parameter_gates_available.keys()) \
@@ -113,7 +139,7 @@ def call_quark_transpiler(qc:QuantumCircuit|list|str,chip_name:str,compile:bool,
                 continue
             else:
                 raise(ValueError(f'The {two_qubit_gates_info} cannot be executed directly by the chip. Please insert SWAP gates or reselect the layout.'))
-
+        quarkQC_half_compiled = quarkQC
         quarkQC_compiled = quarkQC
 
     # check CZ
@@ -122,10 +148,9 @@ def call_quark_transpiler(qc:QuantumCircuit|list|str,chip_name:str,compile:bool,
         raise(ValueError(f'The number of two-qubit gates in the circuit is {ncz} exceeds 100.'))
     
     if return_qlisp:
-        qlisp = quarkQC_compiled.to_qlisp
-        return qlisp
+        return quarkQC_compiled.to_qlisp,quarkQC_half_compiled.to_openqasm2
     else:
-        return quarkQC_compiled
+        return quarkQC_compiled,quarkQC_half_compiled
 
 if __name__ == '__main__':
     nqubits = 4
@@ -134,5 +159,5 @@ if __name__ == '__main__':
         qc.cx(0,i)
     qc.barrier()
     qc.measure_all()
-    qct_qlisp = call_quark_transpiler(qc,'Dongling1','True',{})
+    qct_qlisp = call_quark_transpiler(qc,'Baihua','True',{})
     print(qct_qlisp)

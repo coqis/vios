@@ -24,7 +24,7 @@ nav:
       - studio: usage/quark/studio.md
       - canvas: usage/quark/canvas.md
       - remote: usage/quark/remote.md
-      - circuit: usage/code/tanspiler.ipynb
+      - circuit: usage/code/transpiler.ipynb
     - waveform: usage/waveform/waveform.md
       # - index:  usage/waveform/index.md
       # - waveform:  usage/waveform/waveform.md

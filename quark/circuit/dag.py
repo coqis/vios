@@ -27,6 +27,7 @@ from .quantumcircuit import QuantumCircuit
 from .quantumcircuit_helpers import (
     one_qubit_gates_available,
     two_qubit_gates_available,
+    three_qubit_gates_available,
     one_qubit_parameter_gates_available,
     two_qubit_parameter_gates_available,
     functional_gates_available,
@@ -53,7 +54,10 @@ def draw_dag(dag, output='dag_figure.png'):
             node.attr['label'] = gate
     for u, v, data in dag.edges(data=True):
         edge = A.get_edge(u, v)
-        edge.attr['label'] = data['qubit'] 
+        line = ''
+        for qubit in data['qubit']:
+            line += 'q'+str(qubit)
+        edge.attr['label'] = line #data['qubit'] 
     
     A.graph_attr['dpi'] = '300' 
     A.layout(prog='dot')
@@ -104,6 +108,8 @@ def dag2qc(dag: 'nx.DiGraph',nqubits: int, ncbits: int|None = None) -> 'QuantumC
             new.append((gate,qubits[0]))
         elif gate in two_qubit_gates_available.keys():
             new.append((gate,qubits[0],qubits[1]))
+        elif gate in three_qubit_gates_available.keys():
+            new.append((gate,qubits[0],qubits[1],qubits[2]))
         elif gate in one_qubit_parameter_gates_available.keys():
             params = dag.nodes[node]['params']
             new.append((gate,*params,qubits[0]))
@@ -117,7 +123,8 @@ def dag2qc(dag: 'nx.DiGraph',nqubits: int, ncbits: int|None = None) -> 'QuantumC
             elif gate == 'barrier':
                 new.append((gate,tuple(qubits)))
             elif gate == 'delay':
-                new.append((gate,tuple(qubits)))
+                duration = dag.nodes[node]['duration']
+                new.append((gate,duration,tuple(qubits)))
             elif gate == 'reset':
                 new.append((gate,qubits[0]))
                 

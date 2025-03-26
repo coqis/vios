@@ -20,6 +20,7 @@
 r"""
 This module contains the Backend class, which processes superconducting chip information into an undirected graph representation. It also supports the creation of custom undirected graphs to serve as virtual chips.
 """
+
 import networkx as nx
 import numpy as np
 from typing import Literal
@@ -55,9 +56,12 @@ class Backend:
             self.priority_qubits = self.chip_info['priority_qubits']
             self.qubits_with_attributes = self._collect_qubits_with_attributes()
             self.couplers_with_attributes = self._collect_couplers_with_attributes()
-        elif chip in ['Baihua','Haituo1','Dongling1','Dongling2','Yunmeng1']:
+        elif chip in ['Baihua','Dongling','Haituo','Yunmeng','Miaofeng',]:
             self.chip_name = chip
-            self.chip_info = load_chip_basic_info(chip)
+            try:
+                self.chip_info = load_chip_basic_info(chip)
+            except:
+                raise(ValueError(f'{chip} is under maintenance, configuration information is unavailable'))
             print('The last calibration time was',self.chip_info['calibration_time'])
             self.size = self.chip_info['size']
             self.priority_qubits = self.chip_info['priority_qubits']
@@ -85,7 +89,27 @@ class Backend:
         """
         return self.get_graph()
     
+    def edge_filtered_graph(self,thres = 0.6):
+        """Create a subgraph by filtering out edges with fidelity below a specified threshold.
+
+        Args:
+            thres (float, optional): The fidelity threshold. Defaults to 0.6.
+
+        Returns:
+            networkx.Graph: A new NetworkX graph object containing only edges with fidelity greater than or equal to the threshold.
+        """
+        def edge_filter(u,v):
+            return self.graph[u][v].get("fidelity") >= thres
+        subgraph_view = nx.subgraph_view(self.graph,filter_edge=edge_filter)
+        return nx.Graph(subgraph_view)
+    
     def _collect_qubits_with_attributes(self):
+        """Collect qubit indices and their associated attributes from chip information.
+
+        Returns:
+            list: A list of tuples, where each tuple contains a qubit index (int) and its attributes (dict)
+              extracted from self.chip_info['qubits_info']
+        """
         qubits_with_attributes = []
         for key in self.chip_info['qubits_info'].keys():
             qubit = int(key.split('Q')[1])
@@ -93,6 +117,12 @@ class Backend:
         return qubits_with_attributes
     
     def _collect_couplers_with_attributes(self):
+        """Collect coupler information including qubit indices and their associated attributes from chip information.
+
+        Returns:
+            list: A list of tuples, where each tuple contains two qubit indices (int, int) and the coupler attributes (dict)
+              extracted from self.chip_info['couplers_info'].
+        """
         couplers_with_attributes = []
         for key in self.chip_info['couplers_info'].keys():
             qubit1, qubit2 = self.chip_info['couplers_info'][key]['qubits_index']
@@ -110,8 +140,9 @@ class Backend:
         G.add_edges_from(self.couplers_with_attributes)
         return G
         
-    def draw(self,show_couplers_fidelity:bool = False, show_quibts_attributes:Literal['T1','T2','fidelity','frequency','']='', highlight_nodes:list = [],
-             save_svg_fname: str|None = None,show_qubits_label:bool=False):
+    def draw(self,show_couplers_fidelity:bool = False, show_quibts_attributes:Literal['T1','T2','fidelity','frequency','']='', 
+             show_qubits_index:bool=False,show_couplers_index:bool=False,
+             highlight_nodes:list = [], save_svg_fname: str|None = None,):
         """Draw the chip layout.
     
         Args:
@@ -124,6 +155,8 @@ class Backend:
                 - 'frequancy': Display the frequency of qubits (in GHz).
                 - '': Display no attributes.
                 Defaults to ''.
+            show_qubits_index (bool, optional): Whether to display index for each qubit. Defaults to False.
+            show_couplers_index (bool, optional): Whether to display index for each coupler. Defaults to False.
             highlight_nodes (list, optional): A list of qubits to highlight. Defaults to an empty list [].
             save_svg_fname (str | None, optional): 
                 The filename for saving the drawing as an SVG. If None, the drawing will not be saved. 
@@ -141,8 +174,23 @@ class Backend:
         from matplotlib.colors import Normalize,LinearSegmentedColormap
         from matplotlib.cm import ScalarMappable 
 
+
         edge_fidelity = nx.get_edge_attributes(self.graph, 'fidelity') 
+        node_attributes = nx.get_node_attributes(self.graph,show_quibts_attributes)
         if show_couplers_fidelity:
+            if set(list(edge_fidelity.values())) == {None}:
+                print('The two-qubit gate fidelity is N/A now.')
+                is_edge_info_avaliable = False
+            else:
+                is_edge_info_avaliable = True
+        if show_quibts_attributes:
+            if set(list(node_attributes.values())) == {None}:
+                print('The qubit attributes is N/A now.')
+                is_node_info_avaliable = False
+            else:
+                is_node_info_avaliable = True            
+
+        if show_couplers_fidelity is True and is_edge_info_avaliable is True:
             min_fidelity = sorted(list(edge_fidelity.values()))[0]
             max_fidelity = sorted(list(edge_fidelity.values()))[-1]
             edge_norm = Normalize(vmin = min_fidelity, vmax = max_fidelity)
@@ -153,32 +201,36 @@ class Backend:
 
         edge_labels = {}
         for k,v in edge_fidelity.items():
-            fidelity = np.round(v, 3)
-            if show_couplers_fidelity:
-                edge_labels[k] = fidelity
+            if v == None:
+                fidelity = ''
+            else:
+                fidelity = np.round(v, 3)
+            if show_couplers_fidelity is True and is_edge_info_avaliable is True:
+                if show_couplers_index:
+                    edge_labels[k] = self.graph.edges[k].get('index')
+                else:
+                    edge_labels[k] = fidelity
             else:
                 edge_labels[k] = self.graph.edges[k].get('index')
 
-        if show_quibts_attributes != '':
-            node_attributes = nx.get_node_attributes(self.graph,show_quibts_attributes)
+        if show_quibts_attributes != '' and is_node_info_avaliable is True:
             min_attributes = sorted(list(node_attributes.values()))[0]
             max_attributes = sorted(list(node_attributes.values()))[-1]
             node_norm = Normalize(vmin = min_attributes, vmax = max_attributes)
             node_cmap = LinearSegmentedColormap.from_list('truncated_blues', plt.get_cmap('Blues')(np.linspace(0.31, 1.0, 1000))) #plt.get_cmap('Blues') 
-
             node_colors = [ScalarMappable(norm = node_norm, cmap = node_cmap).to_rgba(attribute) for attribute in node_attributes.values()]
             if show_quibts_attributes == 'fidelity':
-                if show_qubits_label:
+                if show_qubits_index:
                     node_labels = {node:node for node in self.graph.nodes()} 
                 else:
                     node_labels =  {node: np.round(attr, 3) for node, attr in node_attributes.items()} # 保留三位有效数字
             else:
-                if show_qubits_label:
+                if show_qubits_index:
                     node_labels = {node:node for node in self.graph.nodes()} 
                 else:    
                     node_labels =  {node: np.round(attr, 2) for node, attr in node_attributes.items()}  # 保留两位有效数字
             node_font_size = 8 
-            if show_couplers_fidelity:
+            if show_couplers_fidelity is True and is_edge_info_avaliable is True:
                 figsize = (15, 15)
             else:
                 figsize = (15, 13.5)
@@ -186,7 +238,7 @@ class Backend:
             node_colors = ['#083776' for node in self.graph.nodes()]
             node_labels = {node:node for node in self.graph.nodes()}   
             node_font_size = 10 
-            if show_couplers_fidelity:
+            if show_couplers_fidelity is True and is_edge_info_avaliable is True:
                 figsize = (15, 13.5)
             else:
                 figsize = (15, 13)
@@ -223,7 +275,7 @@ class Backend:
         nx.draw_networkx_labels(self.graph,pos,labels=node_labels,font_size=node_font_size, font_color='white')
         nx.draw_networkx_edge_labels(self.graph, pos, edge_labels=edge_labels,font_size=8, font_color='white',bbox=dict(facecolor='none', edgecolor='none'))
 
-        if show_quibts_attributes:
+        if show_quibts_attributes != '' and is_node_info_avaliable is True:
             if show_quibts_attributes == 'T1':
                 show_label = 'T1 ($\mu s$)'
             elif show_quibts_attributes == 'T2':
@@ -234,13 +286,13 @@ class Backend:
                 show_label = 'Frequency (GHz)'
             node_sm = ScalarMappable(cmap=node_cmap, norm=node_norm)
             node_sm.set_array(list(node_attributes.values()))  # 设置包含数据的数组
-            if show_couplers_fidelity:
+            if show_couplers_fidelity and is_edge_info_avaliable is True:
                 node_cbar = fig.colorbar(node_sm, ax=ax, orientation='horizontal',pad=0.07, fraction=0.03, aspect=25)
             else:
                 node_cbar = fig.colorbar(node_sm, ax=ax, orientation='horizontal',pad=0.001, fraction=0.0333, aspect=25)
             node_cbar.set_label(show_label)
 
-        if show_couplers_fidelity:  
+        if show_couplers_fidelity is True and is_edge_info_avaliable is True:
             edge_sm = ScalarMappable(cmap=edge_cmap, norm=edge_norm)# 创建颜色条
             edge_sm.set_array(list(edge_fidelity.values()))  # 设置包含数据的数组
             edge_cbar = fig.colorbar(edge_sm, ax=ax, orientation='horizontal',  pad=0.001, fraction=0.0333, aspect=25)# 调整颜色条大小和位置，放置在底部
@@ -249,7 +301,7 @@ class Backend:
         xlim = ax.get_xlim()
         ylim = ax.get_ylim()
         xpos = (xlim[0] + xlim[1]) / 2
-        ypos = ylim[1] * 0.75 
+        ypos = ylim[1] * 0.96
         ax.text(xpos, ypos, f'{self.chip_name}', va='center', ha='center', fontsize=24, fontweight='bold', color='k', family='serif')
 
         if save_svg_fname:

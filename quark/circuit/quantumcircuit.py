@@ -23,6 +23,7 @@ and converting quantum circuits in various formats such as OpenQASM 2.0 and qlis
 """
 
 import copy
+from typing import Iterable
 from IPython.display import display, HTML
 import numpy as np
 from .quantumcircuit_helpers import (
@@ -30,6 +31,7 @@ from .quantumcircuit_helpers import (
     two_qubit_gates_available,
     one_qubit_parameter_gates_available,
     two_qubit_parameter_gates_available,
+    three_qubit_gates_available,
     functional_gates_available,
     convert_gate_info_to_dag_info,
     parse_openqasm2_to_gates,
@@ -87,21 +89,25 @@ class QuantumCircuit:
         if len(args) == 0:
             self.nqubits = None
             self.ncbits = self.nqubits
-            self.qubits = []
         elif len(args) == 1:
             self.nqubits = args[0]
             self.ncbits = self.nqubits
-            self.qubits = [i for i in range(self.nqubits)]
         elif len(args) == 2:
             self.nqubits = args[0]
             self.ncbits = args[1]
-            self.qubits = [i for i in range(self.nqubits)]
         else:
             raise ValueError("Support only QuantumCircuit(), QuantumCircuit(nqubits) or QuantumCircuit(nqubits,ncbits).")
-
+        
+        self.qubits = []
         self.gates = []
-        self.physical_qubits_espression = False
         self.params_value = {}
+
+    def deepcopy(self):
+        new_qc = QuantumCircuit(self.nqubits,self.ncbits)
+        new_qc.qubits = copy.deepcopy(self.qubits)
+        new_qc.params_value = copy.deepcopy(self.params_value)
+        new_qc.gates = copy.deepcopy(self.gates)
+        return new_qc
 
     def adjust_index(self,thres:int):
         gates = []
@@ -129,6 +135,12 @@ class QuantumCircuit:
         self.gates = gates   
         self.nqubits = self.nqubits + thres
         self.qubits = [idx + thres for idx in self.qubits] 
+
+    def _add_qubits(self,*args):
+        # 去重 排序
+        temp_set = set(self.qubits).union(args)
+        self.qubits = sorted(temp_set)
+        return self
 
     def from_openqasm2(self,openqasm2_str: str) -> None:
         r"""
@@ -174,6 +186,7 @@ class QuantumCircuit:
         """
         if qubit < self.nqubits:
             self.gates.append(('id', qubit))
+            self._add_qubits(qubit)
         else:
             raise ValueError("Qubit index out of range")
 
@@ -189,6 +202,7 @@ class QuantumCircuit:
         """
         if qubit < self.nqubits:
             self.gates.append(('x', qubit))
+            self._add_qubits(qubit)
         else:
             raise ValueError("Qubit index out of range")
 
@@ -204,6 +218,7 @@ class QuantumCircuit:
         """
         if qubit < self.nqubits:
             self.gates.append(('y', qubit))
+            self._add_qubits(qubit)
         else:
             raise ValueError("Qubit index out of range")
 
@@ -219,6 +234,7 @@ class QuantumCircuit:
         """
         if qubit < self.nqubits:
             self.gates.append(('z', qubit))
+            self._add_qubits(qubit)
         else:
             raise ValueError("Qubit index out of range")
 
@@ -234,6 +250,7 @@ class QuantumCircuit:
         """
         if qubit < self.nqubits:
             self.gates.append(('s', qubit))
+            self._add_qubits(qubit)
         else:
             raise ValueError("Qubit index out of range")
 
@@ -249,6 +266,7 @@ class QuantumCircuit:
         """
         if qubit < self.nqubits:
             self.gates.append(('sdg', qubit))
+            self._add_qubits(qubit)
         else:
             raise ValueError("Qubit index out of range")
 
@@ -264,6 +282,7 @@ class QuantumCircuit:
         """
         if qubit < self.nqubits:
             self.gates.append(('sx', qubit))
+            self._add_qubits(qubit)
         else:
             raise ValueError("Qubit index out of range")
         
@@ -279,6 +298,7 @@ class QuantumCircuit:
         """
         if qubit < self.nqubits:
             self.gates.append(('sxdg', qubit))
+            self._add_qubits(qubit)
         else:
             raise ValueError("Qubit index out of range")
 
@@ -294,6 +314,7 @@ class QuantumCircuit:
         """
         if qubit < self.nqubits:
             self.gates.append(('t', qubit))
+            self._add_qubits(qubit)
         else:
             raise ValueError("Qubit index out of range")
 
@@ -308,6 +329,7 @@ class QuantumCircuit:
         """
         if qubit < self.nqubits:
             self.gates.append(('tdg', qubit))
+            self._add_qubits(qubit)
         else:
             raise ValueError("Qubit index out of range")
                
@@ -323,6 +345,7 @@ class QuantumCircuit:
         """
         if qubit < self.nqubits:
             self.gates.append(('h', qubit))
+            self._add_qubits(qubit)
         else:
             raise ValueError("Qubit index out of range")
 
@@ -338,7 +361,11 @@ class QuantumCircuit:
             ValueError: If qubit out of circuit range.
         """
         if max(qubit1,qubit2) < self.nqubits:
-            self.gates.append(('swap', qubit1,qubit2))
+            if qubit1 != qubit2:
+                self.gates.append(('swap', qubit1,qubit2))
+                self._add_qubits(qubit1,qubit2)
+            else:
+                raise ValueError(f"Qubit index conflict: qubit1 and qubit2 are both {qubit1}")
         else:
             raise ValueError("Qubit index out of range")
         
@@ -354,7 +381,11 @@ class QuantumCircuit:
             ValueError: If qubit out of circuit range.
         """
         if max(qubit1, qubit2) < self.nqubits:
-            self.gates.append(('iswap', qubit1,qubit2))
+            if qubit1 != qubit2:
+                self.gates.append(('iswap', qubit1,qubit2))
+                self._add_qubits(qubit1,qubit2)
+            else:
+                raise ValueError(f"Qubit index conflict: qubit1 and qubit2 are both {qubit1}")
         else:
             raise ValueError("Qubit index out of range")
         
@@ -370,7 +401,11 @@ class QuantumCircuit:
             ValueError: If qubit out of circuit range.
         """
         if max(control_qubit,target_qubit) < self.nqubits:
-            self.gates.append(('cx', control_qubit,target_qubit))
+            if control_qubit != target_qubit:
+                self.gates.append(('cx', control_qubit,target_qubit))
+                self._add_qubits(control_qubit,target_qubit)
+            else:
+                raise ValueError(f"Qubit index conflict: control_qubit and target_qubit are both {control_qubit}")
         else:
             raise ValueError("Qubit index out of range")
         
@@ -386,7 +421,11 @@ class QuantumCircuit:
             ValueError: If qubit out of circuit range.
         """
         if max(control_qubit,target_qubit) < self.nqubits:
-            self.cx(control_qubit, target_qubit)
+            if control_qubit != target_qubit:
+                self.cx(control_qubit, target_qubit)
+                self._add_qubits(control_qubit,target_qubit)
+            else:
+                raise ValueError(f"Qubit index conflict: control_qubit and target_qubit are both {control_qubit}")
         else:
             raise ValueError("Qubit index out of range")
                 
@@ -402,7 +441,11 @@ class QuantumCircuit:
             ValueError: If qubit out of circuit range.
         """
         if max(control_qubit,target_qubit) < self.nqubits:
-            self.gates.append(('cy', control_qubit,target_qubit))
+            if control_qubit != target_qubit:
+                self.gates.append(('cy', control_qubit,target_qubit))
+                self._add_qubits(control_qubit,target_qubit)
+            else:
+                raise ValueError(f"Qubit index conflict: control_qubit and target_qubit are both {control_qubit}")
         else:
             raise ValueError("Qubit index out of range")
         
@@ -418,10 +461,77 @@ class QuantumCircuit:
             ValueError: If qubit out of circuit range.
         """
         if max(control_qubit,target_qubit) < self.nqubits:
-            self.gates.append(('cz', control_qubit,target_qubit))
+            if control_qubit != target_qubit:
+                self.gates.append(('cz', control_qubit, target_qubit))
+                self._add_qubits(control_qubit,target_qubit)
+            else:
+                raise ValueError(f"Qubit index conflict: control_qubit and target_qubit are both {control_qubit}")
         else:
             raise ValueError("Qubit index out of range")
 
+    def ccz(self,control_qubit1:int,control_qubit2:int,target_qubit:int):
+        """Add CCZ gate.
+
+        Args:
+            control_qubit1 (int): The qubit used as the first control.
+            control_qubit2 (int): The qubit used as the second control.
+            target_qubit (int): The qubit targeted by the gate.
+
+        Raises:
+            ValueError: If qubit out of circuit range.
+        """
+        qubits0 = [control_qubit1,control_qubit2,target_qubit]
+        if max(qubits0) < self.nqubits:
+            if len(set(qubits0)) == 3:
+                self.gates.append(('ccz',control_qubit1,control_qubit2,target_qubit))
+                self._add_qubits(*qubits0)
+            else:
+                raise ValueError(f"Qubit index conflict: control_qubit1 {control_qubit1} control_qubit2 {control_qubit2} target_qubit {target_qubit}")
+        else:
+            raise ValueError("Qubit index out of range")
+        
+    def ccx(self,control_qubit1:int,control_qubit2:int,target_qubit:int):
+        """Add CCX gate.
+
+        Args:
+            control_qubit1 (int): The qubit used as the first control.
+            control_qubit2 (int): The qubit used as the second control.
+            target_qubit (int): The qubit targeted by the gate.
+
+        Raises:
+            ValueError: If qubit out of circuit range.
+        """
+        qubits0 = [control_qubit1,control_qubit2,target_qubit]
+        if max(qubits0) < self.nqubits:
+            if len(set(qubits0)) == 3:
+                self.gates.append(('ccx',control_qubit1,control_qubit2,target_qubit))
+                self._add_qubits(*qubits0)
+            else:
+                raise ValueError(f"Qubit index conflict: control_qubit1 {control_qubit1} control_qubit2 {control_qubit2} target_qubit {target_qubit}")
+        else:
+            raise ValueError("Qubit index out of range")
+        
+    def cswap(self,control_qubit1:int,control_qubit2:int,target_qubit:int):
+        """Add CSWAP gate.
+
+        Args:
+            control_qubit1 (int): The qubit used as the first control.
+            control_qubit2 (int): The qubit used as the second control.
+            target_qubit (int): The qubit targeted by the gate.
+
+        Raises:
+            ValueError: If qubit out of circuit range.
+        """
+        qubits0 = [control_qubit1,control_qubit2,target_qubit]
+        if max(qubits0) < self.nqubits:
+            if len(set(qubits0)) == 3:
+                self.gates.append(('cswap',control_qubit1,control_qubit2,target_qubit))
+                self._add_qubits(*qubits0)
+            else:
+                raise ValueError(f"Qubit index conflict: control_qubit1 {control_qubit1} control_qubit2 {control_qubit2} target_qubit {target_qubit}")
+        else:
+            raise ValueError("Qubit index out of range")
+        
     def p(self, theta: float, qubit: int) -> None:
         r"""
         Add a Phase gate.
@@ -435,6 +545,7 @@ class QuantumCircuit:
         """
         if qubit < self.nqubits:
             self.gates.append(('p', theta, qubit))
+            self._add_qubits(qubit)
             if isinstance(theta,str):
                 self.params_value[theta] = theta
         else:
@@ -460,6 +571,7 @@ class QuantumCircuit:
         """
         if qubit < self.nqubits:
             self.gates.append(('r', theta, phi, qubit))
+            self._add_qubits(qubit)
             if isinstance(theta,str):
                 self.params_value[theta] = theta
             if isinstance(phi,str):
@@ -491,6 +603,7 @@ class QuantumCircuit:
         """
         if qubit < self.nqubits:
             self.gates.append(('u', theta, phi, lamda, qubit))
+            self._add_qubits(qubit)
             if isinstance(theta,str):
                 self.params_value[theta] = theta
             if isinstance(phi,str):
@@ -499,6 +612,40 @@ class QuantumCircuit:
                 self.params_value[lamda] = lamda
         else:
             raise ValueError("Qubit index out of range")
+
+    def u3(self, theta: float, phi: float, lamda: float, qubit: int) -> None:
+        r"""
+        Add a U3 gate.
+
+        The U3 gate is a single-qubit gate with the following matrix representation:
+
+        $$
+        U3(\theta, \phi, \lambda) = \begin{bmatrix}
+            \cos(\theta/2) & -e^{i\lambda} \sin(\theta/2) \\
+            e^{i\phi} \sin(\theta/2) & e^{i(\phi + \lambda)} \cos(\theta/2)
+            \end{bmatrix}
+        $$
+
+        Args:
+            theta (float): The rotation angle of the gate.
+            phi (float): The rotation angle of the gate.
+            lamda (float): The rotation angle of the gate.
+            qubit (int): The qubit to apply the gate to.
+
+        Raises:
+            ValueError: If qubit out of circuit range.
+        """
+        if qubit < self.nqubits:
+            self.u(theta, phi, lamda, qubit)
+            self._add_qubits(qubit)
+            if isinstance(theta,str):
+                self.params_value[theta] = theta
+            if isinstance(phi,str):
+                self.params_value[phi] = phi
+            if isinstance(lamda,str):
+                self.params_value[lamda] = lamda
+        else:
+            raise ValueError("Qubit index out of range")   
 
     def rx(self, theta: float, qubit: int) -> None:
         r"""
@@ -513,6 +660,7 @@ class QuantumCircuit:
         """
         if qubit < self.nqubits:
             self.gates.append(('rx', theta, qubit))
+            self._add_qubits(qubit)
             if isinstance(theta,str):
                 self.params_value[theta] = theta
         else:
@@ -531,6 +679,7 @@ class QuantumCircuit:
         """
         if qubit < self.nqubits:
             self.gates.append(('ry', theta, qubit))
+            self._add_qubits(qubit)
             if isinstance(theta,str):
                 self.params_value[theta] = theta
         else:
@@ -549,6 +698,7 @@ class QuantumCircuit:
         """
         if qubit < self.nqubits:
             self.gates.append(('rz', theta, qubit))
+            self._add_qubits(qubit)
             if isinstance(theta,str):
                 self.params_value[theta] = theta
         else:
@@ -577,9 +727,13 @@ class QuantumCircuit:
             ValueError: If qubit out of circuit range.
         """
         if max(qubit1, qubit2) < self.nqubits:
-            self.gates.append(('rxx', theta, qubit1, qubit2))
-            if isinstance(theta,str):
-                self.params_value[theta] = theta
+            if qubit1 != qubit2:
+                self.gates.append(('rxx', theta, qubit1, qubit2))
+                self._add_qubits(qubit1,qubit2)
+                if isinstance(theta,str):
+                    self.params_value[theta] = theta
+            else:
+                raise ValueError(f"Qubit index conflict: qubit1 and qubit2 are both {qubit1}")
         else:
             raise ValueError("Qubit index out of range")
         
@@ -606,9 +760,13 @@ class QuantumCircuit:
             ValueError: If qubit out of circuit range.
         """
         if max(qubit1, qubit2) < self.nqubits:
-            self.gates.append(('ryy', theta, qubit1, qubit2))
-            if isinstance(theta,str):
-                self.params_value[theta] = theta
+            if qubit1 != qubit2:
+                self.gates.append(('ryy', theta, qubit1, qubit2))
+                self._add_qubits(qubit1, qubit2)
+                if isinstance(theta, str):
+                    self.params_value[theta] = theta
+            else:
+                raise ValueError(f"Qubit index conflict: qubit1 and qubit2 are both {qubit1}")
         else:
             raise ValueError("Qubit index out of range")
         
@@ -635,9 +793,13 @@ class QuantumCircuit:
             ValueError: If qubit out of circuit range.
         """
         if max(qubit1, qubit2) < self.nqubits:
-            self.gates.append(('rzz', theta, qubit1, qubit2))
-            if isinstance(theta,str):
-                self.params_value[theta] = theta
+            if qubit1 != qubit2:
+                self.gates.append(('rzz', theta, qubit1, qubit2))
+                self._add_qubits(qubit1,qubit2)
+                if isinstance(theta,str):
+                    self.params_value[theta] = theta
+            else:
+                raise ValueError(f"Qubit index conflict: qubit1 and qubit2 are both {qubit1}")
         else:
             raise ValueError("Qubit index out of range")
         
@@ -673,8 +835,10 @@ class QuantumCircuit:
             qubit (int): The qubit to apply the gate to.
         """
         assert(unitary.shape == (2,2))
+        assert(qubit < self.nqubits)
         theta,phi,lamda,phase = u3_decompose(unitary)
         self.gates.append(('u', theta, phi, lamda, qubit))
+        self._add_qubits(qubit)
 
     def zyz_for_unitary(self, unitary: np.ndarray, qubit:int) -> None:
         r"""
@@ -685,10 +849,12 @@ class QuantumCircuit:
             qubit (int): The qubit to apply the gate sequence to.
         """
         assert(unitary.shape == (2,2))
+        assert(qubit < self.nqubits)
         theta, phi, lamda, alpha = zyz_decompose(unitary)
         self.gates.append(('rz', lamda, qubit))
         self.gates.append(('ry', theta, qubit))
         self.gates.append(('rz', phi, qubit))
+        self._add_qubits(qubit)
 
     def kak_for_unitary(self, unitary: np.ndarray, qubit1: int, qubit2: int) -> None:
         r"""
@@ -700,6 +866,7 @@ class QuantumCircuit:
             qubit2 (int): The second qubit to apply the gates to.
         """
         assert(unitary.shape == (4,4))
+        assert(qubit1 != qubit2)
         rots1, rots2 = kak_decompose(unitary)
         self.u3_for_unitary(rots1[0], qubit1)
         self.u3_for_unitary(h_mat @ rots2[0], qubit2)
@@ -712,6 +879,7 @@ class QuantumCircuit:
         self.gates.append(('cz', qubit1, qubit2))        
         self.u3_for_unitary(rots1[3], qubit1)
         self.u3_for_unitary(rots2[3] @ h_mat, qubit2)
+        self._add_qubits(qubit1,qubit2)
 
     def reset(self, qubit: int) -> None:
         r"""
@@ -725,29 +893,31 @@ class QuantumCircuit:
         """
         if qubit < self.nqubits:
             self.gates.append(('reset', qubit))
+            self._add_qubits(qubit)
         else:
             raise ValueError("Qubit index out of range")
         
-    def delay(self,duration:int|float, *qubits:tuple[int],unit='ns') ->None:
+    def delay(self,duration:int|float, *qubits:tuple[int],unit='s') ->None:
         r"""
-        Adds delay to qubits, the unit is ns.
+        Adds delay to qubits, the unit is s.
 
         Raises:
             ValueError: If qubit out of circuit range.
         """
-        # convert 's' 'ms' 'us' to 'ns
-        if unit == 's':
-            duration = duration * 1e9
-        elif unit == 'ms':
-            duration = duration * 1e6
-        elif unit =='us':
-            duration = duration * 1e3
+        # convert 'ns' 'ms' 'us' to 's
+        if unit == 'ns':
+            duration = duration * 1e-9
+        elif unit == 'us':
+            duration = duration * 1e-6
+        elif unit =='ms':
+            duration = duration * 1e-3
 
         if not qubits: # it will add barrier for all qubits
             self.gates.append(('delay', duration, tuple(self.qubits)))
         else:
             if max(qubits) < self.nqubits:
                 self.gates.append(('delay', duration, qubits))
+                self._add_qubits(*qubits)
             else:
                 raise ValueError("Qubit index out of range")
         
@@ -762,7 +932,10 @@ class QuantumCircuit:
             self.gates.append(('barrier', tuple(self.qubits)))
         else:
             if max(qubits) < self.nqubits:
-                self.gates.append(('barrier', qubits))
+                if len(set(qubits)) == len(qubits):
+                    self.gates.append(('barrier', qubits))
+                else:
+                    raise(ValueError(f'Qubit index conflict. {qubits}'))
             else:
                 raise ValueError("Qubit index out of range")
             
@@ -781,25 +954,38 @@ class QuantumCircuit:
         self.gates = new
         return self
     
-    def measure(self,qubitlst: int | list, cbitlst: int | list) -> None:
+    def measure(self,qubitlst: int | Iterable[int], cbitlst: int | Iterable[int]) -> None:
         r"""Adds measurement to qubits.
 
         Args:
             qubitlst (int | list): Qubit(s) to measure.
             cbitlst (int | list): Classical bit(s) to place the measure results in.
         """
-        if type(qubitlst) == list:
-            self.gates.append(('measure', qubitlst,cbitlst))
+        if isinstance(qubitlst,Iterable):
+            qubitlst = list(qubitlst)
+            cbitlst = list(cbitlst)
+            if (len(set(qubitlst)) == len(qubitlst) and 
+                len(set(cbitlst)) == len(cbitlst) and 
+                len(qubitlst) == len(cbitlst)):
+                self.gates.append(('measure', qubitlst,cbitlst))
+                self._add_qubits(*qubitlst)
+            else:
+                raise(ValueError(f'Qubit or Cbits index conflict. {qubitlst} {cbitlst}'))
+        elif isinstance(qubitlst,int):
+            if qubitlst < self.nqubits:
+                self.gates.append(('measure', [qubitlst], [cbitlst]))
+                self._add_qubits(qubitlst)
+            else:
+                raise ValueError("Qubit index out of range")
         else:
-            self.gates.append(('measure', [qubitlst],[cbitlst]))
+            raise(ValueError(''))
 
     def measure_all(self) -> None:
         r"""
         Adds measurement to all qubits.
         """
-        qubitlst = [i for i in sorted(self.qubits)]
+        qubitlst = [i for i in self.qubits]
         cbitlst = [i for i in range(len(qubitlst))]
-        #cbitlst = [i for i in range(self.ncbits)]
         self.gates.append(('measure', qubitlst,cbitlst))
 
     @property
@@ -828,6 +1014,8 @@ class QuantumCircuit:
                 qasm_str += f"{gate[0]} q[{gate[1]}];\n"
             elif gate[0] in two_qubit_gates_available.keys(): # two qubit gate 
                 qasm_str += f"{gate[0]} q[{gate[1]}],q[{gate[2]}];\n"
+            elif gate[0] in three_qubit_gates_available.keys():
+                qasm_str += f"{gate[0]} q[{gate[1]}],q[{gate[2]}],q[{gate[3]}];\n"
             elif gate[0] in two_qubit_parameter_gates_available.keys():
                 if isinstance(gate[1],float):
                     theta = gate[1]
@@ -993,7 +1181,8 @@ class QuantumCircuit:
                     qlisp.append((gate.upper(), tuple('Q'+str(i) for i in gate_info[1:])))
             elif gate in ['iswap']:
                 qlisp.append(('iSWAP', tuple('Q'+str(i) for i in gate_info[1:])))
-
+            elif gate in three_qubit_gates_available.keys():
+                qlisp.append((gate.upper(), tuple('Q'+str(i) for i in gate_info[1:])))
             elif gate in ['rx', 'ry', 'rz', 'p']:
                 if isinstance(gate_info[1],float):
                     qlisp.append(((gate.capitalize(), gate_info[1]), 'Q'+str(gate_info[2])))
@@ -1064,7 +1253,7 @@ class QuantumCircuit:
         Args:
             width (int, optional): The width between gates. Defaults to 4.
         """
-        lines1,lines_use = add_gates_to_lines(self.nqubits,self.ncbits,self.gates,self.physical_qubits_espression,self.params_value, width = width)
+        lines1,lines_use = add_gates_to_lines(self.nqubits,self.ncbits,self.gates,self.params_value, width = width)
         fline = str()
         for line in lines1:
             fline += '\n'
@@ -1084,7 +1273,7 @@ class QuantumCircuit:
         Args:
             width (int, optional): The width between gates. Defaults to 4.
         """
-        lines1,lines_use = add_gates_to_lines(self.nqubits,self.ncbits,self.gates,self.physical_qubits_espression,self.params_value, width=width)
+        lines1,lines_use = add_gates_to_lines(self.nqubits,self.ncbits,self.gates,self.params_value, width=width)
         fline = str()
         for idx in range(2 * self.nqubits):
             if idx in lines_use:
@@ -1122,6 +1311,11 @@ class QuantumCircuit:
             'swap':qc.swap, 
             'iswap':qc.iswap,
             }
+        three_qubit_gates_in_qiskit = {
+            'ccz':qc.ccz,
+            'ccx':qc.ccx,
+            'cswap':qc.cswap,
+        }
         one_qubit_parameter_gates_in_qiskit = {
             'rx':qc.rx, 
             'ry':qc.ry, 
@@ -1147,6 +1341,8 @@ class QuantumCircuit:
                 one_qubit_gates_in_qiskit[gate](*gate_info[1:])
             elif gate in two_qubit_gates_in_qiskit.keys():
                 two_qubit_gates_in_qiskit[gate](*gate_info[1:])
+            elif gate in three_qubit_gates_in_qiskit.keys():
+                three_qubit_gates_in_qiskit[gate](*gate_info[1:])
             elif gate in one_qubit_parameter_gates_in_qiskit.keys():
                 one_qubit_parameter_gates_in_qiskit[gate](*gate_info[1:])
             elif gate in two_qubit_parameter_gates_in_qiskit.keys():
@@ -1160,7 +1356,7 @@ class QuantumCircuit:
                 raise(ValueError(f'the gate name is wrong! {gate}'))
         return qc
 
-    def plot_with_qiskit(self):
+    def plot_with_qiskit(self,file_name=None):
         from qiskit.visualization import circuit_drawer
         qc = self.to_qiskitQC()
-        return circuit_drawer(qc,output="mpl",idle_wires=False, style = {'backgroundcolor':'#EEEEEE','linecolor':'grey'})
+        return circuit_drawer(qc,output="mpl",filename=file_name,idle_wires=False, style = {'backgroundcolor':'#EEEEEE','linecolor':'grey'})
