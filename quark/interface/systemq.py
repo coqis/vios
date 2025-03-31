@@ -24,6 +24,7 @@
 """
 
 
+from qlispc.arch.baqis import QuarkLocalConfig
 from copy import deepcopy
 from importlib import import_module, reload
 from itertools import permutations
@@ -45,15 +46,13 @@ except Exception as e:
 try:
     # qlispc
     try:
-        from lib import (DictDriver, QuarkLocalConfig, Signal, get_arch,
-                         qcompile, sample_waveform)
+        from lib import DictDriver, Signal, get_arch, qcompile, sample_waveform
     except ImportError as e:
         try:
-            from systemq.lib import (DictDriver, QuarkLocalConfig, Signal,
-                                     get_arch, qcompile, sample_waveform)
+            from systemq.lib import (
+                DictDriver, Signal, get_arch, qcompile, sample_waveform)
         except ImportError as e:
             from qlispc import Signal, get_arch
-            from qlispc.arch.baqis.config import QuarkLocalConfig
             from qlispc.kernel_utils import qcompile, sample_waveform
             from qlispc.namespace import DictDriver
 except Exception as e:
@@ -166,6 +165,17 @@ class Context(QuarkLocalConfig):
                 except:
                     break
             raise Exception(f"gate {name} of {qubits} not calibrated.")
+
+
+def create_context(arch: str, data):
+    base = get_arch(arch).snapshot_factory
+    Context.__bases__ = (base,)
+    ctx = Context(data)
+    ctx.arch = arch
+    print(type(ctx).__bases__, '3' * 10)
+    if hasattr(ctx, 'test'):
+        print(ctx.test())
+    return ctx
 
 
 class Pulse(object):

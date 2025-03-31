@@ -25,10 +25,10 @@ from typing import Any
 
 from loguru import logger
 
-from quark.interface import Context, Pulse, Workflow
+from quark.interface import create_context, Pulse, Workflow
 from quark.proxy import dumpv
 
-ctx = Context({})
+ctx = create_context('baqis', {})
 
 
 def initialize(snapshot, **kwds):
@@ -45,7 +45,7 @@ def initialize(snapshot, **kwds):
 
     """
     global ctx
-    ctx = Context({})
+    ctx = create_context(kwds.get('arch', 'baqis'), {})
     # logger.warning('context for compiler initialized ...')
 
     if isinstance(snapshot, int):
@@ -54,7 +54,8 @@ def initialize(snapshot, **kwds):
     # ctx.initial = kwds.get('initial', {'restore': []})
     ctx.bypass = kwds.get('bypass', {})
     ctx._keys = kwds.get('keys', [])
-    return ctx
+    if kwds.get('main', False):
+        return ctx
 
 
 def ccompile(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], circuit: list, **kwds) -> tuple:

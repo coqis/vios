@@ -27,4 +27,4 @@ Abstract: about interface
 """
 
 
-from .systemq import Context, Pulse, Workflow
+from .systemq import create_context, Pulse, Workflow
