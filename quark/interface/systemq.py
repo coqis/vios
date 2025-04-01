@@ -24,13 +24,14 @@
 """
 
 
-from qlispc.arch.baqis import QuarkLocalConfig
+import sys
 from copy import deepcopy
 from importlib import import_module, reload
 from itertools import permutations
 
 import numpy as np
 from loguru import logger
+from qlispc.arch.baqis import QuarkLocalConfig
 
 try:
     # lib: systemq
@@ -49,8 +50,8 @@ try:
         from lib import DictDriver, Signal, get_arch, qcompile, sample_waveform
     except ImportError as e:
         try:
-            from systemq.lib import (
-                DictDriver, Signal, get_arch, qcompile, sample_waveform)
+            from systemq.lib import (DictDriver, Signal, get_arch, qcompile,
+                                     sample_waveform)
         except ImportError as e:
             from qlispc import Signal, get_arch
             from qlispc.kernel_utils import qcompile, sample_waveform
@@ -172,7 +173,7 @@ def create_context(arch: str, data):
     Context.__bases__ = (base,)
     ctx = Context(data)
     ctx.arch = arch
-    print(type(ctx).__bases__, '3' * 10)
+    print('using ', sys.modules[base.__module__])
     if hasattr(ctx, 'test'):
         print(ctx.test())
     return ctx
