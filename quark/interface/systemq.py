@@ -173,7 +173,7 @@ def create_context(arch: str, data):
     Context.__bases__ = (base,)
     ctx = Context(data)
     ctx.arch = arch
-    print('using ', sys.modules[base.__module__])
+    print(f'using {arch}: ', sys.modules[base.__module__])
     if hasattr(ctx, 'test'):
         print(ctx.test())
     return ctx

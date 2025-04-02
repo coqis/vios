@@ -437,7 +437,7 @@ def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, tid: 
     """
     from quark.runtime import ccompile, initialize
 
-    ctx = initialize(cfg if cfg else get_config_by_tid(tid))
+    ctx = initialize(cfg if cfg else get_config_by_tid(tid), **kwds)
     return ctx, ccompile(0, {}, circuit, signal='iq', prep=True, **kwds)
 
 
