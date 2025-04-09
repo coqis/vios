@@ -118,7 +118,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                 continue
 
             kwds = {'sid': sid, 'target': target,
-                    'track': query('etc.server.review'),
+                    'review': query('etc.server.review'),
                     'shared': query('etc.server.shared'),
                     'filter': query('etc.driver.filter')}
             if 'CH' in target or ctype == 'WAIT':
@@ -126,10 +126,16 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
             else:
                 try:
                     # logical channel to hardware channel
-                    context = query(target.split('.', 1)[0])
-                    mapping = query('etc.driver.mapping')
-                    _target = decode(target, context, mapping)
-                    kwds.update({"context": context})
+                    if target.endswith(('drive', 'probe', 'flux', 'acquire')):
+                        context = query(target)
+                        _target = context.pop('address', f'address: {target}')
+                        kwds['context'] = context
+                    else:
+                        # old
+                        context = query(target.split('.', 1)[0])
+                        mapping = query('etc.driver.mapping')
+                        _target = decode(target, context, mapping)
+                        kwds.update({"context": context})
                 except (ValueError, KeyError) as e:
                     continue
 
@@ -144,7 +150,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
             # get sample rate from device
             if ctype != 'WAIT':
                 if _target.count('.') != 2:
-                    logger.critical(f'wrong target: {_target}')
+                    logger.critical(f'wrong address: {_target}')
                     continue
                 dev = _target.split('.', 1)[0]
                 kwds['srate'] = query(f'dev.{dev}.srate')
@@ -154,7 +160,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
 
             # shared channels
             try:
-                if _target in scmd and 'waveform' in target.lower():
+                if _target in scmd and 'waveform' in _target.lower():
                     if isinstance(scmd[_target][1], str):
                         scmd[_target][1] = Pulse.fromstr(scmd[_target][1])
                     if isinstance(cmd[1], str):
@@ -271,9 +277,13 @@ def preprocess(sid: int, instruction: dict[str, dict[str, list[str, Any, str, di
                 # context设置, 用于calculator.calculate
                 context = kwds.pop('context', {})  # 即cfg表中的Qubit、Coupler等
                 if context:
-                    kwds['LEN'] = context['waveform']['LEN']
-                    kwds['calibration'] = context['calibration']
-                    kwds['setting'] = context['setting']
+                    try:
+                        ch = kwds['target'].split('.')[-1]
+                        kwds['LEN'] = context['waveform']['LEN']
+                        kwds['calibration'] = context['calibration'][ch]
+                        kwds['setting'] = context['setting']
+                    except Exception as e:
+                        kwds['calibration'] = context
 
                 # if isinstance(cmd[1], Waveform):
                 #     cmd[1].sample_rate = kwds['srate']

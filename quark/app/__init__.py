@@ -437,7 +437,7 @@ def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, tid: 
     """
     from quark.runtime import ccompile, initialize
 
-    ctx = initialize(cfg if cfg else get_config_by_tid(tid), **kwds)
+    ctx = initialize(cfg if cfg else get_config_by_tid(tid), main=True, **kwds)
     return ctx, ccompile(0, {}, circuit, signal='iq', prep=True, **kwds)
 
 
@@ -464,11 +464,11 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
                 value[-1]['LEN'] = end
                 value[-1]['filter'] = []
                 if not calibrate:
-                    for ch, val in value[-1]['calibration'].items():
-                        try:
-                            val['delay'] = 0
-                        except Exception as e:
-                            logger.error(f'{target, ch, val, e}')
+                    # for ch, val in value[-1].get('calibration', {}).items():
+                    try:
+                        value[-1].get('calibration', {})['delay'] = 0
+                    except Exception as e:
+                        logger.error(f'{target, e}')
 
                 xt = np.arange(start, end, 1 / srate) / unit
                 (_, _, cmd), _ = calculate('main', target, value)

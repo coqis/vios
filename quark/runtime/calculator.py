@@ -57,7 +57,7 @@ def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
         value, **(kwds | {'sampled': sampled}))
 
     cmd[-1] = {'sid': kwds['sid'], 'target': kwds['target'], 'srate': kwds['srate'],
-               'track': kwds['track'], 'shared': kwds['shared']}
+               'review': kwds['review'], 'shared': kwds['shared']}
 
     try:
         line = sample(target, cmd, canvas, delay, offset)

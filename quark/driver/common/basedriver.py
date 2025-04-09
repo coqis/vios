@@ -147,7 +147,7 @@ class BaseDriver(ABC):
         self.check(name, channel)
         opc = self.write(name, value, **kw)
         self.update(name, opc, channel)
-        if kw.get('sid', 0) in kw.get('track', [0]):
+        if kw.get('sid', 0) in kw.get('review', [0]):
             return opc
         # return opc
 

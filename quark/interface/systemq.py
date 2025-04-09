@@ -136,7 +136,7 @@ class Context(QuarkLocalConfig):
         except Exception as e:
             return self.snapshot().dct
 
-    def getGate(self, name, *qubits):
+    def getGate3(self, name, *qubits):
         # ------------------------- added -------------------------
         if name in self.__skip:
             raise Exception(f"gate {name} of {qubits} not calibrated.")
@@ -292,27 +292,23 @@ class Workflow(object):
         compiled = {'main': [('WRITE', *cmd)
                              for cmd in kwds.get('precompile', [])]}
 
-        _, (cmds, dmap) = qcompile(circuit,
-                                   lib=get_gate_lib(kwds.get('lib', '')),
-                                   cfg=kwds.get('ctx', ctx),
-                                   signal=signal,
-                                   shots=kwds.get('shots', 1024),
-                                   context=kwds.get('context', {}),
-                                   arch=kwds.get('arch', 'baqis'),
-                                   align_right=kwds.get('align_right', True),
-                                   waveform_length=kwds.get('waveform_length', 98e-6))
+        ctx.code, (cmds, dmap) = qcompile(circuit,
+                                          lib=get_gate_lib(
+                                              kwds.get('lib', '')),
+                                          cfg=kwds.get('ctx', ctx),
+                                          signal=signal,
+                                          shots=kwds.get('shots', 1024),
+                                          context=kwds.get('context', {}),
+                                          arch=kwds.get('arch', 'baqis'),
+                                          align_right=kwds.get(
+                                              'align_right', False),
+                                          waveform_length=kwds.get('waveform_length', 98e-6))
 
         for cmd in cmds:
             ctype = type(cmd).__name__  # WRITE, READ
-            if ctype == 'WRITE':
-                step = 'main'
-            else:
-                step = ctype
+            step = 'main' if ctype == 'WRITE' else ctype
             op = (ctype, cmd.address, cmd.value, 'au')
-            if step in compiled:
-                compiled[step].append(op)
-            else:
-                compiled[step] = [op]
+            compiled.setdefault(step, []).append(op)
         return compiled, dmap
 
     @classmethod
@@ -335,8 +331,8 @@ class Workflow(object):
             support_waveform_object = kwds.pop('sampled', False)
 
             try:
-                ch = kwds['target'].split('.')[-1]
-                cali = {} if kwds['sid'] < 0 else kwds['calibration'][ch]
+                # ch = kwds['target'].split('.')[-1]
+                cali = {} if kwds['sid'] < 0 else kwds['calibration']  # [ch]
                 delay = cali.get('delay', 0)
                 pulse = sample_waveform(func,
                                         cali,
