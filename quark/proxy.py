@@ -455,12 +455,13 @@ class QuarkProxy(object):
         logger.warning(f'\n\n\n{"#" * 80} task start to run ...\n')
 
         try:
-            from home.demo.run import get_bias_of_coupler
-            bias = get_bias_of_coupler()
+            before = []
+            after = []
         except Exception as e:
-            bias = []
-            logger.error(f'Failed to get bias of coupler, {e}!')
-        circuit = [bias + c for c in task['body']['cirq']]
+            before = []
+            after = []
+            logger.error(f'Failed to extend circuit: {e}!')
+        circuit = [before + c + after for c in task['body']['cirq']]
         task['body']['cirq'] = circuit
 
         qlisp = ',\n'.join([str(op) for op in circuit[0]])
