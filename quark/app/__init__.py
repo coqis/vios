@@ -449,10 +449,11 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
     from waveforms import Waveform
 
     from quark.runtime import calculate
+    from copy import deepcopy
 
     ax: Axes = plt.subplot() if not ax else ax
     wf, index = {}, 0
-    for target, value in cmds.items():
+    for target, value in deepcopy(cmds).items():
         if isinstance(value[1], Waveform):
             _target = value[-1]['target']  # .split('.')[0]
             if _target.startswith(tuple(keys)):

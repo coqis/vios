@@ -276,14 +276,14 @@ def preprocess(sid: int, instruction: dict[str, dict[str, list[str, Any, str, di
 
                 # context设置, 用于calculator.calculate
                 context = kwds.pop('context', {})  # 即cfg表中的Qubit、Coupler等
-                if context:
-                    try:
-                        ch = kwds['target'].split('.')[-1]
-                        kwds['LEN'] = context['waveform']['LEN']
-                        kwds['calibration'] = context['calibration'][ch]
-                        kwds['setting'] = context['setting']
-                    except Exception as e:
-                        kwds['calibration'] = context
+                # if context:
+                try:
+                    ch = kwds['target'].split('.')[-1]
+                    kwds['LEN'] = context['waveform']['LEN']
+                    kwds['calibration'] = context['calibration'][ch]
+                    kwds['setting'] = context['setting']
+                except Exception as e:
+                    kwds['calibration'] = context
 
                 # if isinstance(cmd[1], Waveform):
                 #     cmd[1].sample_rate = kwds['srate']
