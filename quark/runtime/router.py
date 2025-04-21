@@ -88,9 +88,9 @@ def transfer(tid: int, status: str, result: dict, station: str, left: int, **kwd
                                          'station': station,
                                          'left': left
                                          }),
-                        headers={'token': result['token']})
+                        headers={'token': kwds['token']})
     if kwds.get('debug', False):
-        print(tid, status, result, station, left)
+        print(tid, status, result, station, left, kwds)
         print(json.loads(res.content.decode()))
 
 
