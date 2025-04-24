@@ -407,21 +407,26 @@ def update_remote_wheel(wheel: str, index: str | Path, host: str = '127.0.0.1', 
         index (str): location of required packages (downloaded from PyPI).
         host (str, optional): IP address of remote device. Defaults to '127.0.0.1'.
     """
+    if not host:
+        return None, 'host address must be specified!'
+
     if sudo:
-        assert sys.platform != 'win32', 'sudo can not be used on Windows'
+        if sys.platform == 'win32':
+            return None, 'sudo can not be used on Windows'
 
     links = {}
     for filename in Path(index).glob('*.whl'):
         with open(filename, 'rb') as f:
-            print(f'{filename} will be installed!')
+            print(f'{filename} added to links!')
             links[filename.parts[-1]] = f.read()
     rs = connect('QuarkRemote', host=host, port=2087)
-    logger.info(rs.install(wheel, links, sudo))
+    sysinfo = rs.install(wheel, links, sudo)
+    print(sysinfo)
 
     for alias, info in rs.info().items():
         rs.reopen(alias)
-        logger.warning(f'{alias} restarted!')
-    return rs
+        print(f'{alias} restarted!')
+    return rs, sysinfo
 
 
 def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, tid: int = 0, **kwds) -> tuple:
