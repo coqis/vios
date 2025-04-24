@@ -3,6 +3,7 @@
 ???+ example "start"
     ```bash
     # pip install quarkstudio[full] (if not installed)
+    # quark update --studio (if installed)
     quark canvas
     ```
 ### **Real-time Waveform**

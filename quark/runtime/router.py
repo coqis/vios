@@ -91,7 +91,7 @@ def transfer(tid: int, status: str, result: dict, station: str, left: int, **kwd
                         headers={'token': kwds['token']})
     if kwds.get('debug', False):
         print(tid, status, result, station, left, kwds)
-        print(json.loads(res.content.decode()))
+    print(json.loads(res.content.decode()))
 
 
 def postprocess(result: dict):

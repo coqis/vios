@@ -406,13 +406,10 @@ def update_remote_wheel(wheel: str, index: str | Path, host: str = '127.0.0.1', 
         wheel (str): package to be installed.
         index (str): location of required packages (downloaded from PyPI).
         host (str, optional): IP address of remote device. Defaults to '127.0.0.1'.
+        sudo (bool, optional): used on Mac or Linux. Defaults to False.
     """
     if not host:
         return None, 'host address must be specified!'
-
-    if sudo:
-        if sys.platform == 'win32':
-            return None, 'sudo can not be used on Windows'
 
     links = {}
     for filename in Path(index).glob('*.whl'):
@@ -422,10 +419,7 @@ def update_remote_wheel(wheel: str, index: str | Path, host: str = '127.0.0.1', 
     rs = connect('QuarkRemote', host=host, port=2087)
     sysinfo = rs.install(wheel, links, sudo)
     print(sysinfo)
-
-    for alias, info in rs.info().items():
-        rs.reopen(alias)
-        print(f'{alias} restarted!')
+    print(rs.restart())
     return rs, sysinfo
 
 
