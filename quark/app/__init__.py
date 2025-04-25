@@ -416,7 +416,8 @@ def update_remote_wheel(wheel: str, index: str | Path, host: str = '127.0.0.1', 
         with open(filename, 'rb') as f:
             print(f'{filename} added to links!')
             links[filename.parts[-1]] = f.read()
-    rs = connect('QuarkRemote', host=host, port=2087)
+    rs = connect('QuarkRemote', host=host,
+                 port=2087) if isinstance(host, str) else host
     sysinfo = rs.install(wheel, links, sudo)
     print(sysinfo)
     print(rs.restart())
