@@ -36,7 +36,7 @@ from collections import defaultdict
 from functools import cached_property
 from multiprocessing.shared_memory import SharedMemory
 from pathlib import Path
-from queue import Queue
+from queue import Empty, Queue
 from threading import Thread, current_thread
 
 import numpy as np
@@ -442,10 +442,13 @@ class QuarkProxy(object):
         self.server = login()
         setlog()
 
-    def get_circuit(self):
+    def get_circuit(self, timeout: float = 1.0):
         if not self.ready:
             return 'prvious task unfinished'
-        self.task = self.tqueue.get()
+        try:
+            self.task = self.tqueue.get(timeout=timeout)
+        except Empty as e:
+            return 'no pending tasks'
         return self.task['body']['cirq'][0]
 
     def put_circuit(self, circuit):
