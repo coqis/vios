@@ -21,7 +21,9 @@
 
 
 import inspect
+import json
 import sys
+from pathlib import Path
 
 import numpy as np
 
@@ -30,6 +32,7 @@ class Recipe(object):
     """**Recipe仅用于生成任务，没有编译/执行/数据处理等任何逻辑！**
     """
 
+    syspath: list[str] = []
     # --ignore=E731
     before_the_task: list[tuple] = []  # 任务开始前初始化
     before_compiling: list[tuple] = []  # 每步开始前初始化
@@ -187,12 +190,20 @@ class Recipe(object):
         if var not in self.__loops[group]:
             self.__loops[group].append(var)
 
+    def update(self):
+        with open(Path.home() / 'quark.json', 'r') as f:
+            old = json.loads(f.read())
+
+        with open(Path.home() / 'quark.json', 'w') as f:
+            f.write(json.dumps(old | {'path': self.syspath}, indent=4))
+
     def export(self):
         """导出任务
 
         Returns:
             _type_: 任务描述，详见**submit**
         """
+        self.update()
         return {'meta': {'name': f'{self.filename}:/{self.name}',
                          'priority': self.priority,
                          'other': {'shots': self.shots,

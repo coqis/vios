@@ -36,11 +36,11 @@ from collections import defaultdict
 from functools import cached_property
 from multiprocessing.shared_memory import SharedMemory
 from pathlib import Path
-from threading import current_thread
+from queue import Queue
+from threading import Thread, current_thread
 
 import numpy as np
 from loguru import logger
-
 
 try:
     qjs = Path.home() / 'quark.json'
@@ -436,22 +436,33 @@ class QuarkProxy(object):
     def __init__(self) -> None:
         from quark.app import login
 
+        self.tqueue = Queue(-1)
+        self.ready = False
+
         self.server = login()
         setlog()
 
-        try:
-            from home.demo.run import dag
+    def get_circuit(self):
+        if not self.ready:
+            return 'prvious task unfinished'
+        self.task = self.tqueue.get()
+        return self.task['body']['cirq'][0]
 
-            from quark.dag import Scheduler
-            self.scheduler = Scheduler(dag)
-        except Exception as e:
-            logger.error(f'Failed to start Scheduler: {e}')
+    def put_circuit(self, circuit):
+        self.task['body']['cirq'] = [circuit]
+        self.submit(self.task)
+        self.ready = True
 
-    def submit(self, task: dict, block: bool = False):
+    def submit(self, task: dict, suspend: bool = False):
         from quark.app import submit
 
         # by server
         # logger.info(f'task will be executed on local machine: {chip}!')
+
+        if suspend:
+            self.tqueue.put(task['body']['cirq'][0])
+            return task['body']['meta']['tid']
+
         logger.warning(f'\n\n\n{"#" * 80} task start to run ...\n')
 
         try:
@@ -468,9 +479,9 @@ class QuarkProxy(object):
         qasm = task['meta']['coqis']['qasm']
         logger.info(f"\n{'>' * 36}qasm:\n{qasm}\n{'>' * 36}qlisp:\n[{qlisp}]")
 
-        t: Task = submit(task, block=block)  # local machine
-        if block:
-            t.bar(0.2, disable=False)  # if block is True
+        t: Task = submit(task)  # local machine
+        # if block:
+        #     t.bar(0.2, disable=False)  # if block is True
         eid = task['meta']['coqis']['eid']
         user = task['meta']['coqis']['user']
         logger.warning(f'task {t.tid}[{eid}, {user}] will be executed!')

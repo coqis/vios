@@ -24,10 +24,12 @@
 """
 
 
+import json
 import sys
 from copy import deepcopy
 from importlib import import_module, reload
 from itertools import permutations
+from pathlib import Path
 
 import numpy as np
 from loguru import logger
@@ -214,6 +216,17 @@ class Workflow(object):
         pass
 
     @classmethod
+    def check(cls):
+        try:
+            with open(Path.home() / 'quark.json', 'r') as f:
+                for path in json.loads(f.read()).get('path', []):
+                    if path not in sys.path:
+                        logger.warning(f'add {path} to sys.path!')
+                        sys.path.append(path)
+        except Exception as e:
+            pass
+
+    @classmethod
     def qcompile(cls, circuit: list, **kwds):
         """compile circuits to commands
 
@@ -271,6 +284,7 @@ class Workflow(object):
             }
             ```
         """
+        cls.check()
 
         try:
             signal = _form_signal(kwds.get('signal'))
@@ -313,6 +327,7 @@ class Workflow(object):
 
     @classmethod
     def calculate(cls, value, **kwds):
+        cls.check()
 
         if isinstance(value, str):
             try:
@@ -361,4 +376,5 @@ class Workflow(object):
 
     @classmethod
     def analyze(cls, data: dict, datamap: dict):
+        cls.check()
         return get_arch(datamap['arch']).assembly_data(data, datamap)
