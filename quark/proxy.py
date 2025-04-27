@@ -444,16 +444,17 @@ class QuarkProxy(object):
 
     def get_circuit(self, timeout: float = 1.0):
         if not self.ready:
-            return 'prvious task unfinished'
+            return 'previous task unfinished'
         try:
             self.task = self.tqueue.get(timeout=timeout)
         except Empty as e:
             return 'no pending tasks'
+        self.ready = False
         return self.task['body']['cirq'][0]
 
     def put_circuit(self, circuit):
         self.task['body']['cirq'] = [circuit]
-        self.submit(self.task)
+        self.submit(self.task, suspend=False)
         self.ready = True
 
     def submit(self, task: dict, suspend: bool = False):
@@ -464,13 +465,13 @@ class QuarkProxy(object):
 
         if suspend:
             self.tqueue.put(task['body']['cirq'][0])
-            return task['body']['meta']['tid']
+            return task['meta']['tid']
 
-        logger.warning(f'\n\n\n{"#" * 80} task start to run ...\n')
+        logger.warning(f'\n\n\n{"#" * 80} task starts to run ...\n')
 
         try:
-            before = []
-            after = []
+            before = []  # insert circuit
+            after = []  # append circuit
         except Exception as e:
             before = []
             after = []
