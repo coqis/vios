@@ -445,7 +445,10 @@ class QuarkProxy(object):
     def get_circuit(self, timeout: float = 1.0):
         if not self.ready:
             return 'previous task unfinished'
+
         try:
+            if not self.tqueue.qsize():
+                raise Empty
             self.task = self.tqueue.get(timeout=timeout)
         except Empty as e:
             return 'no pending tasks'
@@ -459,9 +462,6 @@ class QuarkProxy(object):
 
     def submit(self, task: dict, suspend: bool = False):
         from quark.app import submit
-
-        # by server
-        # logger.info(f'task will be executed on local machine: {chip}!')
 
         if suspend:
             self.tqueue.put(task['body']['cirq'][0])
