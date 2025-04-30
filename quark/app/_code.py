@@ -22,9 +22,6 @@
 
 import ast
 
-import numpy as np
-import sympy as sp
-
 
 def replace_function_in_module(module: str, target: str, code: str):
     with open(module, 'r', encoding='utf-8') as f:
@@ -50,33 +47,3 @@ def replace_function_in_module(module: str, target: str, code: str):
 
     with open(module, 'w', encoding='utf-8') as f:
         f.write('\n'.join(updated))
-
-
-class SymbolicFunction(object):
-    """Create a function based on the formula.
-
-    ***Example***
-    >>> T1 = SymbolicFunction('A*exp(-t/T1)+B')
-    >>> args = {'A': 2, 'B': 3, 'T1': 5}
-    >>> T1(t = np.array([1, 2, 3]), **d)
-    """
-
-    def __init__(self, expr: str):
-        self.__expr = sp.parse_expr(expr)
-        self.__func = None
-
-    @property
-    def expr(self):
-        return self.__expr
-
-    @property
-    def args(self):
-        return tuple(self.expr.atoms(sp.Symbol))
-
-    def __call__(self, *args, **kwds):
-        if not self.__func:
-            self.lambdify()
-        return self.__func(*args, **kwds)
-
-    def lambdify(self):
-        self.__func = sp.lambdify(self.args, self.expr, 'numpy')

@@ -40,6 +40,7 @@ from zee import flatten_dict
 
 from quark.proxy import Task
 
+from . import _dp as dp
 # get_record_by_rid, get_record_by_tid, sql
 from ._db import get_tid_by_rid
 from ._recipe import Recipe
@@ -444,12 +445,13 @@ def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, tid: 
 def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
             start: float = 0, end: float = 100e-6, srate: float = 0,
             unit: float = 1e-6, offset: float = 0, space: float = 0, ax=None):
+    from copy import deepcopy
+
     import matplotlib.pyplot as plt
     from matplotlib.axes import Axes
     from waveforms import Waveform
 
     from quark.runtime import calculate
-    from copy import deepcopy
 
     ax: Axes = plt.subplot() if not ax else ax
     wf, index = {}, 0
