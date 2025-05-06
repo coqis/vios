@@ -66,7 +66,7 @@ class Super(object):
 
         self._s = login(user, host)
 
-        for mth in ['start', 'query', 'write', 'read', 'snapshot', 'getid', 'cancel', 'review']:
+        for mth in ['start', 'query', 'write', 'read', 'snapshot', 'checkpoint', 'track', 'getid', 'cancel', 'review']:
             setattr(self, mth, getattr(self._s, mth))
 
         for name in ['signup']:
@@ -80,7 +80,7 @@ class Super(object):
         rs: str = ss.update(path, value)
         if rs.startswith('Failed'):
             if 'root' in rs:
-                ss.create(path, {})
+                ss.create(path, value)
             else:
                 path, _f = path.rsplit('.', 1)
                 failed.append((_f, value))

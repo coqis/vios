@@ -278,10 +278,12 @@ def preprocess(sid: int, instruction: dict[str, dict[str, list[str, Any, str, di
                 context = kwds.pop('context', {})  # 即cfg表中的Qubit、Coupler等
                 # if context:
                 try:
-                    ch = kwds['target'].split('.')[-1]
-                    kwds['LEN'] = context['waveform']['LEN']
-                    kwds['calibration'] = context['calibration'][ch]
-                    kwds['setting'] = context['setting']
+                    channel = kwds['target'].split('.')[-1]
+                    # length = context['waveform']['LEN']
+                    kwds['calibration'] = {'length': context['waveform']['LEN'],
+                                           'offset': context.get('setting', {}).get('OFFSET', 0)
+                                           } | context['calibration'][channel]
+                    # kwds['setting'] = context['setting']
                 except Exception as e:
                     kwds['calibration'] = context
 

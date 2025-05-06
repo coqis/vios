@@ -338,7 +338,7 @@ class Workflow(object):
             func = value
 
         delay = 0
-        offset = kwds.get('setting', {}).get('OFFSET', 0)
+        offset = 0  # kwds.get('setting', {}).get('OFFSET', 0)
 
         # sm, _value = loadv(func) # _value[:] = _value*10
 
@@ -349,10 +349,12 @@ class Workflow(object):
                 # ch = kwds['target'].split('.')[-1]
                 cali = {} if kwds['sid'] < 0 else kwds['calibration']  # [ch]
                 delay = cali.get('delay', 0)
+                offset = cali.get('offset', 0)
                 pulse = sample_waveform(func,
                                         cali,
                                         sample_rate=kwds['srate'],
-                                        start=kwds.get('start', 0), stop=kwds.get('LEN', 98e-6),
+                                        start=cali.get('start', 0),
+                                        stop=cali.get('length', 98e-6),
                                         support_waveform_object=support_waveform_object)
             except Exception as e:
                 # KeyError: 'calibration'
