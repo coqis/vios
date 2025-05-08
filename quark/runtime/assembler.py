@@ -255,7 +255,7 @@ def preprocess(sid: int, instruction: dict[str, dict[str, list[str, Any, str, di
                 - target (str): original target like Q0101.waveform.Z
                 - filter (list): sample waveform in the filter list to show in `QuarkCanvas`
                 - srate (float): sampling rate
-                - context (dict): target location like Q0101
+                - context (dict): calibration parameters of target
     """
     if sid == 0:
         ctx.bypass.clear()
@@ -280,7 +280,7 @@ def preprocess(sid: int, instruction: dict[str, dict[str, list[str, Any, str, di
                 try:
                     channel = kwds['target'].split('.')[-1]
                     # length = context['waveform']['LEN']
-                    kwds['calibration'] = {'length': context['waveform']['LEN'],
+                    kwds['calibration'] = {'end': context['waveform']['LEN'],
                                            'offset': context.get('setting', {}).get('OFFSET', 0)
                                            } | context['calibration'][channel]
                     # kwds['setting'] = context['setting']

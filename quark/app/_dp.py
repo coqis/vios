@@ -47,6 +47,10 @@ class SymbolicFunction(object):
     def __repr__(self):
         return f'{self.name}{tuple(self.args)}'
 
+    def show(self):
+        print(self)
+        return self.expr
+
     @property
     def expr(self):
         return self.__expr
@@ -63,7 +67,8 @@ class SymbolicFunction(object):
                 args.insert(0, s)
             else:
                 args.append(s)
-        return args
+        # return sorted(args, key=lambda arg: arg.name, reverse=True)
+        return sorted(args, key=lambda arg: str(self.expr).index(arg.name))
 
     def fit(self, data: np.ndarray, **kwds):
         assert len(data.shape) == 1, 'the input data must be a 1D array!'
@@ -76,7 +81,21 @@ class SymbolicFunction(object):
             params[arg.name] = kwds.pop(arg.name)
 
         kwds['params'] = self.__model.make_params(**params)
-        return self.__model.fit(data, **kwds)
+
+        # from matplotlib.axes import Axes
+        ax = kwds.pop('ax', None)
+        # title = kwds.pop('title', '')
+
+        result = self.__model.fit(data, **kwds)
+
+        if ax:
+            _var = self.__model.independent_vars[0]
+            ax.plot(kwds[_var], data, 'bo')
+            ax.plot(kwds[_var], result.best_fit, 'r.-')
+            ax.legend(['raw', 'fit'])
+            # ax.set_title(title)
+
+        return result
 
     def __call__(self, *args, **kwds):
         if not self.func:

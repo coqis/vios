@@ -354,7 +354,7 @@ class Workflow(object):
                                         cali,
                                         sample_rate=kwds['srate'],
                                         start=cali.get('start', 0),
-                                        stop=cali.get('length', 98e-6),
+                                        stop=cali.get('end', 98e-6),
                                         support_waveform_object=support_waveform_object)
             except Exception as e:
                 # KeyError: 'calibration'

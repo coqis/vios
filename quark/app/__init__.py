@@ -463,8 +463,8 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
                     value[-1]['srate'] = srate
                 else:
                     srate = value[-1]['srate']
-                value[-1]['start'] = start
-                value[-1]['LEN'] = end
+                value[-1]['calibration']['start'] = start
+                value[-1]['calibration']['end'] = end
                 value[-1]['filter'] = []
                 if not calibrate:
                     # for ch, val in value[-1].get('calibration', {}).items():
