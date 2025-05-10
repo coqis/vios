@@ -62,9 +62,9 @@ class Super(object):
         except Exception as e:
             return login()
 
-    def login(self, user: str = 'baqis', host: str = '127.0.0.1'):
+    def login(self, user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088):
 
-        self._s = login(user, host)
+        self._s = login(user, host, port)
 
         for mth in ['start', 'query', 'write', 'read', 'snapshot', 'checkpoint', 'track', 'getid', 'cancel', 'review']:
             setattr(self, mth, getattr(self._s, mth))
@@ -76,7 +76,7 @@ class Super(object):
         return ping(self.ss())
 
     def update(self, path: str, value, failed: list = []):
-        ss = self.ss()  # login(verbose=False)
+        ss = self.ss()
         rs: str = ss.update(path, value)
         if rs.startswith('Failed'):
             if 'root' in rs:
@@ -108,7 +108,7 @@ def ping(ss):
     return ss.ping('hello') == 'hello'
 
 
-def login(user: str = 'baqis', host: str = '127.0.0.1', verbose: bool = True):
+def login(user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088, verbose: bool = True):
     """login to the server as **user**
 
     Args:
@@ -118,11 +118,11 @@ def login(user: str = 'baqis', host: str = '127.0.0.1', verbose: bool = True):
     Returns:
         _type_: a connection to the server
     """
-    uid = f'{current_thread().name}: {user}@{host}'
+    uid = f'{current_thread().name}: {user}@{host}:{port}'
     try:
         ss = _sp[uid]
     except KeyError as e:
-        ss = _sp[uid] = connect('QuarkServer', host, 2088)
+        ss = _sp[uid] = connect('QuarkServer', host, port)
 
     m = ss.login(user)
     if verbose:
@@ -137,7 +137,7 @@ def signup(user: str, system: str, **kwds):
         user (str): name of the user
         system (str): name of the system(i.e. the name of the cfg file)
     """
-    ss = s.ss()  # login()
+    ss = s.ss()
     logger.info(ss.adduser(user, system, **kwds))
     ss.login(user)  # relogin
 
@@ -194,7 +194,7 @@ def submit(task: dict, block: bool = False, **kwds):
     if 'backend' in kwds:  # from master
         ss = kwds['backend']
     else:
-        ss = s.ss()  # login(verbose=False)
+        ss = s.ss()
 
         trigger: list[str] = ss.query('station.triggercmds')
         task['body']['loop']['trig'] = [(t, 0, 'au') for t in trigger]
@@ -219,7 +219,7 @@ def rollback(rid: int = 0, tid: int = 0):
     Args:
         tid (int): task id
     """
-    ss = s.ss()  # login(verbose=False)
+    ss = s.ss()
 
     try:
         if rid:

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vios"
-version = "3.2.8"
+version = "3.2.9"
 authors = [
   { name="YL Feng", email="fengyl@baqis.ac.cn" },
 ]
@@ -33,7 +33,14 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-server = ["apscheduler","dill","gitpython","loguru","networkx","tqdm"]
+server = ["apscheduler",
+          "dill",
+          "gitpython",
+          "loguru",
+          "networkx",
+          "tqdm",
+          "lmfit",
+          "sympy"]
 
 [project.urls]
 "homepage" = "https://quarkstudio.readthedocs.io/en/latest"
