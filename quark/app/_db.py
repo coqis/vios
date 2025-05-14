@@ -30,7 +30,7 @@ from srpc import loads
 
 from quark.proxy import startup
 
-sql = sqlite3.connect(Path(startup['quarkserver']['home']) / 'checkpoint.db',
+sql = sqlite3.connect(Path(startup['server']['home']) / 'checkpoint.db',
                       check_same_thread=False)
 
 

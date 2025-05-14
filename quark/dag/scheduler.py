@@ -48,7 +48,7 @@ dag = {'task': {'graph': [('S21', 'Spectrum'), ('Spectrum', 'PowerRabi'), ('Powe
 
        'chip': {'group': {'0': ['Q0', 'Q1'], '1': ['Q5', 'Q8']}}
        }
-home = Path(startup['quarkserver']['home']) / 'cfg/dag.json'
+home = Path(startup['server']['home']) / 'cfg/dag.json'
 home.parent.mkdir(parents=True, exist_ok=True)
 
 

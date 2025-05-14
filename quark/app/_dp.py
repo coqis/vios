@@ -38,7 +38,7 @@ class SymbolicFunction(object):
 
     def __init__(self, name: str, expr: str, independent_vars: list[str]):
         self.name = name
-        self.__expr = sp.parse_expr(expr)
+        self.__expr = sp.parse_expr(expr, evaluate=True)
         self.__vars = independent_vars
 
         self.lambdify()
@@ -49,7 +49,11 @@ class SymbolicFunction(object):
 
     def show(self):
         print(self)
-        return self.expr
+        try:
+            from IPython.display import display
+            display(self.expr)
+        except Exception as e:
+            print(e)
 
     @property
     def expr(self):
@@ -138,6 +142,10 @@ Sin = SymbolicFunction('Sin',
 Gauss = SymbolicFunction('Gauss',
                          'A * exp(-((t - mu) / sigma)**2 / 2)',
                          ['t'])
+
+Lorentzian = SymbolicFunction('Lorentzian',
+                              '(A*Gamma/2) / ((Gamma/2)**2 + (omega - omega0)**2)',
+                              ['omega'])
 
 if __name__ == '__main__':
     s21d = np.array([0])
