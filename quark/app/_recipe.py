@@ -32,7 +32,7 @@ class Recipe(object):
     """**Recipe仅用于生成任务，没有编译/执行/数据处理等任何逻辑！**
     """
 
-    syspath: list[str] = []
+    syspath: list[str] = sys.path
     # --ignore=E731
     before_the_task: list[tuple] = []  # 任务开始前初始化
     before_compiling: list[tuple] = []  # 每步开始前初始化

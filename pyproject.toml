@@ -53,4 +53,7 @@ packages = ["quark.app",
             "quark.interface",
             "quark.runtime"]
 py-modules = ["quark.proxy"]
-
+# [tool.setuptools.packages.find]
+# where = ["."]
+# include=["quark"]
+# exclude = ["quark.circuit.*"]
