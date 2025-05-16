@@ -51,13 +51,15 @@ class Recipe(object):
             name (str, optional): 实验名称, 如 S21. Defaults to ''.
             shots (int, optional): 触发次数, 1024的整数倍. Defaults to 1024.
             signal (str, optional): 采集信号. Defaults to 'iq_avg'.
+            filename (str, optional): 数据存储文件名. Defaults to '~/Desktop/home/dat'.
+            priority (int, optional): 任务排队, 越小优先级越高. Defaults to 0.
         """
         self.name = name
         self.shots = shots
         self.signal = signal
 
-        self.filename = filename  # 数据存储文件名, 位于桌面/home/dat文件夹下
-        self.priority = priority  # 任务排队用, 越小优先级越高
+        self.filename = filename
+        self.priority = priority
 
         # [('AWG.CH1.Waveform', 'zero()', 'au')]
         self.initcmd = [(t, v, 'au') for t, v in Recipe.before_the_task]
@@ -97,7 +99,8 @@ class Recipe(object):
             try:
                 self.__circuit['file'] = sys.modules[cirq.__module__].__file__
             except Exception as e:
-                self.__circuit['file'] = ''
+                _p = Path.cwd() / f'{cirq.__module__}.py'
+                self.__circuit['file'] = _p.as_posix()
         else:
             raise TypeError(f'invalid circuit: list[list] or function needed!')
 

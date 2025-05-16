@@ -388,9 +388,8 @@ def get_data_by_tid(tid: int, **kwds) -> dict:
 
     info, data = get_dataset_by_tid(tid)
 
-    signal = info['meta']['other']['signal'].split('|')[0]
-
-    if kwds.get('plot', False) and signal:
+    if kwds.get('plot', False):
+        signal = info['meta']['other']['signal'].split('|')[0]
         task = Task({'meta': info['meta']})
         task.meta = info['meta']
         task.data = {signal: data[signal]}
