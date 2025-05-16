@@ -95,11 +95,11 @@ class Recipe(object):
         elif callable(cirq):
             self.__circuit = {'name': cirq.__name__,
                               'code': inspect.getsource(cirq),
-                              'module': cirq.__module__}
+                              'module': cirq.__module__.split('.')[-1]}
             try:
                 self.__circuit['file'] = sys.modules[cirq.__module__].__file__
             except Exception as e:
-                _p = Path.cwd() / f'{cirq.__module__}.py'
+                _p = Path.cwd() / f"{cirq.__module__.replace('.', '/')}.py"
                 self.__circuit['file'] = _p.as_posix()
         else:
             raise TypeError(f'invalid circuit: list[list] or function needed!')
