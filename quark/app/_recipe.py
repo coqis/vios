@@ -99,8 +99,7 @@ class Recipe(object):
             try:
                 self.__circuit['file'] = sys.modules[cirq.__module__].__file__
             except Exception as e:
-                _p = Path.cwd() / f"{cirq.__module__.replace('.', '/')}.py"
-                self.__circuit['file'] = _p.as_posix()
+                self.__circuit['file'] = inspect.getabsfile(cirq)
         else:
             raise TypeError(f'invalid circuit: list[list] or function needed!')
 
@@ -129,7 +128,10 @@ class Recipe(object):
             if '.' in key:
                 # cfg表中参数，如'gate.Measure.Q0.params.frequency'
                 # value = np.asarray(value)
-                if self.__ckey:
+                if '@' in key:
+                    target, group = key.rsplit('@')
+                    self.define(group, f'${target}', value)
+                elif self.__ckey:
                     self.define(self.__ckey, f'${key}', value)
                     self.__ckey = ''
                 else:
@@ -193,7 +195,13 @@ class Recipe(object):
         if var not in self.__loops[group]:
             self.__loops[group].append(var)
 
+        dims = [len(d) for k, d, u in self.__loops[group]]
+        assert len(set(dims)) == 1, f'{target} in {group}: wrong dims {dims}!'
+
     def update(self):
+        if not self.syspath:
+            return
+
         with open(Path.home() / 'quark.json', 'r') as f:
             old = json.loads(f.read())
 
