@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vios"
-version = "3.3.4"
+version = "3.3.5"
 authors = [
   { name="YL Feng", email="fengyl@baqis.ac.cn" },
 ]
@@ -14,7 +14,11 @@ license = {file = "LICENSE"}
 requires-python = ">=3.10"
 dependencies = [
     "rich",
+    "lmfit",
+    "sympy",
+    "loguru",
     "pyvisa",
+    "gitpython",
     "anyon",
     "waveforms",
 ]
@@ -35,12 +39,7 @@ classifiers = [
 [project.optional-dependencies]
 server = ["apscheduler",
           "dill",
-          "gitpython",
-          "loguru",
-          "networkx",
-          "tqdm",
-          "lmfit",
-          "sympy"]
+          "tqdm"]
 
 [project.urls]
 "homepage" = "https://quarkstudio.readthedocs.io/en/latest"
