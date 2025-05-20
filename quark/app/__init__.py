@@ -52,7 +52,7 @@ class Super(object):
 
     def __repr__(self):
         try:
-            return f'connection to {self._s.raddr}'
+            return f'connection to {self.addr}'
         except Exception as e:
             return ''
 
@@ -62,11 +62,15 @@ class Super(object):
         except Exception as e:
             return login()
 
+    @property
+    def addr(self):
+        return self.ss().raddr
+
     def login(self, user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088):
 
         self._s = login(user, host, port)
 
-        for mth in ['start', 'query', 'write', 'read', 'snapshot', 'checkpoint', 'track', 'getid', 'cancel', 'review']:
+        for mth in ['start', 'query', 'write', 'read', 'checkpoint', 'track', 'getid', 'cancel', 'report', 'review']:
             setattr(self, mth, getattr(self._s, mth))
 
         for name in ['signup']:
@@ -74,6 +78,21 @@ class Super(object):
 
     def ping(self):
         return ping(self.ss())
+
+    def snapshot(self, tid: int = 0):
+        return self.ss().snapshot(tid=tid)
+
+    def result(self, tid: int):
+        if self.addr[0] == '127.0.0.1':
+            return get_data_by_tid(tid)
+        else:
+            return self.ss().load(tid)
+
+    def lookup(self, start: str = '', end: str = '', name: str = ''):
+        if self.addr[0] == '127.0.0.11':
+            return lookup(start, end, name)
+        else:
+            return lookup(records=self.ss().load(0))
 
     def update(self, path: str, value, failed: list = []):
         ss = self.ss()
@@ -279,17 +298,19 @@ def diff(new: int | dict, old: int | dict, fmt: str = 'dict'):
         return msg
 
 
-def lookup(start: str = '', end: str = '', name: str = '', fmt: str = '%Y-%m-%d-%H-%M-%S'):
+def lookup(start: str = '', end: str = '', name: str = '', fmt: str = '%Y-%m-%d-%H-%M-%S', records: list = []):
     import pandas as pd
 
     from ._db import get_record_list_by_name
     from ._view import PagedTable
 
-    days = time.time() - 14 * 24 * 60 * 60
-    start = time.strftime(fmt, time.localtime(days)) if not start else start
-    end = time.strftime(fmt) if not end else end
-
-    rs = get_record_list_by_name(name, start, end)[::-1]
+    if not records:
+        days = time.localtime(time.time() - 14 * 24 * 60 * 60)
+        start = time.strftime(fmt, days) if not start else start
+        end = time.strftime(fmt) if not end else end
+        rs = get_record_list_by_name(name, start, end)[::-1]
+    else:
+        rs = records
 
     df = pd.DataFrame(rs)[[0, 1, 2, 6]]
     df.columns = ['rid', 'tid', 'name', 'status']
