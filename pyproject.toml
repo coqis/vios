@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vios"
-version = "3.3.5"
+version = "3.3.6"
 authors = [
   { name="YL Feng", email="fengyl@baqis.ac.cn" },
 ]
@@ -13,14 +13,17 @@ readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.10"
 dependencies = [
+    "tqdm",
     "rich",
     "lmfit",
     "sympy",
     "loguru",
-    "pyvisa",
+    "jsonschema",
     "gitpython",
-    "anyon",
-    "waveforms",
+    "dill",
+    "apscheduler",
+    "networkx",
+    "qlispc"
 ]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
@@ -36,19 +39,12 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Physics",
 ]
 
-[project.optional-dependencies]
-server = ["apscheduler",
-          "dill",
-          "tqdm"]
-
 [project.urls]
 "homepage" = "https://quarkstudio.readthedocs.io/en/latest"
 
 [tool.setuptools]
 packages = ["quark.app", 
             "quark.dag",
-            "quark.driver",
-            "quark.driver.common",
             "quark.interface",
             "quark.runtime"]
 py-modules = ["quark.proxy"]
