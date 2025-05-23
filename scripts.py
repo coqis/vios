@@ -1,10 +1,12 @@
 """Generate the code reference pages and navigation."""
 
+import re
 import site
 from pathlib import Path
-import re
 
 import mkdocs_gen_files
+
+import quark.driver
 
 
 def generate(src: list[Path], dst: str = 'reference', included: str = 'quark', excluded: str = 'none|None'):
@@ -17,7 +19,7 @@ def generate(src: list[Path], dst: str = 'reference', included: str = 'quark', e
     nav = mkdocs_gen_files.Nav()
     mod_symbol = '<code class="doc-symbol doc-symbol-nav doc-symbol-module"></code>'
 
-    print('s'*10, src)
+    print('s' * 10, src)
     ipattern = re.compile(included)
     xpattern = re.compile(excluded)
 
@@ -43,7 +45,7 @@ def generate(src: list[Path], dst: str = 'reference', included: str = 'quark', e
         # if xpattern.search(str(path)) or not ipattern.search(str(path)):
         #     print('e'*10, path)
         #     continue
-        print('>'*10, path)
+        print('>' * 10, path)
         module_path = path.relative_to(_src).with_suffix("")
         doc_path = path.relative_to(_src).with_suffix(".md")
         full_doc_path = Path(dst, doc_path)
@@ -71,17 +73,14 @@ def generate(src: list[Path], dst: str = 'reference', included: str = 'quark', e
             nav_file.writelines(nav.build_literate_nav())
 
 
-#!
-# import quark.circuit
-# print('*'*50, quark.circuit)
+extra = [Path(quark.driver.__file__).parents[2]]
 
-# extra = Path(quark.circuit.__file__).parents[2]
+print('*' * 50, '\r\n', quark.driver, '\r\n', extra, '\r\n', '*' * 50)
 
-generate([Path(__file__).parent], # uninstall quarkstudio
+generate([Path(__file__).parent] + extra,  # uninstall quarkstudio
          'modules',
          included='quark/',
          excluded='scripts|tests|sphinx')
-
 
 
 # generate([extra],
