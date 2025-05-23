@@ -12,5 +12,6 @@ mkdocs-git-revision-date-localized-plugin
 
 mkdocs-jupyter
 inset
+quarkcircuit
 matplotlib
 networkx

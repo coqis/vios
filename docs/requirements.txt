@@ -181,12 +181,16 @@ nbformat==5.10.4
 nest-asyncio==1.6.0
     # via ipykernel
 networkx==3.4.2
-    # via -r ./docs/requirements.in
+    # via
+    #   -r ./docs/requirements.in
+    #   quarkcircuit
 numpy==2.2.6
     # via
     #   contourpy
     #   inset
     #   matplotlib
+    #   quarkcircuit
+    #   scipy
 packaging==25.0
     # via
     #   ipykernel
@@ -256,6 +260,8 @@ pyzmq==26.4.0
     # via
     #   ipykernel
     #   jupyter-client
+quarkcircuit==0.3.1
+    # via -r ./docs/requirements.in
 referencing==0.36.2
     # via
     #   jsonschema
@@ -266,6 +272,8 @@ rpds-py==0.25.1
     # via
     #   jsonschema
     #   referencing
+scipy==1.15.3
+    # via quarkcircuit
 six==1.17.0
     # via python-dateutil
 smmap==5.0.2
