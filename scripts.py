@@ -1,12 +1,16 @@
 """Generate the code reference pages and navigation."""
 
 import re
+import shutil
 import site
+import os
 from pathlib import Path
 
 import mkdocs_gen_files
 
 import quark.driver
+
+sitepath = Path(quark.driver.__file__).parents[2]
 
 
 def generate(src: list[Path], dst: str = 'reference', included: str = 'quark', excluded: str = 'none|None'):
@@ -73,22 +77,9 @@ def generate(src: list[Path], dst: str = 'reference', included: str = 'quark', e
             nav_file.writelines(nav.build_literate_nav())
 
 
-extra = [Path(quark.driver.__file__).parents[2]]
+print('*' * 50, '\r\n', quark.driver, '\r\n', sitepath, '\r\n', '*' * 50)
 
-print('*' * 50, '\r\n', quark.driver, '\r\n', extra, '\r\n', '*' * 50)
-
-generate([Path(__file__).parent] + extra,  # uninstall quarkstudio
+generate([sitepath],  # [Path(__file__).parent] + uninstall quarkstudio
          'modules',
          included='quark/',
          excluded='scripts|tests|sphinx')
-
-
-# generate([extra],
-#          'modules',
-#          included='quark/',
-#          excluded='scripts|tests|sphinx')
-
-
-# generate(Path(site.getusersitepackages()),
-#          'quark', excluded='scripts|tests|sphinx')
-# generate(Path.home()/'Desktop/systemq','systemq')

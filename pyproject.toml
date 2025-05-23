@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vios"
-version = "3.3.7"
+version = "3.3.8"
 authors = [
   { name="YL Feng", email="fengyl@baqis.ac.cn" },
 ]
@@ -21,6 +21,7 @@ dependencies = [
     "jsonschema",
     "gitpython",
     "dill",
+    "inset",
     "apscheduler",
     "networkx",
     "qlispc"
