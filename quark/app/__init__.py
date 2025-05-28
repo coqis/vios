@@ -42,7 +42,7 @@ from quark.proxy import Task
 
 from . import _dp as dp
 # get_record_by_rid, get_record_by_tid, sql
-from ._db import get_tid_by_rid
+from ._db import get_tid_by_rid, reshape
 from ._recipe import Recipe
 
 
@@ -86,7 +86,14 @@ class Super(object):
         if self.addr[0] == '127.0.0.1':
             return get_data_by_tid(tid)
         else:
-            return self.ss().load(tid)
+            data = self.ss().load(tid)
+            try:
+                shape = data['meta']['other']['shape']
+                data['data'] = {k: reshape(np.asarray(v), shape)
+                                for k, v in data['data'].items()}
+            except Exception as e:
+                logger.error(f'Failed to reshape data: {e}')
+            return data
 
     def lookup(self, start: str = '', end: str = '', name: str = ''):
         if self.addr[0] == '127.0.0.11':

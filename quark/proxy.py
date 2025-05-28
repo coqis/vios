@@ -269,8 +269,9 @@ class Task(object):
 
     def result(self):
         try:
+            from quark.app import reshape
             shape = self.meta['other']['shape']
-            data = {k: np.asarray(v).reshape(*shape, *v[0].shape)
+            data = {k: reshape(np.asarray(v), shape)
                     for k, v in self.data.items()}
         except Exception as e:
             logger.error(f'Failed to reshape data: {e}')

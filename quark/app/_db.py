@@ -34,6 +34,19 @@ sql = sqlite3.connect(Path(startup['server']['home']) / 'checkpoint.db',
                       check_same_thread=False)
 
 
+def reshape(raw: np.ndarray | list, shape: tuple | list):
+    try:
+        raw = np.asarray(raw)
+        idx = np.unravel_index(np.arange(raw.shape[0]), shape)
+        data = np.full((*shape, *raw.shape[1:]), 0, raw.dtype)
+        data[idx] = raw
+    except Exception as e:
+        logger.error(f'{e}')
+        data = raw
+
+    return data
+
+
 def get_dataset_by_tid(tid: int, task: bool = False):
     filename, dataset = get_record_by_tid(tid)[7:9]
 
@@ -61,13 +74,7 @@ def get_dataset_by_tid(tid: int, task: bool = False):
                 data[k] = ds[:]
                 continue
 
-            try:
-                idx = np.unravel_index(np.arange(ds.shape[0]), shape)
-                data[k] = np.full((*shape, *ds.shape[1:]), 0, ds.dtype)
-                data[k][idx] = ds[:]
-            except Exception as e:
-                logger.error(f'{e}')
-                data[k] = ds[:]
+            data[k] = reshape(ds[:], shape)
 
     return info, data
 
