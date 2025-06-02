@@ -47,9 +47,9 @@ try:
     if qjs.exists():
         with open(qjs, 'r') as f:
             startup = json.loads(f.read())
-            SYSTEMQ = str(Path(startup['root']).resolve())
-            if SYSTEMQ not in sys.path:
-                sys.path.append(SYSTEMQ)
+            HOME = str(Path(startup['server']['home']).resolve())
+            if HOME not in sys.path:
+                sys.path.append(HOME)
 except Exception as e:
     # logger.error(str(e))
     os.remove(qjs)

@@ -42,7 +42,7 @@ from quark.proxy import Task
 
 from . import _dp as dp
 # get_record_by_rid, get_record_by_tid, sql
-from ._db import get_tid_by_rid, reshape
+from ._db import get_tid_by_rid
 from ._recipe import Recipe
 
 
@@ -88,6 +88,8 @@ class Super(object):
         else:
             data = self.ss().load(tid)
             try:
+                from ._db import reshape
+
                 shape = data['meta']['other']['shape']
                 data['data'] = {k: reshape(np.asarray(v), shape)
                                 for k, v in data['data'].items()}
@@ -105,7 +107,7 @@ class Super(object):
         ss = self.ss()
         rs: str = ss.update(path, value)
         if rs.startswith('Failed'):
-            if 'root' in rs:
+            if path.count('.') == 0:
                 ss.create(path, value)
             else:
                 path, _f = path.rsplit('.', 1)
