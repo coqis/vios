@@ -33,6 +33,96 @@ _vs = {'viewer': connect('QuarkViewer', port=2086),
        'studio': connect('QuarkViewer', port=1086)}
 
 
+class Figure(object):
+    def __init__(self):
+        self.__backend = _vs['viewer']
+        self.data = []
+        self.axes = []
+
+    @property
+    def backend(self):
+        return self.__backend
+
+    @backend.setter
+    def backend(self, name: str):
+        assert name in _vs, 'wrong name!'
+        self.__backend = _vs[name]
+
+    def __enter__(self):
+        self.clear()
+        return self
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        self.show()
+
+    def clear(self):
+        self.data.clear()
+        self.axes.clear()
+        self.backend.clear()
+
+    def subplot(self, length: int):
+        if len(self.axes) > 100:
+            self.axes.clear()
+            self.data.clear()
+
+        for i in range(length):
+            ax = Axes(self)
+            self.axes.append(ax)
+            self.data.append(ax.raw)
+        return self.axes
+
+    def show(self):
+        self.backend.plot(self.data)
+
+
+class Axes(object):
+    def __init__(self, fig: Figure):
+        self.fig = fig
+        self.raw = {}
+
+    def plot(self, ydata: np.ndarray | list, xdata: np.ndarray | list = [], **kwds):
+        line = {'ydata': np.asarray(ydata)}
+
+        xdata = np.arange(len(ydata)) if not len(xdata) else xdata
+        assert len(xdata) == len(ydata), 'x and y must have same dimension'
+        line['xdata'] = np.asarray(xdata)
+
+        line['linestyle'] = kwds.get('linestyle', 2)
+        line['linewidth'] = kwds.get('linewidth', 2)
+        line['linecolor'] = kwds.get('linecolor', 'r')
+        line['marker'] = kwds.get('marker', 'o')
+        line['markersize'] = kwds.get('markersize', 5)
+        line['markercolor'] = kwds.get('markercolor', 'r')
+        self.style(line, **kwds)
+
+    def scatter(self, ydata: np.ndarray | list, xdata: np.ndarray | list = [], **kwds):
+        self.plot(ydata, xdata=xdata, **(kwds | {'linestyle': 'none'}))
+
+    def imshow(self, zdata: np.ndarray | list, xdata: np.ndarray | list = [], ydata: np.ndarray | list = [], **kwds):
+        line = {'zdata': np.asarray(zdata)}
+        shape = line['zdata'].shape
+
+        xdata = np.arange(shape[0]) if not len(xdata) else xdata
+        assert len(xdata) == shape[0], 'x and z(x) must have same dimension'
+        line['xdata'] = np.asarray(xdata)
+
+        ydata = np.arange(shape[1]) if not len(ydata) else ydata
+        assert len(ydata) == shape[1], 'y and z(y) must have same dimension'
+        line['ydata'] = np.asarray(ydata)
+
+        line['colormap'] = kwds.get('colormap', 'RdBu')
+        self.style(line, **kwds)
+
+    def style(self, line: dict, **kwds):
+        line['title'] = kwds.get('title', 'title')
+        line['xlabel'] = kwds.get('xlabel', 'xlabel')
+        line['ylabel'] = kwds.get('ylabel', 'ylabel')
+        self.raw[len(self.raw) + 1] = line
+
+
+fig = Figure()
+
+
 def plot(task: Task, append: bool = False, backend: str = 'viewer'):
     """real time display of the result
 
@@ -64,6 +154,13 @@ def plot(task: Task, append: bool = False, backend: str = 'viewer'):
     else:
         signal = str(task.meta['other']['signal']).split('.')[-1]
     raw = np.asarray(task.data[signal][task.last:task.index])
+
+    try:
+        if signal == 'iq' and task.progress.total >= 5:
+            raw = raw.mean(-2)
+            signal = 'iq_avg'
+    except Exception as e:
+        logger.warning(f'Failed to average iq: {e}')
 
     if signal == 'iq':
         state = {0: 'b', 1: 'r', 2: 'g'}  # color for state 0,1,2

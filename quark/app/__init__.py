@@ -62,6 +62,10 @@ class Super(object):
         except Exception as e:
             return login()
 
+    def fig(self):
+        from ._view import fig
+        return fig
+
     @property
     def addr(self):
         return self.ss().raddr
@@ -216,8 +220,6 @@ def submit(task: dict, block: bool = False, **kwds):
     Todo: fixes
         * `bugs`
     """
-
-    from ._view import plot
 
     if 'backend' in kwds:  # from master
         ss = kwds['backend']
