@@ -28,9 +28,9 @@ import numpy as np
 from loguru import logger
 from srpc import loads
 
-from quark.proxy import startup
+from quark.proxy import QUARK
 
-sql = sqlite3.connect(Path(startup['server']['home']) / 'checkpoint.db',
+sql = sqlite3.connect(Path(QUARK['server']['home']) / 'checkpoint.db',
                       check_same_thread=False)
 
 

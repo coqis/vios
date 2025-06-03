@@ -46,8 +46,8 @@ try:
     qjs = Path.home() / 'quark.json'
     if qjs.exists():
         with open(qjs, 'r') as f:
-            startup = json.loads(f.read())
-            HOME = str(Path(startup['server']['home']).resolve())
+            QUARK = json.loads(f.read())
+            HOME = str(Path(QUARK['server']['home']).resolve())
             if HOME not in sys.path:
                 sys.path.append(HOME)
 except Exception as e:
@@ -55,7 +55,7 @@ except Exception as e:
     os.remove(qjs)
     logger.critical('Restart QuarkServer Again!!!')
     raise KeyboardInterrupt
-    startup = {}
+    QUARK = {}
 
 
 def setlog(prefix: str = ''):

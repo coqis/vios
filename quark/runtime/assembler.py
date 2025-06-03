@@ -93,7 +93,7 @@ def ccompile(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
 
 
 def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], **kw):
-    """assemble compiled instruction(see cccompile) to corresponding devices
+    """assemble compiled instruction(see ccompile) to corresponding devices
 
     Args:
         sid (int): step index

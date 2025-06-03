@@ -32,7 +32,7 @@ from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.schedulers.background import BackgroundScheduler
 from loguru import logger
 
-from quark.proxy import startup
+from quark.proxy import QUARK
 
 from .executor import execute
 from .graph import ChipManger, TaskManager
@@ -48,7 +48,7 @@ dag = {'task': {'graph': [('S21', 'Spectrum'), ('Spectrum', 'PowerRabi'), ('Powe
 
        'chip': {'group': {'0': ['Q0', 'Q1'], '1': ['Q5', 'Q8']}}
        }
-home = Path(startup['server']['home']) / 'cfg/dag.json'
+home = Path(QUARK['server']['home']) / 'cfg/dag.json'
 home.parent.mkdir(parents=True, exist_ok=True)
 
 
