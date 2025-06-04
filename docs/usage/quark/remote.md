@@ -29,7 +29,7 @@ driver
 2. :material-code-json: remote
     ```python title="remote.json"
     {
-        "path":"dev", # driver path
+        "path":"~/Desktop/driver/dev", # full driver path
         "host":"192.168.1.42", # IP address of the host computer
         "ADC": { # alias of the device
             "name": "VirtualDevice", # filename of the driver

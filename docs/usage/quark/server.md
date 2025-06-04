@@ -15,11 +15,11 @@
 
 - Run `quark server` in a terminal and you'll see the following information if everything is OK![alt text](image/server.png){.center}
 
-- Once the `QuarkServer` is ready, run `quark studio` in another termnal. Click `Signup` and fill the username and system name(i.e., the cfg file name `checkpoint`) in the corresponding blanks and click `sign up`.![alt text](image/signup.png){.center}
+- Once the `QuarkServer` is ready, run `quark studio` in another termnal. Click `Signup` and fill the username and system name(i.e., the cfg filename `checkpoint`) in the corresponding blanks and click `sign up`.![alt text](image/signup.png){.center}
     :material-information: equaivalent operations in Python code
     ```python
     from quark.app import signup
-    signup('baqis', 'checkpoint') # (username, cfg file name)
+    signup('baqis', 'checkpoint') # (username, cfg filename)
     ```
 
 - Fill the username and password in the Login window。![alt text](image/login.png){.center}
@@ -72,7 +72,7 @@
 {
     "etc": {
         "driver": {
-            "path": "dev", # driver path relative to systemq
+            "path": "~/Desktop/home/dev", # full driver path
             "concurrent": True, # open device concurrently if True
             "timeout": 30.0, # device execution timeout
             "filter": ["send Waveform or np.array to device in the list"],
@@ -90,7 +90,6 @@
                 "setting_SHOT": "ADC.Shot",
                 "setting_TRIGD": "ADC.TriggerDelay"
             },
-            "root": "~/Desktop/systemq" # systemq location
         },
         "server": {
             "workers": 1, # number of compilation processes
@@ -98,16 +97,11 @@
             "delay": 10.0, # maximum delay(in the unit of second) for feed
             "cached": 5, # number of cached task
             "review": [0, 1, 10], # index of cached step
-            "schedule": {
-                "job": {
-                    "hour": "2"
-                }
-            },
             "filesize": 4000.0 # maximum size of an hdf5 file
         },
         "canvas": {
             "range": [0, 0.0001], # time range in QuarkCanvas
-            "filter": [] # targets to be displayed in QuarkCanvas
+            "filter": ['Q0','Q3'] # targets to be displayed in QuarkCanvas
         }
     }
 }
