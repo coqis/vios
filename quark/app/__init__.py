@@ -60,7 +60,7 @@ class Super(object):
         try:
             return self._s
         except Exception as e:
-            return login()
+            raise AttributeError('Please login first!')
 
     def fig(self):
         from ._view import fig
@@ -68,7 +68,10 @@ class Super(object):
 
     @property
     def addr(self):
-        return self.ss().raddr
+        try:
+            return self.ss().raddr
+        except Exception as e:
+            return ('127.0.0.1', str(e))
 
     def login(self, user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088):
 
@@ -84,7 +87,10 @@ class Super(object):
         return ping(self.ss())
 
     def snapshot(self, tid: int = 0):
-        return self.ss().snapshot(tid=tid)
+        if tid and self.addr[0] == '127.0.0.1':
+            return get_config_by_tid(tid)
+        else:
+            return self.ss().snapshot(tid=tid)
 
     def result(self, tid: int):
         if self.addr[0] == '127.0.0.1':
@@ -102,7 +108,7 @@ class Super(object):
             return data
 
     def lookup(self, start: str = '', end: str = '', name: str = ''):
-        if self.addr[0] == '127.0.0.11':
+        if self.addr[0] == '127.0.0.1':
             return lookup(start, end, name)
         else:
             return lookup(records=self.ss().load(0))
@@ -257,7 +263,7 @@ def rollback(rid: int = 0, tid: int = 0):
         elif tid:
             config = get_config_by_tid(tid)
         else:
-            raise ValueError('one of rid and tid must be given!')
+            raise ValueError('one of rid and tid is required!')
         ss.clear()
         for k, v in config.items():
             ss.create(k, v)
@@ -441,7 +447,7 @@ def update_remote_wheel(wheel: str, index: str | Path, host: str = '127.0.0.1', 
         sudo (bool, optional): used on Mac or Linux. Defaults to False.
     """
     if not host:
-        return None, 'host address must be specified!'
+        return None, 'host address is required!'
 
     links = {}
     for filename in Path(index).glob('*.whl'):
