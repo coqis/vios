@@ -36,7 +36,7 @@ classifiers = [
   "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX :: Linux",
   "Operating System :: MacOS :: MacOS X",
-  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.12",
   "Topic :: Scientific/Engineering :: Physics",
 ]
 
