@@ -1,3 +1,9 @@
+---
+icon: simple/beekeeperstudio
+---
+
+
+
 # **Introduction to QuarkStudio**
 ### **How to start**
 ???+ example "start"

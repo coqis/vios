@@ -14,13 +14,13 @@ nav:
   # - Cloud:
     # - User Guide: usage/cloud.md
     # - demo: usage/demo.ipynb
-  - Experiment:
+  - QuarkStudio:
     - index: usage/index.md
     # - user guide: markdown/qos_tools.md
     # - bayes: markdown/bayes.md
-    - Tutorial: usage/quark/index.md
+    - Tutorial: usage/tutorial.md
     - quarkstudio: 
-      # - index: usage/quark/index.md
+      - usage/quark/index.md
       - server: usage/quark/server.md
       - studio: usage/quark/studio.md
       - canvas: usage/quark/canvas.md
@@ -73,7 +73,8 @@ theme:
     - navigation.prune
     # - navigation.footer
     - navigation.indexes
-    # - navigation.sections # expand toc on the left
+    - navigation.sections # expand toc on the left
+    # - navigation.expand
     - navigation.tracking
     - navigation.instant
     - navigation.tabs

@@ -1,3 +1,8 @@
+---
+icon: simple/mockserviceworker
+---
+
+
 # **Introduction to QuarkServer**
 ### **How to start**
 ???+ example "start"
