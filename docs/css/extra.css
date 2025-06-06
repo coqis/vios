@@ -50,3 +50,8 @@
     display: none;
 } */
  
+
+/* 目录缩进 */
+.md-nav__list {
+    margin-left: 1em;
+}
