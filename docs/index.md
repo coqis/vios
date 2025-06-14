@@ -41,10 +41,10 @@ from quark import Task
 tmgr = Task('token')
 ```
 !!! warning "quarkstudio"
-    A token is required here, which can be applied by click [**SQCLab**](https://quafu-sqc.baqis.ac.cn/) above or sending an email to quafu_ts@baqis.ac.cn. The token is a verification key that guarantees your rights to fully use the platform, so **don't share it with others**. Each token has a expiration time of **30 days**. When it expires, you need to apply a new token from [**SQCLab**](https://quafu-sqc.baqis.ac.cn/). 
+    A token is required here, which can be applied by click [**SQCLab**](https://quafu-sqc.baqis.ac.cn/login) above. The token is a verification key that guarantees your rights to fully use the platform, so **don't share it with others**. Each token has a expiration time of **30 days**. When it expires, you need to apply a new token from [**SQCLab**](https://quafu-sqc.baqis.ac.cn/login). 
 
 
-    Each user can submit 100 tasks per day since the backend quantum computing systems have a limited processing capacity, which is designed to ensure fair access and optimal performance for all users. The daily limit for users may be adjusted according to the overall load. Your submitted tasks that exceed the daily limit will be queued and processed on the following days. 
+    Each user can submit 1000 tasks per day since the backend quantum computing systems have a limited processing capacity, which is designed to ensure fair access and optimal performance for all users. The daily limit for users may be adjusted according to the overall load. Your submitted tasks that exceed the daily limit will be queued and processed on the following days. 
 
     If you have heavy computation resource requirement, please contact us at quafu_ts@baqis.ac.cn for additional collaboration opportunities.
 

@@ -435,12 +435,13 @@ class Task(object):
 class QuarkProxy(object):
 
     def __init__(self) -> None:
-        from quark.app import login
+        from quark.app import s
 
         self.tqueue = Queue(-1)
         self.ready = False
 
-        self.server = login()
+        s.login()
+        self.server = s.ss()
         setlog()
 
     def get_circuit(self, timeout: float = 1.0):
