@@ -269,7 +269,7 @@ class Task(object):
 
     def result(self):
         try:
-            from quark.app import reshape
+            from quark.app._db import reshape
             shape = self.meta['other']['shape']
             data = {k: reshape(np.asarray(v), shape)
                     for k, v in self.data.items()}
