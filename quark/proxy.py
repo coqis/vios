@@ -282,7 +282,7 @@ class Task(object):
         """submit the task to the `QuarkServer`
         """
         self.stime = time.time()  # start time
-        self.tid = self.server.submit(self.task, keep=True)
+        self.tid = self.server.submit(self.task)  # , keep=True)
 
     def status(self, key: str = 'runtime'):
         if key == 'runtime':
@@ -302,7 +302,7 @@ class Task(object):
                     fv = ['error traceback']
                     for sk, sv in v.items():
                         _sv = sv.replace("\n", "\n    ")
-                        fv.append(f'--->{sk}: {_sv}')
+                        fv.append(f'--> {sk}: {_sv}')
                     msg = '\r\n'.join(fv)
                 elif k == 'cirq':
                     msg = v.replace("\n", "\n    ")

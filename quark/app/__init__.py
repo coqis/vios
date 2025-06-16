@@ -80,7 +80,7 @@ class Super(object):
         for mth in ['start', 'query', 'write', 'read', 'checkpoint', 'track', 'getid', 'cancel', 'report', 'review']:
             setattr(self, mth, getattr(self._s, mth))
 
-        for name in ['signup']:
+        for name in ['signup', 'submit']:
             setattr(self, name, globals()[name])
 
     def ping(self):

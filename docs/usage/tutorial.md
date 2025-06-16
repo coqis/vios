@@ -17,7 +17,7 @@ icon: material/badge-account-horizontal
 import matplotlib.pyplot as plt
 import numpy as np
 
-from quark.app import Recipe, s, submit  # (1)!
+from quark.app import Recipe, s  # (1)!
 ```
 
 ???+ note "导入模块"
@@ -28,7 +28,7 @@ from quark.app import Recipe, s, submit  # (1)!
             - 查询参数：`s.query('gate.Measure.Q0.params.frequency')`
             - 写设备：`s.write('ZW_AD3.CH1.Offset', 0.2)`
             - 读设备：`s.read('ZW_AD3.CH1.Offset')`
-        - submit: 向server提交Recipe生成的任务
+            - `s.submit`: 向server提交Recipe生成的任务
 
 
 
@@ -49,11 +49,11 @@ s.start() # 打开设备 (3)
 
 ???+ tip "注册登录"
     1. :material-language-python: login
-        - 如果login提示错误，则执行signup操作
+        - 如果login提示错误，则需先执行signup操作
         - 每次重启server都需要重新login，用户名与注册时保持一致
 
     2. :material-language-python: signup
-        - 用户名任意(此处为baqis)，用于login
+        - 用户名任意(此处为baqis)绑定到cfg表（文件名，此处为checkpoint），用于login
         - signup完毕后重新login
 
     2. :material-language-python: start
@@ -113,7 +113,7 @@ for q in qubits: # 参数设置 (3)
 
 #### 提交任务
 ```python
-s21 = submit(rcp.export(), block=False, preview=['M1'], plot=False) # (1)
+s21 = s.submit(rcp.export(), block=False, preview=['M1'], plot=False) # (1)
 s21.bar(interval=1)  # (2)
 ```
 
