@@ -55,10 +55,11 @@ class Figure(object):
     def __exit__(self, exception_type, exception_value, traceback):
         self.show()
 
-    def clear(self):
+    def clear(self, backend: str = 'viewer'):
         self.data.clear()
         self.axes.clear()
-        self.backend.clear()
+        if backend in _vs:
+            self.backend.clear()
 
     def subplot(self, length: int):
         if len(self.axes) > 100:

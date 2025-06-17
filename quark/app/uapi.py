@@ -48,12 +48,12 @@ def query(app: str = None, start: datetime = None, end: datetime = None, page: i
     """
     print(app, start, end, page)
     if not app:
-        return [], [], 0, [r[0] for r in get_record_set_by_name()]
+        return [], [], [r[0] for r in get_record_set_by_name()]
     records = get_record_list_by_name(app, start.strftime(
         '%Y-%m-%d-%H-%M-%S'), end.strftime('%Y-%m-%d-%H-%M-%S'))
     headers = ['id', 'tid', 'name', 'user', 'priority', 'system', 'status',
                'filename', 'dataset', 'created', 'finished', 'committed']
-    return headers, records, len(records) // 50, {}
+    return headers, records[::-1], {}
 
 
 def update(rid: int, tags: str):
@@ -61,12 +61,60 @@ def update(rid: int, tags: str):
 
 
 def load(rid: int):
-    return f'get_data_by_id({rid})'
+    from . import get_data_by_rid
+    from ._view import fig
+
+    fig.clear(backend='')
+
+    axes = fig.subplot(3)
+    axes[0].imshow(np.random.randn(30, 20),
+                   xdata=np.arange(30) * 1e6,
+                   ydata=np.arange(20),
+                   colormap='jet',
+                   title='image')
+
+    axes[1].plot(np.random.randn(100),
+                 xdata=np.arange(100),
+                 linestyle='-.',
+                 linecolor='b',
+                 markersize=5,
+                 xlabel='xx',
+                 ylabel='yyy')
+    axes[1].plot(np.random.randn(100) + 10,
+                 xdata=np.arange(100),
+                 title='curve')
+
+    axes[2].scatter(np.random.randn(100),
+                    xdata=np.arange(100),
+                    markercolor='b',
+                    markersize=10)
+    axes[2].scatter(np.random.randn(100),
+                    xdata=np.arange(100),
+                    markercolor='r',
+                    markersize=5,
+                    title='scatter')
+
+    return fig.data
 
 
 # region plot
 
 def mplot(fig, data):
+
+    axes = fig.subplots(nrows=8, ncols=4)
+
+    # 为每个子图添加内容
+    for i in range(8):
+        for j in range(4):
+            ax = axes[i, j]
+            x = np.linspace(0, 2 * np.pi, 100)
+            y = np.sin(x + (i * 4 + j) * 0.5)
+            ax.plot(x, y)
+            ax.set_title(f'Plot {i * 4 + j + 1}')
+            ax.grid(True)
+
+    return
+
     ax = fig.add_subplot(1, 1, 1)
     # ax.plot(np.random.randn(1024), '-o')
     # First create the x and y coordinates of the points.
