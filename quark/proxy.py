@@ -220,7 +220,7 @@ class Task(object):
 
     @cached_property
     def rid(self):
-        from quark.app._db import get_record_by_tid
+        from .app._db import get_record_by_tid
         return get_record_by_tid(self.tid)[0]
 
     def __repr__(self):
@@ -269,7 +269,7 @@ class Task(object):
 
     def result(self):
         try:
-            from quark.app._db import reshape
+            from .app._db import reshape
             shape = self.meta['other']['shape']
             data = {k: reshape(np.asarray(v), shape)
                     for k, v in self.data.items()}
@@ -337,7 +337,7 @@ class Task(object):
         self.process(data)
 
         if self.plot:
-            from quark.app._view import plot
+            from .app._viewer import plot
             plot(self, not meta)
 
         return self.data
@@ -434,8 +434,8 @@ class Task(object):
 
 class QuarkProxy(object):
 
-    def __init__(self) -> None:
-        from quark.app import s
+    def __init__(self, file: str = '') -> None:
+        from .app import s
 
         self.tqueue = Queue(-1)
         self.ready = False
@@ -443,6 +443,17 @@ class QuarkProxy(object):
         s.login()
         self.server = s.ss()
         setlog()
+
+        if file:
+            if not file.endswith('.json'):
+                raise ValueError('file should be a json file')
+            if not Path(file).exists():
+                raise FileNotFoundError(f'file {file} not found')
+            with open(file, 'r') as f:
+                dag = json.loads(f.read())
+
+            from .dag import Scheduler
+            Scheduler(dag=dag)
 
     def get_circuit(self, timeout: float = 1.0):
         if not self.ready:
@@ -463,7 +474,7 @@ class QuarkProxy(object):
         self.ready = True
 
     def submit(self, task: dict, suspend: bool = False):
-        from quark.app import submit
+        from .app import submit
 
         if suspend:
             self.tqueue.put(task['body']['cirq'][0])
@@ -501,7 +512,7 @@ class QuarkProxy(object):
         pass
 
     def result(self, tid: int, raw: bool = False):
-        from quark.app import get_data_by_tid
+        from .app import get_data_by_tid
         try:
             result = get_data_by_tid(tid, 'count')
             return result if raw else self.process(result)

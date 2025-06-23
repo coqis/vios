@@ -62,7 +62,7 @@ def update(rid: int, tags: str):
 
 def load(rid: int):
     from . import get_data_by_rid
-    from ._view import fig
+    from ._viewer import fig
 
     fig.clear(backend='')
 
@@ -97,7 +97,30 @@ def load(rid: int):
     return fig.data
 
 
+def get_data_from_dag(path: str = 'Q0.Spectrum') -> np.ndarray:
+    with open(Path.home() / 'Desktop/home/cfg/dag.json', 'r') as f:
+        dag = loads(f.read())
+        node, method = path.split('.')
+        return np.array(dag[node][method]['history'])[:, -1].astype(float)
+    return np.random.randn(101)
+
+
+def get_graph_from_dag(node: str = 'Q0') -> dict:
+    return {'nodes': {0: {'pos': (3, 1), 'name': 's21', 'pen': (135, 155, 75, 255, 5)},
+                      1: {'pos': (3, 3), 'name': 'Spectrum', 'pen': (35, 255, 75, 255, 2)},
+                      2: {'pos': (3, 5), 'name': 'Rabi', 'pen': (35, 155, 75, 255, 2)},
+                      3: {'pos': (1, 8), 'name': 'Ramsey', 'pen': (35, 165, 75, 255, 2)},
+                      4: {'pos': (5, 8), 'name': 'Scatter', 'pen': (35, 155, 175, 255, 2)},
+                      5: {'pos': (3, 10), 'name': 'RB', 'pen': (35, 155, 75, 255, 2)}},
+
+            'edges': {(0, 1): {'name': 'C0', 'pen': (155, 123, 255, 180, 2)},
+                      (1, 2): {'name': 'C1', 'pen': (55, 223, 255, 180, 4)},
+                      (2, 3): {'name': 'C2', 'pen': (55, 123, 155, 180, 6)},
+                      (2, 4): {'name': 'C3', 'pen': (55, 123, 55, 180, 8)},
+                      (4, 5): {'name': 'C4', 'pen': (55, 13, 255, 180, 10)}}}
+
 # region plot
+
 
 def mplot(fig, data):
 

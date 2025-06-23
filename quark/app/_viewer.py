@@ -62,10 +62,6 @@ class Figure(object):
             self.backend.clear()
 
     def subplot(self, length: int):
-        if len(self.axes) > 100:
-            self.axes.clear()
-            self.data.clear()
-
         for i in range(length):
             ax = Axes(self)
             self.axes.append(ax)
@@ -294,13 +290,13 @@ def network():
     for i in range(12):
         r, c = divmod(i, 3)
         nodes[i] = {'name': f'Q{i}',
-                    'index': (r * 3, c * 3),
-                    'color': (35, 155, 75, 255, 2),
+                    'pos': (r * 3, c * 3),
+                    'pen': (35, 155, 75, 255, 2),
                     'value': {'a': np.random.random(1)[0] + 5}}
         if i > 10:
             break
         edges[(i, i + 1)] = {'name': f'C{i}',
-                             'color': (55, 123, 255, 180, 21),
+                             'pen': (55, 123, 255, 180, 21),
                              'value': {'b': np.random.random(1)[0] + 5, 'c': {'e': 134}, 'f': [(1, 2, 34)]}}
 
     _vs.graph(dict(nodes=nodes, edges=edges))

@@ -20,27 +20,31 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import time
+from importlib import import_module, reload
 
 import numpy as np
+from loguru import logger
 
 
 def execute(method: str = 'ramsey', target: list[str] | tuple[str] = ['Q0', 'Q1'], level: str = 'check', history: dict = {}):
     try:
         # tid = mapping[method][level]['exp'](target)  # args
-        tid, result = 1234, {}  # exp.Ramsey(target)  # args
-        fitted = analyze(method, result, level)
-        summary = diagnose(method, fitted, level, history)
+        logger.info(f'{method}{target} started')
+        module = reload(import_module(f'run.{method}'))
+        result, tid = module.calibrate(target)  # args
+        fitted = module.analyze(result, level)
+        summary = module.diagnose(fitted, level, history)
 
-        print(f'[{time.strftime("%Y-%m-%d %H:%M:%S")}]', tid,
-              f'{method}({target}) finished')
-        print('<' * 32, '\r\n')
+        logger.info(f'{tid} {method}{target} finished')
 
         return summary | {'tid': tid}
     except Exception as e:
-        summary = {'Q0': ('red', 5e9),
-                   'Q1': ('green', 5.353e9),
-                   'Q5': ('green', 5.123e9),
-                   'Q8': ('red', 5.1e9)}  # 所有比特
+        logger.error(f'{method}{target} failed: {e}')
+        # summary = {'Q0': ('red', 5e9),
+        #            'Q1': ('green', 5.353e9),
+        #            'Q5': ('green', 5.123e9),
+        #            'Q8': ('red', 5.1e9)}  # 所有比特
+        summary = {q: ('red', 0) for q in target}  # 所有比特
         return summary
 
 

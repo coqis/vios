@@ -63,7 +63,7 @@ class Super(object):
             raise AttributeError('Please login first!')
 
     def fig(self):
-        from ._view import fig
+        from ._viewer import fig
         return fig
 
     @property
@@ -319,7 +319,7 @@ def lookup(start: str = '', end: str = '', name: str = '', fmt: str = '%Y-%m-%d-
     import pandas as pd
 
     from ._db import get_record_list_by_name
-    from ._view import PagedTable
+    from ._viewer import PagedTable
 
     if not records:
         days = time.localtime(time.time() - 14 * 24 * 60 * 60)
@@ -422,7 +422,7 @@ def get_data_by_tid(tid: int, **kwds) -> dict:
         dict: data & meta
     """
     from ._db import get_dataset_by_tid
-    from ._view import plot
+    from ._viewer import plot
 
     info, data = get_dataset_by_tid(tid)
 
