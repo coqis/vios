@@ -289,16 +289,38 @@ def network():
     edges = {}
     for i in range(12):
         r, c = divmod(i, 3)
-        nodes[i] = {'name': f'Q{i}',
-                    'pos': (r * 3, c * 3),
-                    'pen': (35, 155, 75, 255, 2),
-                    'value': {'a': np.random.random(1)[0] + 5}}
+        nodes[f'Q{i}'] = {
+            # 'name': f'Q{i}',
+            # 'id': i,
+            'pos': (r * 3, c * 3),
+            'pen': (35, 155, 75, 255, 2),
+            'value': {
+                "probe": "M1",
+                "couplers": [
+                    "C0"
+                ],
+                "waveform": {
+                    "SR": 6000000000.0,
+                    "LEN": 8e-05,
+                    "DDS_LO": 6000000000.0,
+                    "RF": "zero()",
+                    "DDS": "zero()"
+                },
+                "channel": {
+                    "DDS": "ZW_AWG_13.CH2"
+                },
+                "calibration": {
+                    "DDS": {
+                        "delay": 3.05e-08
+                    }
+                }}}
+
         if i > 10:
             break
-        edges[(i, i + 1)] = {'name': f'C{i}',
-                             'pen': (55, 123, 255, 180, 21),
-                             'value': {'b': np.random.random(1)[0] + 5, 'c': {'e': 134}, 'f': [(1, 2, 34)]}}
-
+        edges[(f'Q{i}', f'Q{i + 1}')] = {'name': f'C{i}',
+                                         'pen': (55, 123, 255, 180, 21),
+                                         'value': {'b': np.random.random(1)[0] + 5, 'c': {'e': 134}, 'f': [(1, 2, 34)]}
+                                         }
     _vs.graph(dict(nodes=nodes, edges=edges))
 
 

@@ -36,10 +36,10 @@ class ChipManger(object):
                             'lifetime': 200,
                             'tolerance': 0.01,
                             'history': []},
-                'Ramsey': {'status': 'OK',
-                        'lifetime': 200,
-                        'tolerance': 0.01,
-                        'history': []}},
+               'Ramsey': {'status': 'OK',
+                          'lifetime': 200,
+                          'tolerance': 0.01,
+                          'history': []}},
         'C1': {'fidelity': {'status': 'OK',
                             'lifetime': 200,
                             'tolerance': 0.01,
@@ -67,11 +67,6 @@ class ChipManger(object):
     def history(self, target: list[str] = ['Q0', 'Q1']):
         return {t: self.query(t) for t in target}
 
-    def checkpoint(self, path: str = ''):
-        with open(path, 'w') as f:
-            f.write(json.dumps(self.info, indent=4))
-        logger.info(f'{path} saved!')
-
     def load(self, path: str = ''):
         with open(path, 'r') as f:
             self.info = json.loads(f.read())
@@ -82,22 +77,26 @@ class ChipManger(object):
 
 
 class TaskManager(nx.DiGraph):
-    """
-    Example: task info
-        ``` {.py3 linenums="1"}
-        {'edges': [('S21', 'Spectrum'), ('Spectrum', 'PowerRabi'), ('Spectrum', 'TimeRabi'),
-                ('PowerRabi', 'Ramsey'), ('TimeRabi', 'Ramsey')],
-        'check': {'period': 60, 'method': 'Ramsey'}
-        }
-        ```
-     """
 
-    def __init__(self, task: dict) -> None:
+    def __init__(self, task: dict[str, dict]) -> None:
         super().__init__()
         self.checkin = task['check']
-        self.add_edges_from(task['graph'])
 
-    def __getitem__(self, key: str):
+        for k, v in task['nodes'].items():
+            self.add_node(k, **v)
+
+        for k, v in task['edges'].items():
+            self.add_edge(k[0], k[1], **v)
+
+        try:
+            nx.find_cycle(self, self, orientation='original')
+        except nx.NetworkXNoCycle:
+            # logger.info('No cycle detected in the task graph.')
+            pass
+
+    def __getitem__(self, key: str | tuple):
+        if isinstance(key, tuple):
+            return self.edges[key]
         return self.nodes[key]  # ['task']
 
     def parents(self, key: str):

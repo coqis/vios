@@ -444,16 +444,20 @@ class QuarkProxy(object):
         self.server = s.ss()
         setlog()
 
-        if file:
-            if not file.endswith('.json'):
-                raise ValueError('file should be a json file')
-            if not Path(file).exists():
-                raise FileNotFoundError(f'file {file} not found')
-            with open(file, 'r') as f:
-                dag = json.loads(f.read())
+        if 1:
+            # if not file.endswith('.json'):
+            #     raise ValueError('file should be a json file')
+            # if not Path(file).exists():
+            #     raise FileNotFoundError(f'file {file} not found')
+            # with open(file, 'r') as f:
+            #     dag = json.loads(f.read())
+
+            (Path(HOME) / 'run').mkdir(parents=True, exist_ok=True)
+
+            import run
 
             from .dag import Scheduler
-            Scheduler(dag=dag)
+            Scheduler(run.dag())
 
     def get_circuit(self, timeout: float = 1.0):
         if not self.ready:

@@ -23,6 +23,7 @@
 import random
 import time
 from datetime import datetime
+from importlib import reload
 from pathlib import Path
 
 import h5py
@@ -97,28 +98,94 @@ def load(rid: int):
     return fig.data
 
 
-def get_data_from_dag(path: str = 'Q0.Spectrum') -> np.ndarray:
-    with open(Path.home() / 'Desktop/home/cfg/dag.json', 'r') as f:
-        dag = loads(f.read())
-        node, method = path.split('.')
-        return np.array(dag[node][method]['history'])[:, -1].astype(float)
-    return np.random.randn(101)
+def history(path: str = 'Q0.Spectrum') -> np.ndarray:
+    try:
+        import run
+        run = reload(run)
+        return run.get_history_data(path)
+    except Exception as e:
+        with open(Path.home() / 'Desktop/home/cfg/dag.json', 'r') as f:
+            dag = loads(f.read())
+            node, method = path.split('.')
+            return np.array(dag[node][method]['history'])[:, -1].astype(float)
+        return np.random.randn(101)
 
 
-def get_graph_from_dag(node: str = 'Q0') -> dict:
-    return {'nodes': {0: {'pos': (3, 1), 'name': 's21', 'pen': (135, 155, 75, 255, 5)},
-                      1: {'pos': (3, 3), 'name': 'Spectrum', 'pen': (35, 255, 75, 255, 2)},
-                      2: {'pos': (3, 5), 'name': 'Rabi', 'pen': (35, 155, 75, 255, 2)},
-                      3: {'pos': (1, 8), 'name': 'Ramsey', 'pen': (35, 165, 75, 255, 2)},
-                      4: {'pos': (5, 8), 'name': 'Scatter', 'pen': (35, 155, 175, 255, 2)},
-                      5: {'pos': (3, 10), 'name': 'RB', 'pen': (35, 155, 75, 255, 2)}},
+def digraph(node: str = 'Q0') -> dict:
+    try:
+        import run
+        run = reload(run)
+        return run.get_task_graph()
+    except Exception as e:
+        return {'nodes': {'s21': {'pos': (3, 1)},  # , 'pen': (135, 155, 75, 255, 5)
+                          'Spectrum': {'pos': (3, 3)},
+                          'Rabi': {'pos': (3, 5)},
+                          'Ramsey': {'pos': (1, 8)},
+                          'Scatter': {'pos': (5, 8)},
+                          'RB': {'pos': (3, 10)}},
 
-            'edges': {(0, 1): {'name': 'C0', 'pen': (155, 123, 255, 180, 2)},
-                      (1, 2): {'name': 'C1', 'pen': (55, 223, 255, 180, 4)},
-                      (2, 3): {'name': 'C2', 'pen': (55, 123, 155, 180, 6)},
-                      (2, 4): {'name': 'C3', 'pen': (55, 123, 55, 180, 8)},
-                      (4, 5): {'name': 'C4', 'pen': (55, 13, 255, 180, 10)}}}
+                'edges': {('s21', 'Spectrum'): {'name': ''},  # , 'pen': (155, 123, 255, 180, 2)
+                          ('Spectrum', 'Rabi'): {'name': ''},
+                          ('Rabi', 'Ramsey'): {'name': ''},
+                          ('Rabi', 'Scatter'): {'name': ''},
+                          ('Scatter', 'RB'): {'name': ''}}}
 
+
+def tpgraph():
+    try:
+        import run
+        run = reload(run)
+        return run.get_chip_graph()
+    except Exception as e:
+        nodes = {}
+        edges = {}
+        for i in range(12):
+            r, c = divmod(i, 3)
+            nodes[f'Q{i}'] = {
+                # 'name': f'Q{i}',
+                # 'id': i,
+                'pos': (r * 3, c * 3),
+                'pen': (35, 155, 75, 255, 2),
+                'value': {
+                    "probe": "M1",
+                    "couplers": [
+                        "C0"
+                    ],
+                    "waveform": {
+                        "SR": 6000000000.0,
+                        "LEN": 8e-05,
+                        "DDS_LO": 6000000000.0,
+                        "RF": "zero()",
+                        "DDS": "zero()"
+                    },
+                    "channel": {
+                        "DDS": "ZW_AWG_13.CH2"
+                    },
+                    "calibration": {
+                        "DDS": {
+                            "delay": 3.05e-08
+                        }
+                    },
+                    "index": [
+                        -9,
+                        -9
+                    ],
+                    "color": "green",
+                    "params": {
+                        "T1": 7.544957236854869e-05,
+                        "T2_star": 1.9762589666408893e-05,
+                        "T2_echo": 3.951455640774801e-05,
+                        "chi": 0.525,
+                        "Ec": None,
+                        "T2star": 21.77932423416822
+                    }}}
+            if i > 10 or i in [2, 5, 8, 11]:
+                continue
+            edges[(f'Q{i}', f'Q{i + 1}')] = {'name': f'C{i}',
+                                             'pen': (55, 123, 255, 180, 21),
+                                             'value': {'b': np.random.random(1)[0] + 5, 'c': {'e': 134}, 'f': [(1, 2, 34)]}
+                                             }
+        return dict(nodes=nodes, edges=edges)
 # region plot
 
 

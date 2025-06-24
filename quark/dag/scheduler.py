@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+import json
 import time
 from copy import deepcopy
 from datetime import datetime
@@ -42,7 +43,18 @@ bs.add_executor(ThreadPoolExecutor(max_workers=1,
                                    pool_kwargs={'thread_name_prefix': 'QDAG Checking'}))
 
 
-dag = {'task': {'graph': [('S21', 'Spectrum'), ('Spectrum', 'PowerRabi'), ('PowerRabi', 'Ramsey')],
+dag = {'task': {'nodes': {'s21': {'pos': (3, 1)},  # , 'pen': (135, 155, 75, 255, 5)
+                          'Spectrum': {'pos': (3, 3)},
+                          'Rabi': {'pos': (3, 5)},
+                          'Ramsey': {'pos': (1, 8)},
+                          'Scatter': {'pos': (5, 8)},
+                          'RB': {'pos': (3, 10)}},
+
+                'edges': {('s21', 'Spectrum'): {'name': ''},  # , 'pen': (155, 123, 255, 180, 2)
+                          ('Spectrum', 'Rabi'): {'name': ''},
+                          ('Rabi', 'Ramsey'): {'name': ''},
+                          ('Rabi', 'Scatter'): {'name': ''},
+                          ('Scatter', 'RB'): {'name': ''}},
                 'check': {'period': 60, 'method': 'Ramsey'}
                 },
 
@@ -124,7 +136,7 @@ class Scheduler(object):
                     ts.append(t)
             failed[tuple(ts)] = method
 
-        self.cmgr.checkpoint(home.as_posix())
+        self.checkpoint(home.as_posix())
         return failed
 
     def run(self):
@@ -152,3 +164,8 @@ class Scheduler(object):
                 pass
             except Exception as e:
                 print(e)
+
+    def checkpoint(self, path: str = ''):
+        with open(path, 'w') as f:
+            f.write(json.dumps(self.cmgr.info, indent=4))
+        logger.info(f'{path} saved!')
