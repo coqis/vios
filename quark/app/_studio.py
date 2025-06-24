@@ -115,7 +115,7 @@ def digraph(node: str = 'Q0') -> dict:
     try:
         import run
         run = reload(run)
-        return run.get_task_graph()
+        return run.get_task_graph(node)
     except Exception as e:
         return {'nodes': {'s21': {'pos': (3, 1)},  # , 'pen': (135, 155, 75, 255, 5)
                           'Spectrum': {'pos': (3, 3)},
