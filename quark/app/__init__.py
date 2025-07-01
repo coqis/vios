@@ -92,9 +92,9 @@ class Super(object):
         else:
             return self.ss().snapshot(tid=tid)
 
-    def result(self, tid: int):
+    def result(self, tid: int, **kwds):
         if self.addr[0] == '127.0.0.1':
-            return get_data_by_tid(tid)
+            return get_data_by_tid(tid, **kwds)
         else:
             data = self.ss().load(tid)
             try:
@@ -432,7 +432,7 @@ def get_data_by_tid(tid: int, **kwds) -> dict:
         task.meta = info['meta']
         task.data = {signal: data[signal]}
         task.index = len(data[signal]) + 1
-        plot(task, backend=kwds.get('backend', 'studio'))
+        return plot(task, backend=kwds.get('backend', 'studio'))
 
     return {'data': data, 'meta': info['meta']}
 

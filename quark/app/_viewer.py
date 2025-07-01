@@ -138,13 +138,14 @@ def plot(task: Task, append: bool = False, backend: str = 'viewer'):
         - the attributes of the lines or image(line color/width and so on) is the same as those in matplotlib **in most cases**
     """
 
-    viewer = _vs[backend]
-    if backend == 'studio':
-        viewer.clear()
+    if backend:
+        viewer = _vs[backend]
+        if backend == 'studio':
+            viewer.clear()
 
-    if not ping(viewer):
-        task.plot = False
-        return
+        if not ping(viewer):
+            task.plot = False
+            return
 
     if 'population' in str(task.meta['other']['signal']):
         signal = 'population'
@@ -196,7 +197,7 @@ def plot(task: Task, append: bool = False, backend: str = 'viewer'):
             return
 
     uname = f'{task.name}_{xlabel}'
-    if task.last == 0:
+    if backend and task.last == 0:
         if uname not in task.counter or len(label) == 2 or signal == 'iq':
             viewer.clear()  # clear the canvas
             task.counter.clear()  # clear the task history
@@ -276,6 +277,9 @@ def plot(task: Task, append: bool = False, backend: str = 'viewer'):
             cell[f'{uname}{task.counter[uname]}'] = line
             # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             data.append(cell)
+
+        if not backend:
+            return data
         if not append:
             viewer.plot(data)  # create a new canvas
         else:

@@ -65,6 +65,9 @@ def load(rid: int):
     from . import get_data_by_rid
     from ._viewer import fig
 
+    data = get_data_by_rid(rid, plot=True, backend=False)
+    return data
+
     fig.clear(backend='')
 
     axes = fig.subplot(3)
