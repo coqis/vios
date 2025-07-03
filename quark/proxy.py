@@ -47,13 +47,16 @@ try:
     if qjs.exists():
         with open(qjs, 'r') as f:
             QUARK = json.loads(f.read())
-            HOME = str(Path(QUARK['server']['home']).resolve())
-            if HOME not in sys.path:
-                sys.path.append(HOME)
+    else:
+        QUARK = {"server": {"home": Path.home() / "Desktop/home"}}
+    HOME = Path(QUARK['server']['home']).resolve()
+    HOME.mkdir(parents=True, exist_ok=True)
+    if str(HOME) not in sys.path:
+        sys.path.append(str(HOME))
 except Exception as e:
     # logger.error(str(e))
     os.remove(qjs)
-    logger.critical('Restart QuarkServer Again!!!')
+    logger.critical('Restart and try again!!!')
     raise KeyboardInterrupt
     QUARK = {}
 

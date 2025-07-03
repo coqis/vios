@@ -28,10 +28,9 @@ import numpy as np
 from loguru import logger
 from srpc import loads
 
-from quark.proxy import QUARK
+from quark.proxy import HOME
 
-sql = sqlite3.connect(Path(QUARK['server']['home']) / 'checkpoint.db',
-                      check_same_thread=False)
+sql = sqlite3.connect(HOME / 'checkpoint.db', check_same_thread=False)
 
 
 def reshape(raw: np.ndarray | list, shape: tuple | list):

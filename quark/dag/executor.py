@@ -19,6 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import inspect
 import time
 from importlib import import_module, reload
 
@@ -27,10 +28,16 @@ from loguru import logger
 
 
 def execute(method: str = 'ramsey', target: list[str] | tuple[str] = ['Q0', 'Q1'], level: str = 'check', history: dict = {}):
+
+    # sig = inspect.signature(execute)
+    # bound_args = sig.bind(method, target, level, history)
+    # bound_args.apply_defaults()
+    # args_dict = bound_args.arguments
+
     try:
-        # tid = mapping[method][level]['exp'](target)  # args
         logger.info(f'{method}{target} started')
         module = reload(import_module(f'run.{method}'))
+
         result, tid = module.calibrate(target)  # args
         fitted = module.analyze(result, level)
         summary = module.diagnose(fitted, level, history)
