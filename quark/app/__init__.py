@@ -73,6 +73,9 @@ class Super(object):
         except Exception as e:
             return ('127.0.0.1', str(e))
 
+    def user_exists(self):
+        return self.ss().user_exists
+
     def login(self, user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088):
 
         self._s = login(user, host, port)
@@ -162,7 +165,8 @@ def login(user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088, verbos
     except KeyError as e:
         ss = _sp[uid] = connect('QuarkServer', host, port)
 
-    m = ss.login(user)
+    m: str = ss.login(user)
+    ss.user_exists = False if m.startswith('LookupError') else True
     if verbose:
         logger.info(m)
     return ss
