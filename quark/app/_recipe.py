@@ -129,6 +129,7 @@ class Recipe(object):
                 # cfg表中参数，如'gate.Measure.Q0.params.frequency'
                 # value = np.asarray(value)
                 if '@' in key:
+                    # 跟着一个变量变化的另一变量，如：Measure.phi@freq
                     target, group = key.rsplit('@')
                     self.define(group, f'${target}', value)
                 elif self.__ckey:

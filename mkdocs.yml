@@ -1,4 +1,4 @@
-site_name: "Project Quark"
+site_name: "QuarkStudio"
 watch: [mkdocs.yml, README.md, quark]
 
 
@@ -212,4 +212,4 @@ extra:
 repo_url: https://gitee.com/
 repo_name: baqis/quarkstudio
 
-copyright: Copyright &copy; 2020 - 2024 BAQIS
+copyright: Copyright &copy; 2020 - 2025 BAQIS

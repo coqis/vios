@@ -23,21 +23,21 @@ from quark.app import Recipe, s  # (1)!
 ???+ note "导入模块"
     1. :material-language-python: quark.app
         - Recipe: 记录任务信息，生成任务描述
-        - s: 与server进行通信交互的工具，如
+        - s: 与server进行交互的工具，如
             - 更新参数：`s.update('gate.Measure.Q0.params.frequency', 5.321e9)`
             - 查询参数：`s.query('gate.Measure.Q0.params.frequency')`
             - 写设备：`s.write('ZW_AD3.CH1.Offset', 0.2)`
             - 读设备：`s.read('ZW_AD3.CH1.Offset')`
-            - `s.submit`: 向server提交Recipe生成的任务
+            - `s.submit`: 向server提交Recipe生成的任务描述
 
 
 
 ### **准备工作**
 
 ???+ warning "启动服务"
-    - 将实验所用配置信息表（如[checkpoint.json](../code/checkpoint.json)，后以**cfg**代称）复制到： ~/Desktop/home/cfg(如目录不存在可自行创建)
+    - 将实验所用参数表（如[checkpoint.json](../code/checkpoint.json)，后以**cfg**代称）复制到： ~/Desktop/home/cfg(如目录不存在可自行创建)
     - 任意位置打开终端并执行`quark server`以启动[**QuarkServer**](quark/server.md)(后以**server**代称)
-    - 注册登录
+    - 完成上述操作，可注册登录
 
 ```python
 s.login('baqis') # 登录 (1)
@@ -68,14 +68,16 @@ s.start() # 打开设备 (3)
                     d = connect(‘alias’, host, port)
             ```
         - 设备打开之前，任务不可执行！
-        - 若设备打开异常，参考**设备调试**进行排查！
+        - 若设备打开异常，参考**[设备调试](#_8)**进行排查！
 
 
 ### **Example: s21**
 
 #### 定义任务
 ```python
-def S21(qubits: list[str], freq:float, ctx=None) -> list: # (1)
+def S21(qubits: tuple[str], freq:float, ctx=None) -> list: # (1)
+    """qlisp线路函数。ctx为编译所需上下文，主要用于对cfg表进行查询等操作。
+    """
     cc = [(('Measure', i, ), q) for i, q in enumerate(qubits)]
     return cc
 ```
@@ -208,16 +210,17 @@ for i, q in enumerate(qubits):
 #### **常见问题**
 ??? qustion "常见问题"
     ***遇到问题先看错误信息！遇到问题先看错误信息！遇到问题先看错误信息！***
+
     1. 设备没有正常开启？
-    - 检查`etc.driver.path`是否正确，一般为`~/Desktop/home/dev`！
-    - 设备`type`为`remote`时，检查设备名字、`host`和`port`是否和设备的ip和端口匹配！
+        - 检查`etc.driver.path`是否正确，一般为`~/Desktop/home/dev`！
+        - 设备`type`为`remote`时，检查设备名字、`host`和`port`是否和设备的ip和端口匹配！
 
     2. 线路编译错误？
-    - 检查线路编写是否有误！
-    - 检查`lib.gates.__init__`中导入的门模块是否正确，或cfg表中填写的参数是否匹配！
+        - 检查线路编写是否有误！
+        - 检查`lib.gates.__init__`中导入的门模块是否正确，或cfg表中填写的参数是否匹配！
 
     3. 实验没有数据或采集设备显示超时？
-    - 检查触发设备是否输出或`shots`设置和采集设备设置是否一致！
+        - 检查触发设备是否输出或`shots`设置和采集设备设置是否一致！
 
     4. 波形下发错误？
-    - 检查设备上的numpy（**大**版本同为1.x.x或2.x.x）和waveforms版本和测量电脑是否一致！
+        - 检查设备上的numpy（**大**版本同为1.x.x或2.x.x）和waveforms版本和测量电脑是否一致！

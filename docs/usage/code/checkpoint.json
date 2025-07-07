@@ -3741,7 +3741,7 @@
     "var": {},
     "etc": {
         "driver": {
-            "path": "sss",
+            "path": "C:\\Users\\Dell\\Desktop\\home\\dev",
             "concurrent": true,
             "timeout": 30.0,
             "filter": [
@@ -3760,8 +3760,7 @@
                 "setting_PNT": "ADC.PointNumber",
                 "setting_SHOT": "ADC.Shot",
                 "setting_TRIGD": "ADC.TriggerDelay"
-            },
-            "root": "C:\\Users\\NUC\\Desktop\\quarkstudio\\systemqos"
+            }
         },
         "server": {
             "workers": 1,
@@ -3777,25 +3776,14 @@
                 0,
                 1,
                 3
-            ],
-            "schedule": {
-                "job": {
-                    "hour": "2"
-                }
-            },
-            "filesize": 4000.0
+            ]
         },
         "canvas": {
             "range": [
                 0.0,
                 8e-06
             ],
-            "filter": []
-        },
-        "cloud": {
-            "host": "172.16.1.251",
-            "online": false,
-            "station": "Dongling"
+            "filter": ["Q0"]
         }
     }
 }
