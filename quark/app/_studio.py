@@ -140,55 +140,40 @@ def tpgraph():
         run = reload(run)
         return run.get_chip_graph()
     except Exception as e:
-        nodes = {}
-        edges = {}
-        for i in range(12):
-            r, c = divmod(i, 3)
-            nodes[f'Q{i}'] = {
-                # 'name': f'Q{i}',
-                # 'id': i,
-                'pos': (r * 3, c * 3),
-                'pen': (35, 155, 75, 255, 2),
-                'value': {
-                    "probe": "M1",
-                    "couplers": [
-                        "C0"
-                    ],
-                    "waveform": {
-                        "SR": 6000000000.0,
-                        "LEN": 8e-05,
-                        "DDS_LO": 6000000000.0,
-                        "RF": "zero()",
-                        "DDS": "zero()"
-                    },
-                    "channel": {
-                        "DDS": "ZW_AWG_13.CH2"
-                    },
-                    "calibration": {
-                        "DDS": {
-                            "delay": 3.05e-08
-                        }
-                    },
-                    "index": [
-                        -9,
-                        -9
-                    ],
-                    "color": "green",
-                    "params": {
-                        "T1": 7.544957236854869e-05,
-                        "T2_star": 1.9762589666408893e-05,
-                        "T2_echo": 3.951455640774801e-05,
-                        "chi": 0.525,
-                        "Ec": None,
-                        "T2star": 21.77932423416822
-                    }}}
-            if i > 10 or i in [2, 5, 8, 11]:
-                continue
-            edges[(f'Q{i}', f'Q{i + 1}')] = {'name': f'C{i}',
-                                             'pen': (55, 123, 255, 180, 21),
-                                             'value': {'b': np.random.random(1)[0] + 5, 'c': {'e': 134}, 'f': [(1, 2, 34)]}
-                                             }
-        return dict(nodes=nodes, edges=edges)
+        layout = {'nodes': {}, 'edges': {}}
+
+        for i in range(72):
+            row, col = divmod(i, 6)
+            layout['nodes'][f'Q{i}'] = {
+                # must be tuple
+                'label': f'Q{i}',
+                'pos': (1 * (2 * col + row % 2), 1 * (22 - row)),
+                'pen': (235, 155, 75, 255, 1),
+                'value': {'a': {'b': 0, 'c': 0, 'd': 0, 'e': 0, 'f': 0}}
+            }
+
+        for i in range(121):
+            row, col = divmod(i, 11)
+            if col % 2 == 0:
+                layout['edges'][(f'Q{row * 6 + col // 2}', f'Q{row * 6 + col // 2 + 6}')] = {
+                    'label': f'C{i}',
+                    'pen': (35, 155, 75, 255, 48),
+                    'value': {'a': {'b': 0, 'c': 0, 'd': 0, 'e': 0, 'f': 0}}
+                }
+            elif col % 2 == 1 and row % 2 == 0:
+                layout['edges'][(f'Q{row * 6 + col // 2 + 1}', f'Q{row * 6 + col // 2 + 6}')] = {
+                    'label': f'C{i}',
+                    'pen': (35, 155, 75, 255, 48),
+                    'value': {'a': {'b': 0, 'c': 0, 'd': 0, 'e': 0, 'f': 0}}
+                }
+            elif col % 2 == 1 and row % 2 == 1:
+                layout['edges'][(f'Q{row * 6 + col // 2}', f'Q{row * 6 + col // 2 + 7}')] = {
+                    'label': f'C{i}',
+                    'pen': (35, 155, 75, 255, 48),
+                    'value': {'a': {'b': 0, 'c': 0, 'd': 0, 'e': 0, 'f': 0}}
+                }
+            return layout
+
 # region plot
 
 

@@ -18,16 +18,16 @@
         "filesize": 3.359,
         "workshop": "default",
         "quark": {
-            "pid": 21664,
+            "pid": 13004,
             "sub": {
-                "pid": 14992,
+                "pid": 21896,
                 "sub": {
                     "Assembler": {
-                        "0": 14340
+                        "0": 4300
                     },
-                    "Calculator": 18940,
-                    "DeviceManager": 20804,
-                    "Demodulator": 19252
+                    "Calculator": 20140,
+                    "DeviceManager": 28784,
+                    "Demodulator": 11268
                 }
             }
         }
@@ -1982,7 +1982,8 @@
             "DDS": "zero()"
         },
         "channel": {
-            "DDS": "ZW_AWG_13.CH2"
+            "DDS": "ZW_AWG_13.CH2",
+            "ZBIAS": "ZW_AWG_10.CH2"
         },
         "calibration": {
             "DDS": {
@@ -2002,7 +2003,9 @@
             "Ec": null,
             "T2star": 21.77932423416822
         },
-        "setting": {},
+        "setting": {
+            "OFFSET": 0
+        },
         "readout_matrix": {
             "ndarray": "V4iLWYqFLkBXiItZioUswP/6O4q98DDA//o7ir3wMUA=",
             "dtype": "<f8",
@@ -2148,7 +2151,9 @@
             "C3",
             "C4"
         ],
-        "setting": {},
+        "setting": {
+            "OFFSET": 0
+        },
         "waveform": {
             "SR": 6000000000.0,
             "LEN": 8e-05,
@@ -2157,7 +2162,8 @@
             "DDS": "zero()"
         },
         "channel": {
-            "DDS": "ZW_AWG_11.CH11"
+            "DDS": "ZW_AWG_11.CH11",
+            "ZBIAS": "ZW_AWG_4.CH2"
         },
         "calibration": {
             "DDS": {
@@ -2356,7 +2362,9 @@
             "C8",
             "C9"
         ],
-        "setting": {},
+        "setting": {
+            "OFFSET": 0
+        },
         "waveform": {
             "SR": 6000000000.0,
             "LEN": 8e-05,
@@ -2365,7 +2373,8 @@
             "DDS": "zero()"
         },
         "channel": {
-            "DDS": "ZW_AWG_13.CH16"
+            "DDS": "ZW_AWG_13.CH16",
+            "ZBIAS": "ZW_AWG_9.CH2"
         },
         "calibration": {
             "DDS": {
@@ -3351,394 +3360,364 @@
         "color": "green",
         "LH_Trig": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer",
-            "port": -1
+            "pid": 2852,
+            "inuse": true
         },
         "MW1": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer",
-            "port": -1
+            "pid": 2852,
+            "inuse": true
         },
         "NA": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
+            "pid": 2852,
             "model": "3672A",
-            "host": "QuarkServer",
-            "port": -1
+            "inuse": true
         },
         "ZW_AWG_2": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AD2": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AD1": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AD3": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AWG_3": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_Trig": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer",
-            "port": -1
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AWG_4": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AWG_5": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AWG_6": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AWG_7": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AWG_8": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AWG_9": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AWG_10": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AWG_11": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AWG_12": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AWG_13": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AWG_14": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AWG_15": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AWG_16": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AWG_17": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AWG_18": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AWG_19": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "DG645_203": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer",
-            "port": -1
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AWG_1": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_Trig2": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer",
-            "port": -1
+            "pid": 2852,
+            "inuse": true
         },
         "AWG_16_116_47": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer",
-            "port": -1
+            "pid": 2852,
+            "inuse": true
         },
         "AWG_16_116_48": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer",
-            "port": -1
+            "pid": 2852,
+            "inuse": true
         },
         "AWG_16_116_49": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer",
-            "port": -1
+            "pid": 2852,
+            "inuse": true
         },
         "AWG_16_116_50": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer",
-            "port": -1
+            "pid": 2852,
+            "inuse": true
         },
         "AWG_16_116_51": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer",
-            "port": -1
+            "pid": 2852,
+            "inuse": true
         },
         "AWG_16_116_52": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer",
-            "port": -1
+            "pid": 2852,
+            "inuse": true
         },
         "AWG_16_116_33": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer",
-            "port": -1
+            "pid": 2852,
+            "inuse": true
         },
         "AWG_16_116_34": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer",
-            "port": -1
+            "pid": 2852,
+            "inuse": true
         },
         "AWG_16_116_35": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer",
-            "port": -1
+            "pid": 2852,
+            "inuse": true
         },
         "AWG_16_116_36": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer",
-            "port": -1
+            "pid": 2852,
+            "inuse": true
         },
         "AWG_16_116_37": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer",
-            "port": -1
+            "pid": 2852,
+            "inuse": true
         },
         "AWG_16_116_38": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer",
-            "port": -1
+            "pid": 2852,
+            "inuse": true
         },
         "AWG_16_116_39": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer",
-            "port": -1
+            "pid": 2852,
+            "inuse": true
         },
         "AWG_16_116_53": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer",
-            "port": -1
+            "pid": 2852,
+            "inuse": true
         },
         "ZW_AWG_35": {
             "addr": "192.168.103.2",
-            "name": "VirtualDevice",
+            "name": "quark.driver.VirtualDevice",
             "type": "driver",
-            "port": -1,
             "srate": 1000000000.0,
-            "pid": 20804,
-            "host": "QuarkServer"
+            "pid": 2852,
+            "inuse": true
         }
     },
-    "var": {},
+    "var": {
+        "a": {
+            "b": {
+                "c": {
+                    "e": {
+                        "dd": 3
+                    },
+                    "ee": {
+                        "dd": 3
+                    }
+                }
+            }
+        }
+    },
     "etc": {
         "driver": {
             "path": "C:\\Users\\Dell\\Desktop\\home\\dev",
@@ -3768,9 +3747,11 @@
             "delay": 10.0,
             "cached": 5,
             "review": [
+                -2,
+                -1,
                 0,
                 1,
-                3
+                2
             ],
             "track": [
                 0,
@@ -3783,7 +3764,41 @@
                 0.0,
                 8e-06
             ],
-            "filter": ["Q0"]
+            "filter": [
+                "M1"
+            ]
+        }
+    },
+    "Q999": {
+        "Measure": {
+            "duration": 4e-06,
+            "amp": 0.019,
+            "frequency": 6964370000.0,
+            "weight": "const(1)",
+            "phi": -2.636421695283167,
+            "threshold": 8502633802.265065,
+            "ring_up_amp": 0.024,
+            "ring_up_waist": 0.006,
+            "ring_up_time": 6e-07
+        },
+        "probe": {
+            "address": "ZW_AD2.CH1.Waveform",
+            "delay": 5e-06
+        },
+        "drive": {
+            "address": "ZW_AWG_13.CH2.Waveform",
+            "delay": 2.52e-07
+        },
+        "R": {
+            "width": 2.1e-08,
+            "amp": 0.5140937118030053,
+            "frequency": 4473337704.6286335,
+            "delta": 947840.2529478334,
+            "plateau": 2.1e-08
+        },
+        "acquire": {
+            "address": "ZW_AD2.CH13.IQ",
+            "TRIGD": 5.222e-06
         }
     }
 }
