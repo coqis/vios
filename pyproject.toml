@@ -10,7 +10,10 @@ authors = [
 ]
 description = "runtime requirements for systemq"
 readme = "README.md"
-license = {file = "LICENSE"}
+license = "MIT"
+license-files = [
+    "LICEN[CS]E*"
+]
 requires-python = ">=3.12"
 dependencies = [
     "tqdm",
@@ -30,7 +33,6 @@ classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: MIT License",
   "Natural Language :: Chinese (Simplified)",
   "Natural Language :: English",
   "Operating System :: Microsoft :: Windows",
