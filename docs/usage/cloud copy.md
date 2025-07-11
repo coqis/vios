@@ -14,7 +14,7 @@ hide:
         - 夸父量子计算云平台（https://quafu.baqis.ac.cn）由北京量子院、中科院物理所及清华大学开发维护，为用户提供方便快捷的通道以访问量子计算资源。
         - 我们同时提供更为快捷的基于`QuarkStudio`的接口，用于直连超导量子芯片后端，以适应诸如qiskit等工具链，以下对`QuarkStudio`使用作简要说明。
 
-    - 安装Python(**>=3.10**)
+    - 安装Python(**>=3.12**)
     - 安装`QuarkStudio`
         ```bash
         pip install quarkstudio

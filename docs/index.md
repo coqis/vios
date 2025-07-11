@@ -24,10 +24,10 @@ Welcome to the Quafu Superconducting Quantum Computing(Quafu-SQC) cloud([https:/
 
 
 ## 2. Installation
-`QuarkStudio` supports all major operating systems, including Windows, MacOS and Linux. To install, a Python(>=3.10) is required and then install latest `QuarkStudio` by pip (in a terminal):
+`QuarkStudio` supports all major operating systems, including Windows, MacOS and Linux. To install, a Python(>=3.12) is required and then install latest `QuarkStudio` by pip (in a terminal):
 
 ```bash
-pip install quarkstudio # python>=3.10
+pip install quarkstudio # python>=3.12
 ```
 
 Now you are ready to submit your quantum circuits **directly** to the backends listed above.
