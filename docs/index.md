@@ -187,9 +187,9 @@ plt.xticks(rotation=45)
 
 ![count](usage/2024041917095371986.jpg)
 
-By default, the Bayesian corrected result is not returned. Since the inevitable readout & initialization errors of the physical qubits, the resulted data may not reflect your circuit evolution. To show how the errors can be corrected, the readout correction matrix $M$ was measured in advance and then multiplied by the raw `data`, giving us the corrected result as shown in the figure below,
+<!-- By default, the Bayesian corrected result is not returned. Since the inevitable readout & initialization errors of the physical qubits, the resulted data may not reflect your circuit evolution. To show how the errors can be corrected, the readout correction matrix $M$ was measured in advance and then multiplied by the raw `data`, giving us the corrected result as shown in the figure below,
 
-![corrected](usage/2024041917095371986_corrected.jpg)
+![corrected](usage/2024041917095371986_corrected.jpg) -->
 
 <!-- >For more information about the topic, see [Bayesian Correction](https://www.yuque.com/wuming-6g8w2/ghzgfk/um1z1x474lgihb2w?singleDoc# ) -->
 

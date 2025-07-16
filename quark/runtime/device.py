@@ -25,27 +25,35 @@ from typing import Any
 from quark.driver.common import BaseDriver
 
 
-def read(device: BaseDriver, quantity: str, channel: int = 1, **kwds) -> Any:
+def read(device: BaseDriver, quantity: str, channel: str = 'CH1', **kwds) -> Any:
     """read from the device
 
     Args:
         device (_type_): device handler
         quantity (str): hardware attribute, e.g., Waveform/Power/Offset
-        channel (int, optional): channel number. Defaults to 1.
+        channel (int, optional): channel string. Defaults to 'CH1'.
 
     Returns:
         Any: result from the device
     """
-    return device.getValue(quantity, ch=channel, **kwds)
+    # assert isinstance(channel, str) and channel.startswith('CH'), \
+    #     f'channel should be a string starting with "CH", got {channel}'
+    chstr = channel[2:]
+    ch = int(chstr) if chstr.isdigit() else chstr
+    return device.getValue(quantity, ch=ch, **kwds)
 
 
-def write(device: BaseDriver, quantity: str, value: Any, channel: int = 1, **kwds):
+def write(device: BaseDriver, quantity: str, value: Any, channel: str = 'CH1', **kwds):
     """write to the device
 
     Args:
         device (_type_): device handler
         quantity (str): hardware attribute, e.g., Waveform/Power/Offset
         value (Any): value to be written
-        channel (int, optional): channel number. Defaults to 1.
+        channel (int, optional): channel string. Defaults to 'CH1'.
     """
-    return device.setValue(quantity, value, ch=channel, **kwds)
+    # assert isinstance(channel, str) and channel.startswith('CH'), \
+    #     f'channel should be a string starting with "CH", got {channel}'
+    chstr = channel[2:]
+    ch = int(chstr) if chstr.isdigit() else chstr
+    return device.setValue(quantity, value, ch=ch, **kwds)
