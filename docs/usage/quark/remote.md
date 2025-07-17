@@ -31,7 +31,7 @@ driver
 ```
 
 1. :material-language-python: VirtualDevice
-    [driver template](https://quarkstudio.readthedocs.io/en/latest/modules/quark/driver/VirtualDevice/)
+    [driver template](../../code/driver/)
 2. :material-code-json: remote
     ```python title="remote.json"
     {

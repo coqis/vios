@@ -185,7 +185,7 @@ for i, q in enumerate(qubits):
 
 #### **设备调试**
 ??? bug "设备调试"
-    - 如需编写驱动（可参考dev中其他设备的实现）：
+    - 如需编写驱动（可参考[driver template](../code/driver/)或dev中其他设备的实现）：
         - 设备驱动必须继承自BaseDriver(`from quark.driver.common import BaseDriver`)
         - 所有驱动必须实现`open`/`close`/`write`/`read`方法
 
