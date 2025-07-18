@@ -205,7 +205,10 @@ class Pulse(object):
             if isinstance(a, Waveform) and isinstance(b, Waveform):
                 return (a * cls.WINDOW) == (b * cls.WINDOW)
 
-            return a == b
+            res = a == b
+            if isinstance(res, np.ndarray):
+                return np.all(res)
+            return res
         except Exception as e:
             logger.warning(f'Failed to compare waveform: {e}')
             return False

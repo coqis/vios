@@ -87,12 +87,13 @@ def get_commit_by_tid(tid: int = 0):
         record = get_record_by_tid(tid)
         ckpt, filename, hexsha = record[5], record[7], record[-1]
 
-        if 'Desktop' not in filename:
-            home = Path(filename.split('dat')[0])
-        else:
-            home = Path.home() / 'Desktop/home'
+        # if 'Desktop' not in filename:
+        #     home = Path(filename.split('dat')[0])
+        # else:
+        #     home = Path.home() / 'Desktop/home'
 
-        file = (home / f'cfg/{ckpt}').with_suffix('.json')
+        file = (HOME / f'cfg/{ckpt}').with_suffix('.json')
+        print(file)
 
         repo = git.Repo(file.resolve().parent)
         if not tid:

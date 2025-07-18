@@ -136,7 +136,8 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                         mapping = query('etc.driver.mapping')
                         _target = decode(target, context, mapping)
                         kwds.update({"context": context})
-                except (ValueError, KeyError) as e:
+                except Exception as e:  # (ValueError, KeyError, AttributeError)
+                    logger.error(f'Failed to decode {target}({context}), {e}!')
                     continue
 
             # save initial value to restore
