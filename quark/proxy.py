@@ -31,6 +31,7 @@ import json
 import os
 import string
 import sys
+import textwrap
 import time
 from collections import defaultdict
 from functools import cached_property
@@ -309,7 +310,9 @@ class Task(object):
                     msg = '\r\n'.join(fv)
                 elif k == 'cirq':
                     msg = v.replace("\n", "\n    ")
-                print(f'{k}: {msg}')
+                print(textwrap.fill(f'{k}: {msg}',
+                                    width=120,
+                                    replace_whitespace=False))
         return r
 
     def process(self, data: list[dict]):

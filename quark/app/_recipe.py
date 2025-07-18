@@ -61,11 +61,6 @@ class Recipe(object):
         self.filename = filename
         self.priority = priority
 
-        # [('AWG.CH1.Waveform', 'zero()', 'au')]
-        self.initcmd = [(t, v, 'au') for t, v in Recipe.before_the_task]
-        self.postcmd = [(t, v, 'au') for t, v in Recipe.after_the_task]
-        self.prestep = [(t, v, 'au') for t, v in Recipe.before_compiling]
-
         self.verbose = False
 
         self.__circuit: list[list] = []  # qlisp线路
@@ -208,6 +203,11 @@ class Recipe(object):
 
         with open(Path.home() / 'quark.json', 'w') as f:
             f.write(json.dumps(old | {'path': self.syspath}, indent=4))
+
+        # [('AWG.CH1.Waveform', 'zero()', 'au')]
+        self.initcmd = [(t, v, 'au') for t, v in self.before_the_task]
+        self.postcmd = [(t, v, 'au') for t, v in self.after_the_task]
+        self.prestep = [(t, v, 'au') for t, v in self.before_compiling]
 
     def export(self):
         """导出任务
