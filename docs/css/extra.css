@@ -55,3 +55,8 @@
 .md-nav__list {
     margin-left: 1em;
 }
+/* annoation tooltip */
+.md-tooltip--active
+{
+    width: 50%;
+}
