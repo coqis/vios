@@ -293,7 +293,7 @@ class Workflow(object):
             signal = _form_signal(kwds.get('signal'))
         except Exception as e:
             if not isinstance(circuit, list):
-                raise TypeError(f'wrong type circuit: {circuit}')
+                raise TypeError(f'wrong type of circuit: {circuit}')
 
             # [(('SET','Frequency'), 'MW.CH1'), (('GET','S'), 'NA.CH1')]
             cmds = []

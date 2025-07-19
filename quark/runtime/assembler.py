@@ -127,6 +127,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                 try:
                     # logical channel to hardware channel
                     if target.endswith(('drive', 'probe', 'flux', 'acquire')):
+                        value = ctx.snapshot().cache.pop(target, value)
                         context = query(target)
                         _target = context.pop('address', f'address: {target}')
                         kwds['context'] = context
@@ -137,7 +138,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                         _target = decode(target, context, mapping)
                         kwds.update({"context": context})
                 except Exception as e:  # (ValueError, KeyError, AttributeError)
-                    logger.error(f'Failed to decode {target}({context}), {e}!')
+                    logger.error(f'Failed to map {target}({context}), {e}!')
                     continue
 
             # save initial value to restore
