@@ -142,9 +142,9 @@ except Exception as e:
 class Progress(tqdm):
     bar_format = '{desc} {percentage:3.0f}%|{bar}|{n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}{postfix}]'
 
-    def __init__(self, desc='test', total=100, postfix='running', disable: bool = False):
-        super().__init__([], desc, total, ncols=None, colour='blue',
-                         bar_format=self.bar_format, position=0, postfix=postfix, disable=disable)
+    def __init__(self, desc='test', total=100, postfix='running', disable: bool = False, leave: bool = True):
+        super().__init__([], desc, total, postfix=postfix, disable=disable, leave=leave,
+                         ncols=None, colour='blue', bar_format=self.bar_format, position=0)
 
     @property
     def max(self):
@@ -382,7 +382,7 @@ class Task(object):
         except Exception as e:
             pass
 
-    def bar(self, interval: float = 2.0, disable: bool = False):
+    def bar(self, interval: float = 2.0, disable: bool = False, leave: bool = True):
         """task progress. 
 
         Tip: tips
@@ -391,6 +391,8 @@ class Task(object):
 
         Args:
             interval (float, optional): time period to retrieve data from `QuarkServer`. Defaults to 2.0.
+            disable (bool, optional): disable the progress bar. Defaults to False.
+            leave (bool, optional): whether to leave the progress bar after completion. Defaults to True
 
         Raises:
             TimeoutError: if TimeoutError is raised, the task progress bar will be stopped.
@@ -404,10 +406,11 @@ class Task(object):
                 elif status == 'Canceled':
                     return 'Task canceled!'
                 else:
-                    self.progress = Progress(desc=self.name,
+                    self.progress = Progress(desc=str(self),
                                              total=self.report(False)['size'],
                                              postfix=current_thread().name,
-                                             disable=disable)
+                                             disable=disable,
+                                             leave=leave)
                     break
             except Exception as e:
                 logger.error(

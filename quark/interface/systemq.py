@@ -119,6 +119,7 @@ class Context(QuarkLocalConfig):
         self.initial = {}
         self.bypass = {}
         self._keys = []
+        self.opaques = stdlib.opaques
 
         self.__skip = ['Barrier', 'Delay', 'setBias', 'Pulse']
 
@@ -137,6 +138,11 @@ class Context(QuarkLocalConfig):
             return self.snapshot().todict()
         except Exception as e:
             return self.snapshot().dct
+
+    def iscmd(self, target: str):
+        """check if target is a command
+        """
+        return not any(s in target for s in self.opaques)
 
     def getGate3(self, name, *qubits):
         # ------------------------- added -------------------------

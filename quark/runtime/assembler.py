@@ -117,6 +117,10 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                 ctx.update(target, value)
                 continue
 
+            if ctype not in ('READ', 'WRITE', 'WAIT'):
+                logger.warning(f'Unknown command type: {ctype}!')
+                continue
+
             kwds = {'sid': sid, 'target': target,
                     'review': query('etc.server.review'),
                     'shared': query('etc.server.shared'),
@@ -124,6 +128,9 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
             if 'CH' in target or ctype == 'WAIT':
                 _target = target
             else:
+                if not ctx.iscmd(target):
+                    # logger.warning(f'Unknown target: {target}!')
+                    continue
                 try:
                     # logical channel to hardware channel
                     if target.endswith(('drive', 'probe', 'flux', 'acquire')):

@@ -61,6 +61,7 @@ class Recipe(object):
         self.filename = filename
         self.priority = priority
 
+        self.timeout = 30  # 编译超时, 单位秒
         self.verbose = False
 
         self.__circuit: list[list] = []  # qlisp线路
@@ -223,6 +224,7 @@ class Recipe(object):
                                    'lib': self.lib,
                                    'arch': self.arch,
                                    'align_right': self.align_right,
+                                   'timeout': float(self.timeout),
                                    'verbose': self.verbose,
                                    'precompile': self.prestep,
                                    'waveform_length': self.waveform_length,
