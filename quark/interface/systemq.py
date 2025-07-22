@@ -111,6 +111,32 @@ def get_gate_lib(lib: str):
         return stdlib
 
 
+def split_circuit(circuit: list):
+    """split circuit to commands and circuit
+
+    Args:
+        circuit (list): qlisp circuit
+
+    Returns:
+        tuple: commands, circuit
+    """
+    cmds = {'main': [], 'read': []}
+    circ = []
+    for op, target in circuit:
+        if isinstance(op, tuple):
+            if op[0] == 'GET':
+                cmds['read'].append(
+                    ('READ', f'{target}.{op[1]}', '', 'au'))
+            elif op[0] == 'SET':
+                cmds['main'].append(
+                    ('WRITE', f'{target}.{op[1]}', op[2], 'au'))
+            else:
+                circ.append((op, target))
+        else:
+            circ.append((op, target))
+    return cmds, circ
+
+
 class Context(QuarkLocalConfig):
 
     def __init__(self, data) -> None:
@@ -295,25 +321,31 @@ class Workflow(object):
         """
         cls.check()
 
-        try:
-            signal = _form_signal(kwds.get('signal'))
-        except Exception as e:
-            if not isinstance(circuit, list):
-                raise TypeError(f'wrong type of circuit: {circuit}')
+        compiled, circuit = split_circuit(circuit)
+        rawmap = {'signal': kwds['signal'], 'arch': 'undefined'}
+        if not circuit:
+            return compiled, rawmap
 
-            # [(('SET','Frequency'), 'MW.CH1'), (('GET','S'), 'NA.CH1')]
-            cmds = []
-            for op in circuit:
-                if isinstance(op[0], tuple) and op[0][0] == 'GET':
-                    cmds.append(('READ', f'{op[-1]}.{op[0][-1]}', '', 'au'))
-            return {'read': cmds}, {'arch': 'undefined'}
+        try:
+            signal = _form_signal(rawmap['signal'])
+        except Exception as e:
+            signal = 'iq'
+        #     if not isinstance(circuit, list):
+        #         raise TypeError(f'wrong type of circuit: {circuit}')
+
+        #     # [(('SET','Frequency'), 'MW.CH1'), (('GET','S'), 'NA.CH1')]
+        #     cmds = []
+        #     for op in circuit:
+        #         if isinstance(op[0], tuple) and op[0][0] == 'GET':
+        #             cmds.append(('READ', f'{op[-1]}.{op[0][-1]}', '', 'au'))
+        #     return {'read': cmds}, {'arch': 'undefined'}
 
         ctx: Context = kwds.pop('ctx')
         ctx._getGateConfig.cache_clear()
         ctx.snapshot().cache = kwds.pop('cache', {})
 
-        compiled = {'main': [('WRITE', *cmd)
-                             for cmd in kwds.get('precompile', [])]}
+        compiled['main'].extend([('WRITE', *cmd)
+                                 for cmd in kwds.get('precompile', [])])
 
         ctx.code, (cmds, dmap) = qcompile(circuit,
                                           lib=get_gate_lib(
@@ -332,6 +364,9 @@ class Workflow(object):
             step = 'main' if ctype == 'WRITE' else ctype
             op = (ctype, cmd.address, cmd.value, 'au')
             compiled.setdefault(step, []).append(op)
+        if rawmap['signal'] in ['S', 'Trace']:
+            # for NA
+            dmap = rawmap
         return compiled, dmap
 
     @classmethod
