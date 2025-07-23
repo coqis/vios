@@ -114,18 +114,18 @@ hide:
 
 1.  :material-transit-connection-variant: 读取通道
     - address：格式为`设备.通道.属性`，`属性`列表参见驱动文件的`quants`。波形由**Measure**门生成。
-    - address以外的其他参数（比如delay）传与`quark.interface.Workflow.calculate`，即其中的`cali`
+    - address以外的其他参数（比如delay）传与`quark.interface.Workflow.calculate`中的`cali`
     ```python
     pulse = sample_waveform(func,
                             cali, # address以外的其他参数
-                            sample_rate=kwds['srate'],
+                            sample_rate=kwds['srate'], # 采样率来自dev
                             start=cali.get('start', 0),
                             stop=cali.get('end', 98e-6),
                             support_waveform_object=support_waveform_object)
     ......
     ```
 2.  :material-transit-connection-variant: 采集通道
-    - address：同**读取通道**。解调系数由编译生成的**Coefficient**生成。
+    - address：格式同**读取通道**。解调系数由编译生成的**Coefficient**生成。
     - TRIGD: 触发延时
     - 采集回来的数据传与`quark.interface.Workflow.process`处理，实际调用函数为`lib.arch.rcp.data.assembly_data`
     ```python
@@ -147,9 +147,9 @@ hide:
         ......
     ```
 3. :material-transit-connection-variant: 驱动通道
-    - address：同**读取通道**，波形由**R**门生成
+    - address：格式同**读取通道**，波形由**R**门生成
 4. :material-transit-connection-variant: 偏置通道
-    - address：同**读取通道**，波形由**setBias**门生成
+    - address：格式同**读取通道**，波形由**setBias**门生成
 5. :material-transit-connection-variant: **R**门
     - 编译生成的波形写入**drive**通道
     - 见lib.gates.u3中**R**门
@@ -222,27 +222,27 @@ hide:
             "type": "driver", # (2)
             "srate": -1.0,
             "pid": 1989,
-            "Keepmode": None,
-            "model": None,
             "inuse": true
+            "Keepmode": None,
+            "model": None
         },
         "NA": {
             "addr": "192.168.103.125",
             "name": "NetworkAnalyzer",
             "type": "driver",
             "srate": -1.0,
-            "pid": 62605,
-            "Keepmode": None, # 其他设置，可选
-            "model": "3674C", # 设备型号，可选
+            "pid": 2613,
             "inuse": true
+            "Keepmode": None, # 其他设置，可选
+            "model": "3674C"  # 设备型号，可选
         },
         "ChipQ4_1": {
-            "type": "remote", # (3)
-            "srate": 2000000000.0,
-            "pid": 62605,
-            "inuse": true,
             "host": "127.0.0.1",
             "port": 40043
+            "type": "remote", # (3)
+            "srate": 2000000000.0,
+            "pid": 6605,
+            "inuse": true
         }
     }
     ```

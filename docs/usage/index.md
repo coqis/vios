@@ -63,16 +63,12 @@ Then you can install `quarkstudio` and start using from the beginner's [**tutori
     ``` bash
     # install quarkstudio
     pip install -U quarkstudio
-    # or force reinstall to fix issues
-    pip install -U quarkstudio --force-reinstall
 
-    # download drivers and libraries to `~/Desktop/home`
-    # and install the required dependencies
-    quark init
+    # download drivers/libraries to `~/Desktop/home` and install the requirements
+    quark init --home ~/Desktop/home
 
-    # update server and studio
-    quark update --server
-    quark update --studio
+    # update if needed
+    quark update
     ```
 
 ???+ warning "command not found"

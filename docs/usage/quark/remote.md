@@ -9,7 +9,7 @@ icon: simple/redmine
 ???+ example "start"
     ```bash
     # pip install quarkstudio[remote] (if not installed)
-    # quark update --remote (if installed)
+    # quark update --mode=remote (if installed)
     quark remote remote.json
     ```
 
