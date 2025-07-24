@@ -228,7 +228,7 @@ class Task(object):
         return get_record_by_tid(self.tid)[0]
 
     def __repr__(self):
-        return f'{self.name}(rid={self.rid}, tid={self.tid})'
+        return f'{self.name}(tid={self.tid})'  # rid={self.rid},
 
     def cancel(self):
         """cancel the task

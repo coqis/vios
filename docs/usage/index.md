@@ -66,9 +66,6 @@ Then you can install `quarkstudio` and start using from the beginner's [**tutori
 
     # download drivers/libraries to `~/Desktop/home` and install the requirements
     quark init --home ~/Desktop/home
-
-    # update if needed
-    quark update
     ```
 
 ???+ warning "command not found"

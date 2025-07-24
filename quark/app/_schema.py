@@ -70,8 +70,16 @@ class Template(object):
                           },
                 'acquire': {'address': 'ZW_AD2.CH13.IQ',
                             'TRIGD': 5.222e-06  # optional
-                            }
-                }
+                            },
+                'flux': {'address': 'board_all.CH10.Waveform',
+                         'delay': 0,
+                         'distortion': {
+                             'decay': [],
+                             'expfit': [],
+                             'multfit': []
+                         }
+                         },
+                },
 
     @classmethod
     def validate(cls, instance: dict):

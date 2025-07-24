@@ -329,6 +329,7 @@ class Workflow(object):
         try:
             signal = _form_signal(rawmap['signal'])
         except Exception as e:
+            # extra circuit
             signal = 'iq'
         #     if not isinstance(circuit, list):
         #         raise TypeError(f'wrong type of circuit: {circuit}')
