@@ -449,9 +449,12 @@ class QuarkProxy(object):
         self.tqueue = Queue(-1)
         self.ready = False
 
-        s.login()
-        self.server = s.ss()
-        setlog()
+        try:
+            s.login()
+            self.server = s.ss()
+            setlog()
+        except Exception as e:
+            logger.error('Failed to connect QuarkServer')
 
         if 1:
             # if not file.endswith('.json'):
@@ -463,10 +466,13 @@ class QuarkProxy(object):
 
             (Path(HOME) / 'run').mkdir(parents=True, exist_ok=True)
 
-            import run
+            try:
+                import run
 
-            from .dag import Scheduler
-            Scheduler(run.dag())
+                from .dag import Scheduler
+                Scheduler(run.dag())
+            except Exception as e:
+                logger.error('Failed to start Scheduler')
 
     def get_circuit(self, timeout: float = 1.0):
         if not self.ready:
