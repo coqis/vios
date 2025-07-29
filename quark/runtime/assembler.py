@@ -155,6 +155,9 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
             #     if 'waveform' in _target.lower():
             #         init = (ctype, _target, 'zero()', unit)
             #         ctx.initial['restore'].append(init)
+            if not (isinstance(_target, str) and _target):
+                logger.error(f'wrong target: {target}({_target})')
+                continue
 
             # get sample rate from device
             if ctype != 'WAIT':
