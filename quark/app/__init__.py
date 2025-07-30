@@ -529,7 +529,7 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
                 index += 1
 
                 ax.plot(xt, wf[_target])
-                ax.text(xt[-1], np.mean(wf[_target]), _target, va='center')
+                ax.text(xt[-1], wf[_target][-1], _target, va='center')
                 ax.set_xlim(xt[0] - space, xt[-1] + space)
     # plt.axis('off')
     # plt.legend(tuple(wf))

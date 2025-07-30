@@ -36,28 +36,19 @@ from loguru import logger
 from qlispc.arch.baqis import QuarkLocalConfig
 
 try:
-    # lib: systemq
-    try:
-        from lib import stdlib
-    except ImportError as e:
-        from systemq.lib import stdlib
+    from lib import stdlib
 except Exception as e:
     logger.critical('systemq may not be installed', e)
     raise e
 
 
 try:
-    # qlispc
     try:
-        from lib import DictDriver, Signal, get_arch, qcompile, sample_waveform
+        from lib import DictDriver, get_arch, qcompile, sample_waveform
     except ImportError as e:
-        try:
-            from systemq.lib import (DictDriver, Signal, get_arch, qcompile,
-                                     sample_waveform)
-        except ImportError as e:
-            from qlispc import Signal, get_arch
-            from qlispc.kernel_utils import qcompile, sample_waveform
-            from qlispc.namespace import DictDriver
+        from qlispc import get_arch
+        from qlispc.kernel_utils import qcompile, sample_waveform
+        from qlispc.namespace import DictDriver
 except Exception as e:
     logger.critical('qlispc error', e)
     raise e
@@ -65,43 +56,6 @@ except Exception as e:
 
 # waveforms.math: waveforms or waveform-math
 from waveforms import Waveform, WaveVStack, square, wave_eval
-
-
-def _form_signal(sig):
-    """signal类型
-    """
-    sig_tab = {
-        'trace': Signal.trace,
-        'iq': Signal.iq,
-        'state': Signal.state,
-        'count': Signal.count,
-        'diag': Signal.diag,
-        'population': Signal.population,
-        'trace_avg': Signal.trace_avg,
-        'iq_avg': Signal.iq_avg,
-        'remote_trace_avg': Signal.remote_trace_avg,
-        'remote_iq_avg': Signal.remote_iq_avg,
-        'remote_state': Signal.remote_state,
-        'remote_population': Signal.remote_population,
-        'remote_count': Signal.remote_count,
-    }
-    if isinstance(sig, str):
-        if sig == 'raw':
-            sig = 'iq'
-        try:
-            if '|' not in sig:
-                return sig_tab[sig]
-            _sig = None
-            for s in sig.split('|'):
-                _s = getattr(Signal, s)
-                _sig = _s if not _sig else _sig | _s
-            return _sig
-        except KeyError:
-            pass
-    elif isinstance(sig, Signal):
-        return sig
-    raise ValueError(f'unknow type of signal "{sig}".'
-                     f" optional signal types: {list(sig_tab.keys())}")
 
 
 def get_gate_lib(lib: str):
@@ -322,24 +276,11 @@ class Workflow(object):
         cls.check()
 
         compiled, circuit = split_circuit(circuit)
-        rawmap = {'signal': kwds['signal'], 'arch': 'undefined'}
+        rmap = {'signal': kwds['signal'], 'arch': 'undefined'}
         if not circuit:
-            return compiled, rawmap
+            return compiled, rmap
 
-        try:
-            signal = _form_signal(rawmap['signal'])
-        except Exception as e:
-            # extra circuit
-            signal = 'iq'
-        #     if not isinstance(circuit, list):
-        #         raise TypeError(f'wrong type of circuit: {circuit}')
-
-        #     # [(('SET','Frequency'), 'MW.CH1'), (('GET','S'), 'NA.CH1')]
-        #     cmds = []
-        #     for op in circuit:
-        #         if isinstance(op[0], tuple) and op[0][0] == 'GET':
-        #             cmds.append(('READ', f'{op[-1]}.{op[0][-1]}', '', 'au'))
-        #     return {'read': cmds}, {'arch': 'undefined'}
+        signal = 'iq' if rmap['signal'] in ['S', 'Trace'] else rmap['signal']
 
         ctx: Context = kwds.pop('ctx')
         ctx._getGateConfig.cache_clear()
@@ -365,9 +306,9 @@ class Workflow(object):
             step = 'main' if ctype == 'WRITE' else ctype
             op = (ctype, cmd.address, cmd.value, 'au')
             compiled.setdefault(step, []).append(op)
-        if rawmap['signal'] in ['S', 'Trace']:
+        if rmap['signal'] in ['S', 'Trace']:
             # for NA
-            dmap = rawmap
+            dmap = rmap
         return compiled, dmap
 
     @classmethod
@@ -405,17 +346,6 @@ class Workflow(object):
                 # KeyError: 'calibration'
                 logger.error(f"Failed to sample: {e}(@{kwds['target']})")
                 raise e
-                if func.start is None:
-                    func.start = 0
-                if func.stop is None:
-                    func.stop = 60e-6
-                if func.sample_rate is None:
-                    func.sample_rate = kwds['srate']
-
-                if support_waveform_object:
-                    cmd[1] = func
-                else:
-                    cmd[1] = func.sample()
         else:
             pulse = func
 

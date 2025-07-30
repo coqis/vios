@@ -1,5 +1,4 @@
 import numpy as np
-from waveforms import Waveform
 
 from quark.driver.common import BaseDriver, Quantity
 
@@ -23,7 +22,7 @@ class Driver(BaseDriver):
         # AWG
         Quantity('Amplitude', value=0, ch=1, unit='Vpp'),  # float
         Quantity('Offset', value=0, ch=1, unit='V'),  # float
-        Quantity('Waveform', value=np.array([]), ch=1),  # np.array or Waveform
+        Quantity('Waveform', value=np.array([]), ch=1),  # np.array
         Quantity('Marker1', value=[], ch=1),  # Marker1，np.array
         Quantity('Marker2', value=[], ch=1),  # Marker2，np.array
 
@@ -84,8 +83,6 @@ class Driver(BaseDriver):
         if name == 'Frequency':
             self.set_frequency(value)
         elif name == 'Waveform':
-            if isinstance(value, Waveform):
-                value.sample()
             self.set_waveform(value, **kw)
         return value
 
@@ -120,7 +117,7 @@ if __name__ == '__main__':
     driver.setValue('Frequency', 1e9)  # setValue方法会做属性及通道检查，再调用write方法
     print(driver.getValue('Frequency'))  # getValue方法会做属性及通道检查，再调用read方法
 
-    driver.setValue('Waveform', Waveform(np.random.randn(1024)))
+    driver.setValue('Waveform', np.random.randn(1024))
     trace_iq = driver.getValue('TraceIQ')
     print(trace_iq)
 
