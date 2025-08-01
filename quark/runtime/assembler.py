@@ -145,7 +145,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                         _target = decode(target, context, mapping)
                         kwds.update({"context": context})
                 except Exception as e:  # (ValueError, KeyError, AttributeError)
-                    logger.error(f'Failed to map {target}({context}), {e}!')
+                    logger.error(f'Failed to map {target}: {e}!')
                     continue
 
             # save initial value to restore
@@ -170,7 +170,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                     logger.critical(f'Failed to get srate: {dev}({target})!')
             cmd = [ctype, value, unit, kwds]
 
-            # shared channels
+            # Merge commands with the same channel
             try:
                 if _target in scmd and 'waveform' in _target.lower():
                     if isinstance(scmd[_target][1], str):
@@ -178,6 +178,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                     if isinstance(cmd[1], str):
                         cmd[1] = Pulse.fromstr(cmd[1])
                     scmd[_target][1] += cmd[1]
+                    scmd[_target][-1].update(cmd[-1])
                 else:
                     scmd[_target] = cmd
             except Exception as e:
