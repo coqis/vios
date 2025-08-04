@@ -298,6 +298,10 @@ def preprocess(sid: int, instruction: dict[str, dict[str, list[str, Any, str, di
                                            } | context['calibration'][channel]
                     # kwds['setting'] = context['setting']
                 except Exception as e:
+                    if target.lower().endswith('waveform'):
+                        end = ctx.query('station.waveform_length')
+                        if isinstance('end', float):
+                            context['end'] = end
                     kwds['calibration'] = context
 
                 # if isinstance(cmd[1], Waveform):

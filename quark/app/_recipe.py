@@ -29,7 +29,7 @@ import numpy as np
 
 
 class Recipe(object):
-    """**Recipe仅用于生成任务，没有编译/执行/数据处理等任何逻辑！**
+    """**Recipe仅用于生成任务**
     """
 
     syspath: list[str] = sys.path
@@ -65,7 +65,6 @@ class Recipe(object):
         self.verbose = False
 
         self.__circuit: list[list] = []  # qlisp线路
-        self.__setting: list[tuple] = []  # 临时设置
 
         self.__rules: list[str] = []  # 变量依赖关系列表
         self.__loops: dict[str, list] = {}  # 变量列表
@@ -98,15 +97,6 @@ class Recipe(object):
                 self.__circuit['file'] = inspect.getabsfile(cirq)
         else:
             raise TypeError(f'invalid circuit: list[list] or function needed!')
-
-    @property
-    def setting(self):
-        return self.__setting
-
-    @setting.setter
-    def setting(self, cmds: list[tuple]):
-        for cmd, val in cmds:
-            self[cmd] = val
 
     def __getitem__(self, key: str):
         try:
