@@ -448,15 +448,15 @@ class QuarkProxy(object):
 
         self.tqueue = Queue(-1)
         self.ready = False
+        setlog()
 
         try:
             s.login()
             self.server = s.ss()
-            setlog()
         except Exception as e:
             logger.error('Failed to connect QuarkServer')
 
-        if 1:
+        if file:
             # if not file.endswith('.json'):
             #     raise ValueError('file should be a json file')
             # if not Path(file).exists():
@@ -467,12 +467,16 @@ class QuarkProxy(object):
             (Path(HOME) / 'run').mkdir(parents=True, exist_ok=True)
 
             try:
-                import run
-
                 from .dag import Scheduler
-                Scheduler(run.dag())
+                Scheduler(self.proxy().dag())
             except Exception as e:
                 logger.error('Failed to start Scheduler')
+
+    @classmethod
+    def proxy(cls):
+        import run.proxy as rp
+        from importlib import reload
+        return reload(rp)
 
     def get_circuit(self, timeout: float = 1.0):
         if not self.ready:
@@ -501,14 +505,14 @@ class QuarkProxy(object):
 
         logger.warning(f'\n\n\n{"#" * 80} task starts to run ...\n')
 
-        try:
-            before = []  # insert circuit
-            after = []  # append circuit
-        except Exception as e:
-            before = []
-            after = []
-            logger.error(f'Failed to extend circuit: {e}!')
-        circuit = [before + c + after for c in task['body']['cirq']]
+        # try:
+        #     before = []  # insert circuit
+        #     after = []  # append circuit
+        # except Exception as e:
+        #     before = []
+        #     after = []
+        #     logger.error(f'Failed to extend circuit: {e}!')
+        circuit = [self.proxy().circuit(c) for c in task['body']['cirq']]
         task['body']['cirq'] = circuit
 
         qlisp = ',\n'.join([str(op) for op in circuit[0]])
@@ -583,8 +587,7 @@ class QuarkProxy(object):
 
             try:
                 if coqis['correct']:
-                    from home.ylfeng.cloud import correct_readout
-                    cdres = correct_readout(dres, meta['other']['measure'])
+                    cls.proxy().process(dres, meta['other']['measure'])
                 else:
                     cdres = {}
             except Exception as e:
