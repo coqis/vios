@@ -512,7 +512,8 @@ class QuarkProxy(object):
         #     before = []
         #     after = []
         #     logger.error(f'Failed to extend circuit: {e}!')
-        circuit = [self.proxy().circuit(c) for c in task['body']['cirq']]
+        mcq = task['meta']['other']['measure']  # cbits and qubits from Measure
+        circuit = [self.proxy().circuit(c, mcq) for c in task['body']['cirq']]
         task['body']['cirq'] = circuit
 
         qlisp = ',\n'.join([str(op) for op in circuit[0]])

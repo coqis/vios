@@ -34,6 +34,7 @@ from pathlib import Path
 import numpy as np
 from loguru import logger
 from qlispc.arch.baqis import QuarkLocalConfig
+from waveforms import Waveform, WaveVStack, square, wave_eval
 
 try:
     from lib import stdlib
@@ -52,10 +53,6 @@ try:
 except Exception as e:
     logger.critical('qlispc error', e)
     raise e
-
-
-# waveforms.math: waveforms or waveform-math
-from waveforms import Waveform, WaveVStack, square, wave_eval
 
 
 def get_gate_lib(lib: str):
@@ -119,13 +116,21 @@ class Context(QuarkLocalConfig):
         except Exception as e:
             return self.snapshot().dct
 
+    def query(self, q, default=None):
+        qr = super().query(q)
+        if default is None:
+            return qr
+        if isinstance(qr, tuple) or (isinstance(qr, str) and qr.startswith('Failed')):
+            return default
+        return qr
+
     def iscmd(self, target: str):
         """check if target is a command
         """
         return not any(s in target for s in self.opaques)
 
-    def adjust(self, keys: list[str | tuple] = ['drive', 'flux', 'probe']):
-        """adjust commands for keys"""
+    def adjust(self, keys: list[str | tuple] = ['drive', 'flux']):
+        """adjust commands with given keys"""
 
         if all(isinstance(cmd, tuple) for cmd in keys):
             return keys
@@ -266,9 +271,9 @@ class Workflow(object):
             }
 
             >>> print(datamap)
-            {'dataMap': {'cbits': {0: ('READ.ADx86_159.CH5', 
-                                    0, 
-                                    6932860000.0, 
+            {'dataMap': {'cbits': {0: ('READ.ADx86_159.CH5',
+                                    0,
+                                    6932860000.0,
                                     {'duration': 4e-06,
                                         'amp': 0.083,
                                         'frequency': 6932860000.0,
@@ -303,22 +308,26 @@ class Workflow(object):
         ctx._getGateConfig.cache_clear()
         ctx.snapshot().cache = kwds.pop('cache', {})
 
-        # precompile = kwds.pop('precompile', [])
-        # if isinstance(precompile, list):
-        #     compiled['main'].extend([('WRITE', *cmd)
-        #                             for cmd in ctx.adjust(precompile)])
+        precompile = kwds.pop('precompile', [])  # for changing targets
+        if isinstance(precompile, list):
+            compiled['main'].extend([('WRITE', *cmd)
+                                    for cmd in ctx.adjust(precompile)])
 
+        station = ctx.query('station', {})
         ctx.code, (cmds, dmap) = qcompile(circuit,
                                           lib=get_gate_lib(
-                                              kwds.get('lib', '')),
+                                              station.get('lib', kwds.get('lib', ''))),
                                           cfg=kwds.get('ctx', ctx),
                                           signal=signal,
                                           shots=kwds.get('shots', 1024),
                                           context=kwds.get('context', {}),
-                                          arch=kwds.get('arch', 'baqis'),
-                                          align_right=kwds.get(
-                                              'align_right', False),
-                                          waveform_length=kwds.get('waveform_length', 98e-6))
+                                          arch=station.get(
+                                              'arch', kwds.get('arch', 'baqis')),
+                                          align_right=station.get(
+                                              'align_right', kwds.get('align_right', False)),
+                                          waveform_length=station.get(
+                                              'waveform_length', kwds.get('waveform_length', 98e-6))
+                                          )
 
         for cmd in cmds:
             ctype = type(cmd).__name__  # WRITE, READ
