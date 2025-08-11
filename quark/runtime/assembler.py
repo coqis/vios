@@ -108,6 +108,14 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
     except AttributeError as e:
         query = ctx.query
 
+    if sid < 0:
+        try:
+            step = set.intersection(
+                *(set(instruction), ['init', 'main', 'post'])).pop()
+            instruction[step].extend([('WRITE', *cmd) for cmd in ctx.adjust()])
+        except KeyError:
+            pass
+
     for step, operations in instruction.items():
         if not isinstance(operations, list):
             break
@@ -209,7 +217,7 @@ MAPPING = {
 
 
 # command filters
-SUFFIX = ('Waveform', 'Shot')  # , 'Coefficient', 'TriggerDelay')
+SUFFIX = ('Waveform', )  # 'Shot', 'Coefficient', 'TriggerDelay')
 
 
 def decode(target: str, context: dict, mapping: dict = MAPPING) -> str:
@@ -270,7 +278,7 @@ def preprocess(sid: int, instruction: dict[str, dict[str, list[str, Any, str, di
                 - srate (float): sampling rate
                 - context (dict): calibration parameters of target
     """
-    if sid == 0:
+    if sid == -2:
         ctx.bypass.clear()
     bypass = ctx.bypass
 
@@ -283,9 +291,10 @@ def preprocess(sid: int, instruction: dict[str, dict[str, list[str, Any, str, di
             try:
                 kwds = cmd[-1]
                 # 重复指令缓存比较, 如果与上一步相同, 则跳过执行
-                if target in bypass and target.endswith(SUFFIX) and Pulse.compare(bypass[target][0], cmd[1]):
-                    continue
-                bypass[target] = (cmd[1], kwds['target'])
+                if target.endswith(SUFFIX):
+                    if target in bypass and Pulse.compare(bypass[target][0], cmd[1]):
+                        continue
+                    bypass[target] = (cmd[1], kwds['target'])
 
                 # context设置, 用于calculator.calculate
                 context = kwds.pop('context', {})  # 即cfg表中的Qubit、Coupler等

@@ -124,6 +124,23 @@ class Context(QuarkLocalConfig):
         """
         return not any(s in target for s in self.opaques)
 
+    def adjust(self, keys: list[str | tuple] = ['drive', 'flux', 'probe']):
+        """adjust commands for keys"""
+
+        if all(isinstance(cmd, tuple) for cmd in keys):
+            return keys
+
+        cmds = []
+
+        if not keys:
+            return cmds
+
+        for node, value in self.export().items():
+            for key in set.intersection(*(set(value), keys)):
+                cmds.append((f'{node}.{key}', 'zero()', 'au'))
+
+        return cmds
+
     def getGate3(self, name, *qubits):
         # ------------------------- added -------------------------
         if name in self.__skip:
@@ -286,8 +303,10 @@ class Workflow(object):
         ctx._getGateConfig.cache_clear()
         ctx.snapshot().cache = kwds.pop('cache', {})
 
-        compiled['main'].extend([('WRITE', *cmd)
-                                 for cmd in kwds.get('precompile', [])])
+        # precompile = kwds.pop('precompile', [])
+        # if isinstance(precompile, list):
+        #     compiled['main'].extend([('WRITE', *cmd)
+        #                             for cmd in ctx.adjust(precompile)])
 
         ctx.code, (cmds, dmap) = qcompile(circuit,
                                           lib=get_gate_lib(
