@@ -133,6 +133,7 @@ class Context(QuarkLocalConfig):
         """adjust commands with given keys"""
 
         if all(isinstance(cmd, tuple) for cmd in keys):
+            # from before_the_task, after_the_task, before_compiling
             return keys
 
         cmds = []
