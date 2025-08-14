@@ -309,12 +309,14 @@ class Workflow(object):
         ctx._getGateConfig.cache_clear()
         ctx.snapshot().cache = kwds.pop('cache', {})
 
-        precompile = kwds.pop('precompile', [])  # for changing targets
+        station = ctx.query('station', {})
+
+        precompile = station.get('auto_clear', {}).get(
+            'main', kwds.pop('precompile', []))  # for changing targets
         if isinstance(precompile, list):
             compiled['main'].extend([('WRITE', *cmd)
                                     for cmd in ctx.adjust(precompile)])
 
-        station = ctx.query('station', {})
         ctx.code, (cmds, dmap) = qcompile(circuit,
                                           lib=get_gate_lib(
                                               station.get('lib', kwds.get('lib', ''))),

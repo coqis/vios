@@ -111,7 +111,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
     if sid < 0 and (atuo_clear := ctx.query('station.auto_clear', {})):
         try:
             step = set.intersection(
-                *(set(instruction), ['init', 'main', 'post'])).pop()
+                *(set(instruction), ['init', 'post'])).pop()
             instruction[step].extend([('WRITE', *cmd)
                                      for cmd in ctx.adjust(atuo_clear.get(step, []))])
         except KeyError:
