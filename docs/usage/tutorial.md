@@ -65,7 +65,7 @@ s.start() # 打开设备 (3)
                     d = device.Driver(info['addr'])
                     d.open()
                 elif info['type'] == 'remote':
-                    d = connect(‘alias’, host, port)
+                    d = connect(‘alias’, info['host'], info['port'])
             ```
         - 设备打开之前，任务不可执行！
         - 若设备打开异常，参考**[设备调试](#_8)**进行排查！

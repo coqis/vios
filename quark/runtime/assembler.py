@@ -28,7 +28,7 @@ from loguru import logger
 from quark.interface import create_context, Pulse, Workflow
 from quark.proxy import dumpv
 
-ctx = create_context('baqis', {})
+ctx = None  # create_context('baqis', {})
 
 
 def initialize(snapshot, **kwds):
@@ -45,12 +45,12 @@ def initialize(snapshot, **kwds):
 
     """
     global ctx
-    ctx = create_context(kwds.get('arch', 'baqis'), {})
-    # logger.warning('context for compiler initialized ...')
 
     if isinstance(snapshot, int):
         return os.getpid()
-    ctx.reset(snapshot)
+
+    ctx = create_context(kwds.get('arch', 'baqis'), snapshot)
+    # ctx.reset(snapshot)
     # ctx.initial = kwds.get('initial', {'restore': []})
     ctx.bypass = kwds.get('bypass', {})
     ctx._keys = kwds.get('keys', [])

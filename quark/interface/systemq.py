@@ -180,6 +180,15 @@ class Context(QuarkLocalConfig):
 
 
 def create_context(arch: str, data):
+
+    if isinstance(data, dict):
+        station = data.get('station', {})
+    else:
+        station = data.query('station')
+        if not isinstance(station, dict):
+            station = {}
+    arch = station.get('arch', arch)
+
     base = get_arch(arch).snapshot_factory
     Context.__bases__ = (base,)
     ctx = Context(data)
