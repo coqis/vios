@@ -317,10 +317,14 @@ def diff(new: int | dict, old: int | dict, fmt: str = 'dict'):
 
 
 def lookup(start: str = '', end: str = '', name: str = '', fmt: str = '%Y-%m-%d-%H-%M-%S', records: list = []):
+    import itables
     import pandas as pd
 
     from ._db import get_record_list_by_name
     from ._viewer import PagedTable
+
+    itables.init_notebook_mode()
+    itables.options.style = "width:100%"  # 让表格宽度为100%
 
     if not records:
         days = time.localtime(time.time() - 14 * 24 * 60 * 60)
@@ -330,11 +334,16 @@ def lookup(start: str = '', end: str = '', name: str = '', fmt: str = '%Y-%m-%d-
     else:
         rs = records
 
-    df = pd.DataFrame(rs)[[0, 1, 2, 6]]
-    df.columns = ['rid', 'tid', 'name', 'status']
+    try:
+        df = pd.DataFrame(rs)[[0, 1, 2, 6]]
+        df.columns = ['rid', 'tid', 'name', 'status']
+    except Exception as e:
+        # logger.error(f'Failed to get records: {e}')
+        return pd.DataFrame()
 
-    paged_table = PagedTable(df, page_size=10)
-    paged_table.show()
+    # paged_table = PagedTable(df, page_size=10)
+    # paged_table.show()
+    return df
 
     # -------------------------------------------------------------------------
     # items_per_page = 10

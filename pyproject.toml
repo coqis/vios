@@ -24,6 +24,8 @@ dependencies = [
     "jsonschema",
     "gitpython",
     "dill",
+    "itables",
+    "pandas",
     "inset",
     "apscheduler",
     "networkx",
