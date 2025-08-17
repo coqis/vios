@@ -127,7 +127,8 @@ class Context(QuarkLocalConfig):
     def iscmd(self, target: str):
         """check if target is a command
         """
-        return not any(s == target for s in self.opaques)
+        parts = target.split('.')
+        return not any(s in parts for s in self.opaques)
 
     def adjust(self, keys: list[str | tuple] = ['drive', 'flux']):
         """adjust commands with given keys"""
