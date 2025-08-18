@@ -59,7 +59,7 @@ def initialize(snapshot, **kwds):
         return ctx
 
 
-def ccompile(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], circuit: list, **kwds) -> tuple:
+def schedule(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], circuit: list, **kwds) -> tuple:
     """compile circuits to commands(saved in **instruction**)
 
     Args:
@@ -94,7 +94,7 @@ def ccompile(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
 
 
 def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], **kw):
-    """assemble compiled instruction(see ccompile) to corresponding devices
+    """assemble compiled instruction(see schedule) to corresponding devices
 
     Args:
         sid (int): step index
@@ -114,7 +114,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
             step = set.intersection(
                 *(set(instruction), ['init', 'post'])).pop()
             instruction[step].extend([('WRITE', *cmd)
-                                     for cmd in ctx.adjust(atuo_clear.get(step, []))])
+                                     for cmd in ctx.autofill(atuo_clear.get(step, []))])
         except KeyError:
             pass
 

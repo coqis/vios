@@ -130,8 +130,8 @@ class Context(QuarkLocalConfig):
         parts = target.split('.')
         return not any(s in parts for s in self.opaques)
 
-    def adjust(self, keys: list[str | tuple] = ['drive', 'flux']):
-        """adjust commands with given keys"""
+    def autofill(self, keys: list[str | tuple] = ['drive', 'flux']):
+        """autofill commands with given keys"""
 
         if all(isinstance(cmd, tuple) for cmd in keys):
             # from before_the_task, after_the_task, before_compiling
@@ -325,7 +325,7 @@ class Workflow(object):
             'main', kwds.pop('precompile', []))  # for changing targets
         if isinstance(precompile, list):
             compiled['main'].extend([('WRITE', *cmd)
-                                    for cmd in ctx.adjust(precompile)])
+                                    for cmd in ctx.autofill(precompile)])
 
         ctx.code, (cmds, dmap) = qcompile(circuit,
                                           lib=get_gate_lib(

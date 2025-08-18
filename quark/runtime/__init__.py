@@ -27,7 +27,7 @@ Abstract: about envelope
     ``` {.py3 linenums="1" title=" stages of the pipeline"}
     --->@assembler      @calculator       @device          @processor       @router
             ↓           ↑    ↓            ↑  ↓             ↑     ↓          ↑   ↓ 
-            &ccompile   ↑    &calculate -->  &read|write -->     &process -->   &postprocess --->
+            &schedule   ↑    &calculate -->  &read|write -->     &process -->   &postprocess --->
             ↓           ↑
             &assemble -->
     ```
@@ -38,11 +38,11 @@ import dill
 
 from quark.proxy import dumpv, loadv
 
-from .assembler import MAPPING, assemble, ccompile, decode, initialize
+from .assembler import MAPPING, assemble, decode, initialize, schedule
 from .calculator import calculate
 from .device import read, write
 from .processor import process
-from .router import postprocess, schedule, transfer
+from .router import postprocess, transfer
 
 loads = dill.loads
 dumps = dill.dumps

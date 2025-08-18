@@ -47,10 +47,10 @@ def savefig(result):
     plt.savefig('test.png')
 
 
-def schedule():
+def cronjob():
     """Execute pre-set scheduled jobs
 
-    Example: the scheduling rules are specified by `etc.server.schedule` using
+    Example: the scheduling rules are specified by `etc.server.cronjob` using
         |key|type|note|
         |---|---|---|
         |year|int, str|4-digit number|
