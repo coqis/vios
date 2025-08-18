@@ -21,11 +21,12 @@
 
 
 import os
+from copy import deepcopy
 from typing import Any
 
 from loguru import logger
 
-from quark.interface import create_context, Pulse, Workflow
+from quark.interface import Pulse, Workflow, create_context
 from quark.proxy import dumpv
 
 ctx = None  # create_context('baqis', {})
@@ -144,7 +145,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                     # logical channel to hardware channel
                     if target.endswith(('drive', 'probe', 'flux', 'acquire')):
                         value = ctx.snapshot().cache.pop(target, value)
-                        context = query(target)
+                        context = deepcopy(query(target))
                         _target = context.pop('address', f'address: {target}')
                         kwds['context'] = context
                     else:
