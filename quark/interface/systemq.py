@@ -194,9 +194,9 @@ def create_context(arch: str, data):
     Context.__bases__ = (base,)
     ctx = Context(data)
     ctx.arch = arch
-    print(f'using {arch}: ', sys.modules[base.__module__])
-    if hasattr(ctx, 'test'):
-        print(ctx.test())
+    print(f'using {arch} from ', sys.modules[base.__module__].__file__)
+    # if hasattr(ctx, 'test'):
+    #     print(ctx.test())
     return ctx
 
 
@@ -243,7 +243,7 @@ class Workflow(object):
             with open(Path.home() / 'quark.json', 'r') as f:
                 for path in json.loads(f.read()).get('path', []):
                     if path not in sys.path:
-                        logger.warning(f'add {path} to sys.path!')
+                        # logger.warning(f'add {path} to sys.path!')
                         sys.path.append(path)
         except Exception as e:
             pass

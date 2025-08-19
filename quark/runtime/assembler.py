@@ -144,7 +144,10 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                 try:
                     # logical channel to hardware channel
                     if target.endswith(('drive', 'probe', 'flux', 'acquire')):
-                        value = ctx.snapshot().cache.pop(target, value)
+                        try:
+                            value = ctx.snapshot().cache.pop(target, value)
+                        except Exception as e:
+                            pass
                         context = deepcopy(query(target))
                         _target = context.pop('address', f'address: {target}')
                         kwds['context'] = context

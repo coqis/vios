@@ -498,7 +498,7 @@ def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, tid: 
     return ctx, schedule(0, {}, circuit, signal='iq', prep=True, **kwds)
 
 
-def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = False,
+def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = True,
             start: float = 0, end: float = 100e-6, srate: float = 0,
             unit: float = 1e-6, offset: float = 0, space: float = 0, ax=None):
     from copy import deepcopy
