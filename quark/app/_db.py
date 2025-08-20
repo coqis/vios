@@ -93,7 +93,7 @@ def get_commit_by_tid(tid: int = 0):
         #     home = Path.home() / 'Desktop/home'
 
         file = (HOME / f'cfg/{ckpt}').with_suffix('.json')
-        print(file)
+        # print(file)
 
         repo = git.Repo(file.resolve().parent)
         if not tid:

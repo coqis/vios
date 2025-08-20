@@ -178,9 +178,10 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                     logger.critical(f'wrong address: {_target}')
                     continue
                 dev = _target.split('.', 1)[0]
-                kwds['srate'] = query(f'dev.{dev}.srate')
-                if not isinstance(kwds['srate'], (float, int)):  # None, str
-                    logger.critical(f'Failed to get srate: {dev}({target})!')
+                kwds.setdefault('context', {})[
+                    'srate'] = query(f'dev.{dev}.srate')
+                # if not isinstance(kwds['srate'], (float, int)):  # None, str
+                #     logger.critical(f'Failed to get srate: {dev}({target})!')
             cmd = [ctype, value, unit, kwds]
 
             # Merge commands with the same channel
@@ -307,14 +308,16 @@ def preprocess(sid: int, instruction: dict[str, dict[str, list[str, Any, str, di
                 try:
                     channel = kwds['target'].split('.')[-1]
                     # length = context['waveform']['LEN']
-                    kwds['calibration'] = {'end': context['waveform']['LEN'],
-                                           'offset': context.get('setting', {}).get('OFFSET', 0)
-                                           } | context['calibration'][channel]
+                    kwds['calibration'] = {
+                        'srate': context['srate'],
+                        'end': context['waveform']['LEN'],
+                        'offset': context.get('setting', {}).get('OFFSET', 0)
+                    } | context['calibration'][channel]
                     # kwds['setting'] = context['setting']
                 except Exception as e:
                     if target.lower().endswith('waveform'):
-                        context['end'] = ctx.query(
-                            'station.waveform_length', 98e-6)
+                        context['end'] = ctx.query('station', {}).get(
+                            'waveform_length', 98e-6)
                     kwds['calibration'] = context
 
                 # if isinstance(cmd[1], Waveform):

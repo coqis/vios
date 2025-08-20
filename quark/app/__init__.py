@@ -499,7 +499,7 @@ def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, tid: 
 
 
 def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = True,
-            start: float = 0, end: float = 100e-6, srate: float = 0,
+            start: float = 0, end: float = 0, srate: float = 0,
             unit: float = 1e-6, offset: float = 0, space: float = 0, ax=None):
     from copy import deepcopy
 
@@ -515,17 +515,28 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = True,
         if isinstance(value[1], Waveform):
             _target = value[-1]['target']  # .split('.')[0]
             if _target.startswith(tuple(keys)):
-                if srate:
-                    value[-1]['srate'] = srate
-                else:
-                    srate = value[-1]['srate']
-                value[-1]['calibration']['start'] = start
-                value[-1]['calibration']['end'] = end
                 value[-1]['filter'] = []
+
+                calibration = value[-1].get('calibration', {})
+
+                if srate:
+                    calibration['srate'] = srate
+                else:
+                    srate = calibration['srate']
+
+                if start:
+                    calibration['start'] = start
+                else:
+                    start = calibration.get('start', 0)
+
+                if end:
+                    calibration['end'] = end
+                else:
+                    end = calibration.get('end', 100e-6)
+
                 if not calibrate:
-                    # for ch, val in value[-1].get('calibration', {}).items():
                     try:
-                        value[-1].get('calibration', {})['delay'] = 0
+                        calibration['delay'] = 0
                     except Exception as e:
                         logger.error(f'{target, e}')
 

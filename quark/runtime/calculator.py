@@ -51,16 +51,16 @@ def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
     if ctype != 'WRITE':
         return (step, target, cmd), line
 
-    sampled = target.startswith(tuple(kwds.get('filter', ['zzzzz'])))
+    isobject = target.startswith(tuple(kwds.get('filter', ['Waveform'])))
 
-    cmd[1], delay, offset = Workflow.calculate(
-        value, **(kwds | {'sampled': sampled}))
+    cmd[1], delay, offset, srate = Workflow.calculate(
+        value, **(kwds | {'isobject': isobject}))
 
-    cmd[-1] = {'sid': kwds['sid'], 'target': kwds['target'], 'srate': kwds['srate'],
+    cmd[-1] = {'sid': kwds['sid'], 'target': kwds['target'],
                'review': kwds['review'], 'shared': kwds['shared']}
 
     try:
-        line = sample(target, cmd, canvas, delay, offset)
+        line = sample(target, cmd, canvas, delay, offset, srate)
     except Exception as e:
         logger.error(
             f"{'>' * 30}'  failed to calculate waveform', {e}, {type(e).__name__}")
@@ -68,7 +68,8 @@ def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
     return (step, target, cmd), line
 
 
-def sample(target: str, cmd: dict, canvas: dict = {}, delay: float = 0.0, offset: float = 0.0) -> dict:
+def sample(target: str, cmd: dict, canvas: dict = {},
+           delay: float = 0.0, offset: float = 0.0, srate: float = 1e9) -> dict:
     """sample waveforms needed to be shown in the `QuarkCanvas`
 
     Args:
@@ -77,6 +78,7 @@ def sample(target: str, cmd: dict, canvas: dict = {}, delay: float = 0.0, offset
         canvas (dict, optional): from **etc.canvas**. Defaults to {}.
         delay (float, optional): time delay for the channel. Defaults to 0.0.
         offset (float, optional): offset added to the channel. Defaults to 0.0.
+        srate (float, optional): sample rate of the channel. Defaults to 1e9.
 
     Returns:
         dict: _description_
@@ -93,8 +95,6 @@ def sample(target: str, cmd: dict, canvas: dict = {}, delay: float = 0.0, offset
         return {}
 
     if target.endswith(('Waveform', 'Offset')):
-
-        srate = cmd[-1]['srate']
         t1, t2 = canvas['range']
         xr = slice(int(t1 * srate), int(t2 * srate))
 

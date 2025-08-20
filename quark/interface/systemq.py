@@ -71,7 +71,7 @@ def split_circuit(circuit: list):
     Returns:
         tuple: commands, circuit
     """
-    cmds = {'main': [], 'read': []}
+    cmds = {'main': [], 'trig': [], 'read': []}
     circ = []
     for op, target in circuit:
         if isinstance(op, tuple):
@@ -364,25 +364,24 @@ class Workflow(object):
         else:
             func = value
 
+        cali = {} if kwds['sid'] < 0 else kwds['calibration']  # [ch]
+        srate = cali['srate']  # must have key 'srate'
         delay = 0
         offset = 0  # kwds.get('setting', {}).get('OFFSET', 0)
 
         # sm, _value = loadv(func) # _value[:] = _value*10
 
         if isinstance(func, Waveform):
-            support_waveform_object = kwds.pop('sampled', False)
-
             try:
                 # ch = kwds['target'].split('.')[-1]
-                cali = {} if kwds['sid'] < 0 else kwds['calibration']  # [ch]
                 delay = cali.get('delay', 0)
                 offset = cali.get('offset', 0)
                 pulse = sample_waveform(func,
                                         cali,
-                                        sample_rate=kwds['srate'],
+                                        sample_rate=srate,
                                         start=cali.get('start', 0),
                                         stop=cali.get('end', 98e-6),
-                                        support_waveform_object=support_waveform_object)
+                                        support_waveform_object=kwds.pop('isobject', False))
             except Exception as e:
                 # KeyError: 'calibration'
                 logger.error(f"Failed to sample: {e}(@{kwds['target']})")
@@ -390,7 +389,7 @@ class Workflow(object):
         else:
             pulse = func
 
-        return pulse, delay, offset
+        return pulse, delay, offset, srate
 
     @classmethod
     def analyze(cls, data: dict, datamap: dict):
