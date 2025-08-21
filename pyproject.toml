@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vios"
-version = "3.6.0"
+version = "3.6.1"
 authors = [
   { name="YL Feng", email="fengyl@baqis.ac.cn" },
 ]
-description = "QuarkStudio-Based Experimental Runtime"
+description = "QuarkStudio Runtime"
 readme = "README.md"
 license = "MIT"
 license-files = [

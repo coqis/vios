@@ -60,7 +60,8 @@ def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
                'review': kwds['review'], 'shared': kwds['shared']}
 
     try:
-        line = sample(target, cmd, canvas, delay, offset, srate)
+        opts = cmd[-1] | canvas | {'type': target.split('.')[-1]}
+        line = sample(cmd[1], delay, offset, srate, **opts)
     except Exception as e:
         logger.error(
             f"{'>' * 30}'  failed to calculate waveform', {e}, {type(e).__name__}")
@@ -68,14 +69,11 @@ def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
     return (step, target, cmd), line
 
 
-def sample(target: str, cmd: dict, canvas: dict = {},
-           delay: float = 0.0, offset: float = 0.0, srate: float = 1e9) -> dict:
+def sample(pulse, delay: float = 0.0, offset: float = 0.0, srate: float = 1e9, **kwds) -> dict:
     """sample waveforms needed to be shown in the `QuarkCanvas`
 
     Args:
-        target (str): hardware channel
-        cmd (dict): see calculator
-        canvas (dict, optional): from **etc.canvas**. Defaults to {}.
+        pulse (Pulse): waveform to be sampled
         delay (float, optional): time delay for the channel. Defaults to 0.0.
         offset (float, optional): offset added to the channel. Defaults to 0.0.
         srate (float, optional): sample rate of the channel. Defaults to 1e9.
@@ -85,33 +83,34 @@ def sample(target: str, cmd: dict, canvas: dict = {},
     """
     # if not canvas.get('filter', []):
     #     return {}
-    if cmd[-1]['sid'] not in canvas.get('step', np.arange(1000000)):
+    if kwds['sid'] not in kwds.get('step', np.arange(1000000)):
         return {}
 
-    if not canvas.get('reset', False) and cmd[-1]['sid'] < 0:
+    if not kwds.get('reset', False) and kwds['sid'] < 0:
         return {}
 
-    if cmd[-1]['target'].split('.')[0] not in canvas.get('filter', []):
+    if kwds['target'].split('.')[0] not in kwds.get('filter', []):
         return {}
 
-    if target.endswith(('Waveform', 'Offset')):
-        t1, t2 = canvas['range']
+    ptype = kwds.get('type', 'Waveform')
+    if ptype.endswith(('Waveform', 'Offset')):
+        t1, t2 = kwds.get('range', [0, 100e-6])
         xr = slice(int(t1 * srate), int(t2 * srate))
 
-        if target.endswith('Waveform'):
-            val = Pulse.sample(cmd[1])  # + offset
+        if ptype == 'Waveform':
+            val = Pulse.sample(pulse)  # + offset
         else:
-            val = np.zeros(xr.stop - xr.start) + cmd[1]
+            val = np.zeros(xr.stop - xr.start) + pulse
 
         xt = (np.arange(len(val)) / srate)[xr] - delay
         yt = val[xr]
 
-        line = {'xdata': xt, 'ydata': yt, 'suptitle': str(cmd[-1]["sid"])}
-        color = canvas.get('color', None)
+        line = {'xdata': xt, 'ydata': yt, 'suptitle': str(kwds["sid"])}
+        color = kwds.get('color', None)
         if color and isinstance(color, (list, tuple)):
             line['color'] = tuple(color)
 
-        return {cmd[-1]['target']: line}
+        return {kwds['target']: line}
     return {}
 
 

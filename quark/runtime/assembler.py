@@ -106,6 +106,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
 
     try:
         query = kw.get('ctx', ctx).query
+        ctx.bypass = {}  # clear bypass cache
     except AttributeError as e:
         query = ctx.query
 

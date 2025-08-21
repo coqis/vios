@@ -364,7 +364,7 @@ class Workflow(object):
         else:
             func = value
 
-        cali = {} if kwds['sid'] < 0 else kwds['calibration']  # [ch]
+        cali = kwds['calibration']  # {} if kwds['sid'] < 0 else
         srate = cali['srate']  # must have key 'srate'
         delay = 0
         offset = 0  # kwds.get('setting', {}).get('OFFSET', 0)
