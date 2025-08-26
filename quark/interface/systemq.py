@@ -319,27 +319,25 @@ class Workflow(object):
         ctx._getGateConfig.cache_clear()
         ctx.snapshot().cache = kwds.pop('cache', {})
 
-        station = ctx.query('station', {})
-
-        precompile = station.get('auto_clear', {}).get(
-            'main', kwds.pop('precompile', []))  # for changing targets
+        kwds.update(ctx.query('station', {}))
+        precompile = kwds.get('auto_clear', kwds.pop(
+            'precompile', []))  # for changing targets
         if isinstance(precompile, list):
             compiled['main'].extend([('WRITE', *cmd)
                                     for cmd in ctx.autofill(precompile)])
 
         ctx.code, (cmds, dmap) = qcompile(circuit,
                                           lib=get_gate_lib(
-                                              station.get('lib', kwds.get('lib', ''))),
+                                              kwds.get('lib', '')),
                                           cfg=kwds.get('ctx', ctx),
                                           signal=signal,
                                           shots=kwds.get('shots', 1024),
                                           context=kwds.get('context', {}),
-                                          arch=station.get(
-                                              'arch', kwds.get('arch', 'baqis')),
-                                          align_right=station.get(
-                                              'align_right', kwds.get('align_right', False)),
-                                          waveform_length=station.get(
-                                              'waveform_length', kwds.get('waveform_length', 98e-6))
+                                          arch=kwds.get('arch', 'baqis'),
+                                          align_right=kwds.get(
+                                              'align_right', False),
+                                          waveform_length=kwds.get(
+                                              'waveform_length', 98e-6)
                                           )
 
         for cmd in cmds:

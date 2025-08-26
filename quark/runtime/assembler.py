@@ -110,7 +110,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
     except AttributeError as e:
         query = ctx.query
 
-    if sid < 0 and (atuo_clear := ctx.query('station.auto_clear', {})):
+    if sid < 0 and (atuo_clear := ctx.query('station', {}).get('auto_clear', {})):
         try:
             step = set.intersection(
                 *(set(instruction), ['init', 'post'])).pop()

@@ -236,8 +236,11 @@ def submit(task: dict, block: bool = False, **kwds):
     else:
         ss = s.ss()
 
-        trigger: list[str] = ss.query('station.triggercmds')
-        task['body']['loop']['trig'] = [(t, 0, 'au') for t in trigger]
+        # trigger: list[str] = ss.query('station.triggercmds')
+        station = s.query('station')
+        task['body']['loop']['trig'] = [(t, 0, 'au')
+                                        for t in station.get('triggercmds', [])]
+        task['meta']['other'].update(station)
 
         # waveforms to be previewed
         ss.update('etc.canvas.filter', kwds.get('preview', []))
