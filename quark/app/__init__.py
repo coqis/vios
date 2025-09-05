@@ -495,7 +495,7 @@ def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, tid: 
     Returns:
         tuple: context that contains cfg, translated result
     """
-    from quark.runtime import schedule, initialize
+    from quark.runtime import initialize, schedule
 
     ctx = initialize(cfg if cfg else get_config_by_tid(tid), main=True, **kwds)
     return ctx, schedule(0, {}, circuit, signal='iq', prep=True, **kwds)
