@@ -174,6 +174,21 @@ def tpgraph():
                 }
             return layout
 
+
+def totable(data: dict):
+    '''dict to table
+    '''
+    try:
+        import run
+        run = reload(run)
+        headers, table = run.dict_to_table(data)
+    except Exception as e:
+        print(e)
+        headers = ['a', 'b.c', 'c.d.e']
+        table = [[f"Name {i}", i, f"City {i % 10}"] for i in range(500)]
+
+    return headers, table
+
 # region plot
 
 

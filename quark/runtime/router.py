@@ -82,17 +82,21 @@ def transfer(tid: int, status: str, result: dict, station: str, left: int, **kwd
     # result['token'] = '1E5TIgrYjr1O1qpR[VtIwzpG`NzgXEUZNHr{5Ck6UVs/Rg2lEO{lEP{5TNxdUO5RkN1dUN7JDd5WnJtJTNzpEP1p{NzBDPy1jNx1TOzBkNjpkJ1GXbjxjJvOnMkGnM{mXdiKHRkG4djpkJzW3d2Kzf'
 
     url = kwds.get('url', 'https://quafu-sqc.baqis.ac.cn')
-    res = requests.post(f'{url}/task/transfer/',
-                        data=json.dumps({'tid': tid,
-                                         'status': status,
-                                         'result': dumps(result),
-                                         'station': station,
-                                         'left': left
-                                         }),
-                        headers={'token': kwds['token']})
+    resp = requests.post(f'{url}/task/transfer/',
+                         data=json.dumps({'tid': tid,
+                                          'status': status,
+                                          'result': dumps(result),
+                                          'station': station,
+                                          'left': left
+                                          }),
+                         headers={'token': kwds['token']})
     if kwds.get('debug', False):
         print(tid, status, result, station, left, kwds)
-    print('response', json.loads(res.content.decode()))
+
+    try:
+        print('response', json.loads(resp.content.decode()))
+    except Exception as e:
+        raise Exception(f'response: {e}, {resp.text}')
 
 
 def postprocess(result: dict):
