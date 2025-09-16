@@ -72,19 +72,22 @@ def split_circuit(circuit: list):
         tuple: commands, circuit
     """
     cmds = {'main': [], 'trig': [], 'read': []}
-    circ = []
-    for op, target in circuit:
-        if isinstance(op, tuple):
-            if op[0] == 'GET':
-                cmds['read'].append(
-                    ('READ', f'{target}.{op[1]}', '', 'au'))
-            elif op[0] == 'SET':
-                cmds['main'].append(
-                    ('WRITE', f'{target}.{op[1]}', op[2], 'au'))
+    try:
+        circ = []
+        for op, target in circuit:
+            if isinstance(op, tuple):
+                if op[0] == 'GET':
+                    cmds['read'].append(
+                        ('READ', f'{target}.{op[1]}', '', 'au'))
+                elif op[0] == 'SET':
+                    cmds['main'].append(
+                        ('WRITE', f'{target}.{op[1]}', op[2], 'au'))
+                else:
+                    circ.append((op, target))
             else:
                 circ.append((op, target))
-        else:
-            circ.append((op, target))
+    except Exception as e:
+        circ = circuit
     return cmds, circ
 
 
