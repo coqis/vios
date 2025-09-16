@@ -166,7 +166,7 @@ def login(user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088, verbos
         ss = _sp[uid] = connect('QuarkServer', host, port)
 
     m: str = ss.login(user)
-    ss.user_exists = not m.startswith('LookupError')
+    ss.user_exists = isinstance(m, str) and not m.startswith('LookupError')
     if verbose:
         logger.info(m)
     return ss
