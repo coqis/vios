@@ -1,0 +1,16 @@
+[Unit]
+Description=QuarkRemote Service
+Documentation=https://quarkstudio.readthedocs.io/en/latest/usage/quark/remote/
+After=network.target
+
+[Service]
+Type=simple
+User=think
+Group=think
+WorkingDirectory=/home/think/Desktop/home/
+ExecStart=/home/think/.local/bin/quark server
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

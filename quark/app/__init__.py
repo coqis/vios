@@ -66,6 +66,10 @@ class Super(object):
         from ._viewer import fig
         return fig
 
+    def ssh(self, username: str, password: str, host: str = '192.168.1.42'):
+        from ._remote import SSHClient
+        return SSHClient(username, password, host)
+
     @property
     def addr(self):
         try:
