@@ -32,25 +32,19 @@ class SSHClient(object):
         self.port = port
         self.pkey_path = pkey_path
 
-    def upload(self, local_path, remote_path):
-        """上传文件"""
+    def upload(self, local_path: str, remote_path: str):
         try:
             self.__sftp.put(local_path, remote_path)
             print(f"upload successfully: {local_path} -> {remote_path}")
-            return True
         except Exception as e:
             print(f"failed to upload: {e}")
-            return False
 
-    def download(self, remote_path, local_path):
-        """下载文件"""
+    def download(self, remote_path: str, local_path: str):
         try:
             self.__sftp.get(remote_path, local_path)
             print(f"download successfully: {remote_path} -> {local_path}")
-            return True
         except Exception as e:
             print(f"failed to download: {e}")
-            return False
 
     def run(self, command: str):
         if self.__client:
@@ -60,10 +54,8 @@ class SSHClient(object):
             print(output)
             if error:
                 print(error)
-            # return output, error
         else:
             print("SSH client is not connected.")
-            # return None, None
 
     def close(self):
         if self.__client:
