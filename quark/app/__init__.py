@@ -41,7 +41,6 @@ from zee import flatten_dict
 from quark.proxy import Task
 
 from . import _dp as dp
-# get_record_by_rid, get_record_by_tid, sql
 from ._db import get_tid_by_rid
 from ._recipe import Recipe
 
@@ -67,7 +66,7 @@ class Super(object):
         return fig
 
     def ssh(self, username: str, password: str, host: str = '192.168.1.42'):
-        from ._remote import SSHClient
+        from quark.remote import SSHClient
         return SSHClient(username, password, host)
 
     @property

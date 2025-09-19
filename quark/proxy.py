@@ -545,16 +545,6 @@ class QuarkProxy(object):
 
     @classmethod
     def process(cls, result: dict, dropout: bool = False):
-        def _delete_dict(ret: dict, num: int = 0):
-            while num > 0:
-                tmp = np.cumsum(list(ret.values()))
-                ran_num = np.random.randint(tmp[-1] + 1)
-                ran_pos = np.searchsorted(tmp, ran_num)
-                ret[list(ret.keys())[ran_pos]] -= 1
-                if ret[list(ret.keys())[ran_pos]] == 0:
-                    ret.pop(list(ret.keys())[ran_pos], 0)
-                num -= 1
-
         meta = result['meta']
         coqis = meta.get('coqis', {})
         status = 'Failed'
@@ -579,16 +569,8 @@ class QuarkProxy(object):
                     dres[base] = dres.get(base, 0) + int(kv[-1])
 
             try:
-                if dropout:
-                    shots = meta['other']['shots'] * \
-                        len(meta['axis']['repeat']['repeat'])
-                    _delete_dict(dres, shots - (shots // 1000) * 1000)
-            except Exception as e:
-                logger.error(f'Failed to dropout: {e}')
-
-            try:
                 if coqis['correct']:
-                    cls.proxy().process(dres, meta['other']['measure'])
+                    cdres = cls.proxy().process(dres, meta['other']['measure'])
                 else:
                     cdres = {}
             except Exception as e:

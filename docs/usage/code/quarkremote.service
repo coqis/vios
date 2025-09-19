@@ -7,8 +7,8 @@ After=network.target
 Type=simple
 User=think
 Group=think
-WorkingDirectory=/home/think/Desktop/home/
-ExecStart=/home/think/.local/bin/quark server
+WorkingDirectory=/home/think/Desktop/qlab
+ExecStart=/home/think/.local/bin/uv run quark remote remote.json
 Restart=always
 RestartSec=5
 
