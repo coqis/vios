@@ -133,7 +133,6 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                 continue
 
             kwds = {'sid': sid, 'target': target,
-                    'review': query('etc.server.review'),
                     'shared': query('etc.server.shared'),
                     'filter': query('etc.driver.filter')}
             if 'CH' in target or ctype == 'WAIT':

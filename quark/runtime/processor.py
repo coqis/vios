@@ -42,19 +42,19 @@ def process(raw_data, **kwds):
 
     Example: raw_data
         ``` {.py3 linenums="1"}
-        {'main': {'DAx86_153': {'CH1.Waveform': None}, 
-                                'DAx86_50': {'CH1.Waveform': None}, 
+        {'main': {'DAx86_153': {'CH1.Waveform': None},
+                                'DAx86_50': {'CH1.Waveform': None},
                                 'ADx86_159': {'CH10.CaptureMode': None,
-                                              'CH11.CaptureMode': None, 
-                                              'CH10.StartCapture': None, 
-                                              'CH11.StartCapture': None}}, 
-         'tigger': {'Trigger': {'CH1.TRIG': None}}, 
+                                              'CH11.CaptureMode': None,
+                                              'CH10.StartCapture': None,
+                                              'CH11.StartCapture': None}},
+         'tigger': {'Trigger': {'CH1.TRIG': None}},
          'READ': {'ADx86_159': {'CH10.IQ': (array([[16.62256833],
                                                    ...,
-                                                   [14.58617952]]), 
+                                                   [14.58617952]]),
                                             array([[4.0120324 ],
                                                    ...,
-                                                   [4.97671573]])), 
+                                                   [4.97671573]])),
                                 'CH11.IQ': (array([[14.6038444],
                                                    ...,
                                                    [15.33774413]]),
@@ -66,6 +66,7 @@ def process(raw_data, **kwds):
     """
     dataMap = kwds.pop('dataMap', {'arch': 'baqis'})
     if kwds.get('verbose', False):
+        print('*' * 48, kwds, '*' * 48, sep='\r\n')
         print('#' * 48, dataMap, '#' * 48, sep='\r\n')
         print('-' * 48, raw_data, '-' * 48, sep='\r\n')
 
@@ -107,5 +108,8 @@ def process(raw_data, **kwds):
             raw_data,
             dataMap
         ]
+
+    if kwds.get('inreview', False):
+        result.update({'raw': raw_data})
 
     return result

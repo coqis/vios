@@ -56,8 +56,9 @@ def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
     cmd[1], delay, offset, srate = Workflow.calculate(
         value, **(kwds | {'isobject': isobject}))
 
-    cmd[-1] = {'sid': kwds['sid'], 'target': kwds['target'],
-               'review': kwds['review'], 'shared': kwds['shared']}
+    cmd[-1] = {'sid': kwds['sid'],
+               'target': kwds['target'],
+               'shared': kwds['shared']}
 
     try:
         opts = cmd[-1] | canvas | {'type': target.split('.')[-1]}

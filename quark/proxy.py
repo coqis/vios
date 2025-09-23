@@ -288,6 +288,9 @@ class Task(object):
         self.stime = time.time()  # start time
         self.tid = self.server.submit(self.task)  # , keep=True)
 
+    def raw(self, sid: int):
+        return self.server.track(self.tid, sid, raw=True)
+
     def status(self, key: str = 'runtime'):
         if key == 'runtime':
             return self.server.track(self.tid)
