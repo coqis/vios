@@ -110,6 +110,6 @@ def process(raw_data, **kwds):
         ]
 
     if kwds.get('inreview', False):
-        result.update({'raw': raw_data})
+        result.update({'raw': {'data': raw_data, 'dmap': dataMap}})
 
     return result
