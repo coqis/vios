@@ -516,6 +516,7 @@ class QuarkProxy(object):
         #     after = []
         #     logger.error(f'Failed to extend circuit: {e}!')
         mcq = task['meta']['other']['measure']  # cbits and qubits from Measure
+        task['body']['post'] = [(t, v, 'au') for t, v in self.proxy.clear(mcq)]
         circuit = [self.proxy().circuit(c, mcq) for c in task['body']['cirq']]
         task['body']['cirq'] = circuit
 
@@ -524,8 +525,6 @@ class QuarkProxy(object):
         logger.info(f"\n{'>' * 36}qasm:\n{qasm}\n{'>' * 36}qlisp:\n[{qlisp}]")
 
         t: Task = submit(task)  # local machine
-        # if block:
-        #     t.bar(0.2, disable=False)  # if block is True
         eid = task['meta']['coqis']['eid']
         user = task['meta']['coqis']['user']
         logger.warning(f'task {t.tid}[{eid}, {user}] will be executed!')
