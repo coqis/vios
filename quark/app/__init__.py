@@ -55,7 +55,7 @@ class Super(object):
         except Exception as e:
             return ''
 
-    def ss(self):
+    def qs(self):
         try:
             return self._s
         except Exception as e:
@@ -72,12 +72,12 @@ class Super(object):
     @property
     def addr(self):
         try:
-            return self.ss().raddr
+            return self.qs().raddr
         except Exception as e:
             return ('127.0.0.1', str(e))
 
     def user_exists(self):
-        return self.ss().user_exists
+        return self.qs().user_exists
 
     def login(self, user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088):
 
@@ -90,19 +90,19 @@ class Super(object):
             setattr(self, name, globals()[name])
 
     def ping(self):
-        return ping(self.ss())
+        return ping(self.qs())
 
     def snapshot(self, tid: int = 0):
         if tid and self.addr[0] == '127.0.0.1':
             return get_config_by_tid(tid)
         else:
-            return self.ss().snapshot(tid=tid)
+            return self.qs().snapshot(tid=tid)
 
     def result(self, tid: int, **kwds):
         if self.addr[0] == '127.0.0.1':
             return get_data_by_tid(tid, **kwds)
         else:
-            data = self.ss().load(tid)
+            data = self.qs().load(tid)
             try:
                 from ._db import reshape
 
@@ -117,14 +117,14 @@ class Super(object):
         if self.addr[0] == '127.0.0.1':
             return lookup(start, end, name)
         else:
-            return lookup(records=self.ss().load(0))
+            return lookup(records=self.qs().load(0))
 
     def update(self, path: str, value, failed: list = []):
-        ss = self.ss()
-        rs: str = ss.update(path, value)
+        qs = self.qs()
+        rs: str = qs.update(path, value)
         if rs.startswith('Failed'):
             if path.count('.') == 0:
-                ss.create(path, value)
+                qs.create(path, value)
             else:
                 path, _f = path.rsplit('.', 1)
                 failed.append((_f, value))
@@ -133,14 +133,14 @@ class Super(object):
         while failed:
             _f, v = failed.pop()
             path = f'{path}.{_f}'
-            ss.update(path, v)
+            qs.update(path, v)
 
     def delete(self, path: str):
-        ss = self.ss()
+        qs = self.qs()
         if path.count('.') > 0:
-            ss.delete(path)
+            qs.delete(path)
         else:
-            ss.remove(path)
+            qs.remove(path)
 
 
 _sp = {}  # defaultdict(lambda: connect('QuarkServer', host, port))
@@ -148,8 +148,8 @@ _sp = {}  # defaultdict(lambda: connect('QuarkServer', host, port))
 s = Super()
 
 
-def ping(ss):
-    return ss.ping('hello') == 'hello'
+def ping(qs):
+    return qs.ping('hello') == 'hello'
 
 
 def login(user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088, verbose: bool = True):
@@ -164,15 +164,15 @@ def login(user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088, verbos
     """
     uid = f'{current_thread().name}: {user}@{host}:{port}'
     try:
-        ss = _sp[uid]
+        qs = _sp[uid]
     except KeyError as e:
-        ss = _sp[uid] = connect('QuarkServer', host, port)
+        qs = _sp[uid] = connect('QuarkServer', host, port)
 
-    m: str = ss.login(user)
-    ss.user_exists = isinstance(m, str) and not m.startswith('LookupError')
+    m: str = qs.login(user)
+    qs.user_exists = isinstance(m, str) and not m.startswith('LookupError')
     if verbose:
         logger.info(m)
-    return ss
+    return qs
 
 
 def signup(user: str, system: str, **kwds):
@@ -182,9 +182,9 @@ def signup(user: str, system: str, **kwds):
         user (str): name of the user
         system (str): name of the system(i.e. the name of the cfg file)
     """
-    ss = s.ss()
-    logger.info(ss.adduser(user, system, **kwds))
-    ss.login(user)  # relogin
+    qs = s.qs()
+    logger.info(qs.adduser(user, system, **kwds))
+    qs.login(user)  # relogin
 
 
 def submit(task: dict, block: bool = False, **kwds):
@@ -235,23 +235,23 @@ def submit(task: dict, block: bool = False, **kwds):
     """
 
     if 'backend' in kwds:  # from master
-        ss = kwds['backend']
+        qs = kwds['backend']
     else:
-        ss = s.ss()
+        qs = s.qs()
 
-        # trigger: list[str] = ss.query('station.triggercmds')
+        # trigger: list[str] = qs.query('station.triggercmds')
         station = s.query('station')
         task['body']['loop']['trig'] = [(t, 0, 'au')
                                         for t in station.get('triggercmds', [])]
         task['meta']['other'].update(station)
 
         # waveforms to be previewed
-        ss.update('etc.canvas.filter', kwds.get('preview', []))
+        qs.update('etc.canvas.filter', kwds.get('preview', []))
 
     t = Task(task,
              timeout=1e9 if block else None,
              plot=kwds.get('plot', False))
-    t.server = ss
+    t.server = qs
     t.run()
     return t
 
@@ -262,7 +262,7 @@ def rollback(rid: int = 0, tid: int = 0):
     Args:
         tid (int): task id
     """
-    ss = s.ss()
+    qs = s.qs()
 
     try:
         if rid:
@@ -271,9 +271,9 @@ def rollback(rid: int = 0, tid: int = 0):
             config = get_config_by_tid(tid)
         else:
             raise ValueError('one of rid and tid is required!')
-        ss.clear()
+        qs.clear()
         for k, v in config.items():
-            ss.create(k, v)
+            qs.create(k, v)
     except Exception as e:
         logger.error(f'Failed to rollback: {e}')
 

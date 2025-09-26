@@ -455,7 +455,7 @@ class QuarkProxy(object):
 
         try:
             s.login()
-            self.server = s.ss()
+            self.server = s.qs()
         except Exception as e:
             logger.error('Failed to connect QuarkServer')
 
