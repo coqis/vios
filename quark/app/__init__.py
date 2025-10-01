@@ -341,8 +341,8 @@ def lookup(start: str = '', end: str = '', name: str = '', fmt: str = '%Y-%m-%d-
         rs = records
 
     try:
-        df = pd.DataFrame(rs)[[0, 1, 2, 6]]
-        df.columns = ['rid', 'tid', 'name', 'status']
+        df = pd.DataFrame(rs)[[0, 1, 2, 6, 9, 10]]
+        df.columns = ['rid', 'tid', 'name', 'status', 'created', 'finished']
     except Exception as e:
         # logger.error(f'Failed to get records: {e}')
         return pd.DataFrame()
