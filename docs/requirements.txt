@@ -57,7 +57,7 @@ griffe==1.7.3
     # via mkdocstrings-python
 idna==3.10
     # via requests
-inset==1.0.0
+inset
     # via -r ./docs/requirements.in
 ipykernel==6.29.5
     # via mkdocs-jupyter
