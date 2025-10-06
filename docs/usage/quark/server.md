@@ -20,12 +20,12 @@ icon: simple/mockserviceworker
 
 - Run `quark server` in a terminal and you'll see the following information if everything is OK![alt text](image/server.png){.center}
 
-- Once the `QuarkServer` is ready, run `quark studio` in another termnal. Click `Signup` and fill the username and system name(i.e., the cfg filename `checkpoint`) in the corresponding blanks and click `sign up`.![alt text](image/signup.png){.center}
-    :material-information: equaivalent operations in Python code
+- Once the `QuarkServer` is ready, run `quark studio` in another termnal. Click `Signup` and fill the username and system name(i.e., the cfg filename `checkpoint`) in the corresponding blanks and click `Sign up`.![alt text](image/signup.png){.center}
+    <!-- :material-information: equaivalent operations in Python code
     ```python
     from quark.app import signup
     signup('baqis', 'checkpoint') # (username, cfg filename)
-    ```
+    ``` -->
 
 - Fill the username and password in the Login window。![alt text](image/login.png){.center}
 <!-- - Fill in the following content into the configuration file for kernel and place it in `systemq/etc/bootstrap.json`
