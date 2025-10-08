@@ -27,26 +27,33 @@ import subprocess
 
 
 def open_terminal(command: str | None = None, cwd: str | None = None):
-    """打开一个新的终端窗口
+    """Open a new terminal window
 
     Args:
-        command (str | None, optional): 在终端中执行的命令. Defaults to None.
-        cwd (str | None, optional): 指定启动路径. Defaults to None.
+        command (str | None, optional): Optional shell command to run inside the terminal. Defaults to None.
+        cwd (str | None, optional): Optional working directory to start the terminal in. Defaults to None.
+
+    Supports:
+        - Windows Terminal
+        - VSCode integrated environment
+        - PowerShell / CMD fallback
+        - macOS Terminal
+        - Linux terminals (GNOME, Konsole, XFCE, Xterm)
 
     Raises:
-        RuntimeError: 未找到 cmd 或 PowerShell
-        RuntimeError: 未检测到可用的终端程序
-        RuntimeError: 不支持的系统
+        RuntimeError: Neither PowerShell nor CMD found on system
+        RuntimeError: Linux: no supported terminal emulator found
+        RuntimeError: Unsupported platform
     """
     system = platform.system()
 
     # ---------- Windows ----------
     if system == "Windows":
-        # 检查是否在 VSCode 内运行
+        # Detect if running inside VSCode
         is_vscode = "VSCODE_GIT_IPC_HANDLE" in os.environ or "TERM_PROGRAM" in os.environ and "vscode" in os.environ["TERM_PROGRAM"].lower(
         )
 
-        # 优先使用 Windows Terminal
+        # Prefer Windows Terminal if available
         wt_path = shutil.which("wt")
         if wt_path:
             cmd = [wt_path]
@@ -57,17 +64,18 @@ def open_terminal(command: str | None = None, cwd: str | None = None):
             subprocess.Popen(cmd, creationflags=subprocess.CREATE_NEW_CONSOLE)
             return
 
-        # 其次，如果在 VSCode 中运行，尝试通过 code CLI 打开终端
+        # If inside VSCode, suggest using VSCode's terminal
         code_path = shutil.which("code")
         if is_vscode and code_path:
-            print("⚙️ 当前处于 VSCode 内部，建议使用 VSCode 终端执行。")
+            print(
+                "⚙️ Currently running inside VSCode; using VSCode terminal is recommended.")
             subprocess.Popen(["code", "-r", "."])
             return
 
-        # 否则，回退到 cmd 或 PowerShell
+        # Otherwise fallback to PowerShell or CMD
         shell = shutil.which("powershell.exe") or shutil.which("cmd.exe")
         if not shell:
-            raise RuntimeError("未找到 cmd 或 PowerShell")
+            raise RuntimeError("Neither PowerShell nor CMD found on system.")
 
         if "powershell" in shell:
             args = [shell, "-NoExit"]
@@ -82,6 +90,7 @@ def open_terminal(command: str | None = None, cwd: str | None = None):
     # ---------- macOS ----------
     elif system == "Darwin":
         if command:
+            command = f'cd {cwd};{command}' if cwd else command
             subprocess.Popen([
                 "osascript", "-e",
                 f'tell application "Terminal" to do script "{command}"'
@@ -103,7 +112,7 @@ def open_terminal(command: str | None = None, cwd: str | None = None):
                     subprocess.Popen([term], cwd=cwd)
                 break
         else:
-            raise RuntimeError("未检测到可用的终端程序")
+            raise RuntimeError("Linux: no supported terminal emulator found")
 
     else:
-        raise RuntimeError(f"不支持的系统: {system}")
+        raise RuntimeError(f"Unsupported platform: {system}")
