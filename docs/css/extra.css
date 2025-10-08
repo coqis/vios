@@ -60,3 +60,22 @@
 {
     width: 50%;
 } */
+
+/* 去掉表格容器的固定滚动条，只有超宽才出现 */
+.md-typeset table:not([class]) {
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+/* 表格公式字体 */
+.md-typeset table .katex,
+.md-typeset table mjx-container {
+  font-size: 1em !important;
+}
+
+/* See: https://mkdocstrings.github.io/recipes/#prevent-selection-of-prompts-and-output-in-python-code-blocks */
+.highlight .gp, .highlight .go { /* Generic.Prompt, Generic.Output */
+  user-select: none;
+}
+
+

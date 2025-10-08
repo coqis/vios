@@ -12,62 +12,94 @@ hide:
 - 安装[**git**](https://git-scm.com/)
 
     === "Windows"
-        ```bash
-        # 点击上方链接下载安装
-        # 成功后以下命令应当输出版本号
-        git -v
+        点击上方链接下载安装。成功后以下命令应当输出版本号
+        ```pwsh-session
+        PS> git -v
+        git version 2.45.0.windows.1
         ```
 
     === "macOS"
-        ```bash
-        # 在终端输入`git`，如未安装则按提示安装
-        # 成功后以下命令应当输出版本号
-        git -v
+        在终端输入`git`，如未安装则按提示安装。成功后以下命令应当输出版本号
+        ```console
+        $ git -v
+        git version 2.39.5 (Apple Git-154)
         ```
 
 - 安装[**uv**](https://docs.astral.sh/uv/)
 
-    === "Windows"
-        ```bash
-        powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+    <!-- powershell -ExecutionPolicy Bypass -File .\uv-installer.ps1 -->
 
-        # 成功后以下命令应当输出版本号
-        uv -V
+    === "Windows"
+        ```pwsh-session
+        PS> powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+        Downloading uv 0.8.24 (x86_64-pc-windows-msvc)
+        Installing to C:\Users\***\.local\bin
+        uv.exe
+        uvx.exe
+        uvw.exe
+        everything's installed!
+        ```
+
+        成功后以下命令应当输出版本号
+        ```pwsh-session
+        PS> uv -V
+        uv 0.9.0 (39b688653 2025-10-07)
         ```
 
     === "macOS"
-        ```bash
-        curl -LsSf https://astral.sh/uv/install.sh | sh
+        ```console
+        $ curl -LsSf https://astral.sh/uv/install.sh | sh
+        downloading uv 0.9.0 x86_64-apple-darwin
+        no checksums to verify
+        installing to /Users/***/.local/bin
+        uv
+        uvx
+        everything's installed!
 
-        # 成功后以下命令应当输出版本号
-        uv -V
+        To add $HOME/.local/bin to your PATH, either restart your shell or run:
+
+            source $HOME/.local/bin/env (sh, bash, zsh)
+            source $HOME/.local/bin/env.fish (fish)
+        ```
+
+        成功后以下命令应当输出版本号
+        ```console
+        $ uv -V
+        uv 0.9.0 (39b688653 2025-10-07)
         ```
 
     ???+ warning "注意"
-        安装**uv**约5到10分钟，看似卡死，多等会就好！
+        **uv**安装取决于网络环境，快则十数秒，慢则可能约5到10分钟，看似卡死，多等会就好！
 
 ### ***测量环境***
 - 安装[**Python**](https://python.org/)
+
+    进入桌面并创建基于python3.12的工作环境**qlab**(1)。**注意**：python3.12不必事先安装好！
+    { .annotate }
+        
+    1. :material-folder: qlab
+        - qlab文件夹名可任意
+        - 不同文件夹之间相互独立
+        - 因此可以在同一电脑上创建多个测量环境
+
     ```bash
-    # 进入桌面并创建基于python3.12的工作环境qlab (1)
-    # 注意：python3.12不必事先安装好
     cd ~/Desktop
     uv init --python 3.12 --vcs none qlab
+    ```
 
-    # 进入qlab目录
+    进入qlab目录
+    ```bash
     cd qlab
     ```
 
-    1. :material-folder: qlab
-        - qlab文件夹名可任意，
-        - 不同文件夹名之间相互独立
-        - 因此可以在同一电脑上创建多个测量环境
 
 - 安装**quarkstudio**
     ```bash
     uv add quarkstudio --default-index=https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+    ```
 
-    # 下载驱动等文件到指定目录，如./home
+    下载驱动等文件到指定目录，如./home
+    ```bash
     uv run quark init --home ./home -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
     ```
 
@@ -89,15 +121,15 @@ hide:
         │   └── ...
         ├── .python-version # Python版本文件
         ├── main.py # 示例文件，可删除
-        ├── pyproject.toml # 项目配置文件，不可删除！
+        ├── pyproject.toml # 配置文件，不可删除！
         ├── README.md # 说明文件，可删除
-        └── uv.lock # 版本管理文件，uv自动生成
+        └── uv.lock # 版本管理，uv自动生成
         ```
 
 
 ## **实验过程**
 ### **启动服务**
-- 打开终端，确保切换到**qlab**目录下，执行`uv run quark server`以启动[**QuarkServer**](quark/server.md)(后以**server**代称)。**首次**启动成功如下图所示，![](quarkserver.png)
+- 打开终端，确保切换到**qlab**目录下，执行`uv run quark server`以启动[**QuarkServer**](quark/server.md)(后以**server**代称)。启动成功如下图所示，![](quarkserver0.png)
 - 打开另一终端，确保切换到**qlab**目录下，执行`uv run jupyter notebook`![](notebook.png)
 - 新建一个notebook，后续所有操作均在此notebook中进行
 
@@ -135,7 +167,7 @@ hide:
         ```
 
 - #### **添加比特和设备**
-    ```python
+    ```python title="比特" linenums="1"
     # 定义比特
     Q0 = {
         "Measure": {  # 生成读取波形，送入probe通道
@@ -161,7 +193,8 @@ hide:
     }
     # 添加Q0到server
     s.update('Q0', Q0)  # 'Q0'名称任意
-
+    ```
+    ```python title="设备" linenums="1"
     # 设备列表
     dev = {
         'AD': {  # 采集卡
@@ -186,16 +219,17 @@ hide:
     # 添加设备到server
     for k, v in dev.items():
         s.update(f'dev.{k}', v)
+    ```
 
-
+    ```python title="设置" linenums="1"
     # 全局设置
     station = {
         "sample": "test_111",  # 样品名，仅记录用
         "triggercmds": ["Trigger.CH1.TRIG"],  # 触发命令
         "lib": "lib.gates.u3rcp",  # gate库路径
         "arch": "rcp",  # 体系结构，位于lib.arch
-        "align_right": False,  # 波形对齐右侧
-        "waveform_length": 98e-6,  # 波形长度
+        "align_right": True,  # 波形对齐右侧
+        "waveform_length": 18e-6,  # 波形长度
         "auto_clear": {  # 自动清空的命令
             "init": ['flux', 'drive'],  # 任务初始化时，清空flux和drive通道
             "main": ['flux', 'drive'],  # 任务主循环中，清空flux和drive通道
@@ -228,7 +262,7 @@ hide:
     B --> C[提交任务];
     ```
 
-    ```python
+    ```python title="任务" linenums="1" hl_lines="4 12 18"
     def circuit_s21(qubits: tuple[str], freq: float, ctx=None) -> list:
         """定义线路函数。ctx为编译所需上下文，主要用于对cfg表进行查询等操作。
         """
@@ -236,11 +270,11 @@ hide:
         return cc
 
     rcp = Recipe('s21', signal='iq_avg')
-    rcp.circuit = circuit_s21  # 指定扫描线路函数
+    rcp.circuit = circuit_s21  # 指定扫描线路函数(1)
 
     qubits = ['Q0']
     rcp['qubits'] = tuple(qubits)  # 必须为tuple，传与circuit_s21的qubits
-    rcp['freq'] = np.linspace(-10, 10, 101) * 1e6  # 定义扫描范围，传与circuit_s21的freq
+    rcp['freq'] = np.linspace(-10, 10, 101) * 1e6  # 定义扫描范围，传与circuit_s21的freq(2)
 
     for q in qubits:
         rcp[f'{q}.Measure.frequency'] = rcp['freq'] + \
@@ -248,14 +282,70 @@ hide:
 
     s21 = s.submit(rcp.export(),
                 block=False,  # 是否阻塞当前任务至结束
-                #    preview=['Q0'],  # 指定要查看的实时波形，需要在终端打开quark canvas
-                #    plot=True  # 是否查看实时的测量数据，需要在终端打开quark viewer
+                #    preview=['Q0'],  # 指定要查看的实时波形(3)
+                #    plot=True  # 是否查看实时的测量数据(4)
                 )
     s21.bar()
     ```
 
+    1. :man_raising_hand: 关于qlisp
+        ```python title="GHZ示例" linenums="1"
+        circuit = [
+            ('H', 'Q0'),
+            ('Cnot', ('Q0', 'Q1')),
+            ('Cnot', ('Q1', 'Q2')),
+            ('Cnot', ('Q2', 'Q3')),
+            ('Barrier', ('Q0', 'Q1', 'Q2', 'Q3')),
+            (('Measure', 0), 'Q0'),
+            (('Measure', 1), 'Q1'),
+            (('Measure', 2), 'Q2'),
+            (('Measure', 3), 'Q3'),
+        ]
+        ```
+
+
+        **常用门**
+        <div style="font-size: 0.6em; max-height: 300px; overflow-y: auto; overflow-x: auto;">
+
+        | statement | gate | matrix |
+        |:---------:|:----:|:------:|
+        |('I', 'Q0')|  $I$   | $\begin{pmatrix}1 & 0\\0 & 1\end{pmatrix}$ |
+        |('X', 'Q0')|  $\sigma_x$   | $\begin{pmatrix}0 & 1\\1 & 0\end{pmatrix}$ |
+        |('Y', 'Q0')|  $\sigma_y$   | $\begin{pmatrix}0 & -i\\i & 0\end{pmatrix}$ |
+        |('Z', 'Q0')|  $\sigma_z$   | $\begin{pmatrix}1 & 0\\0 & -1\end{pmatrix}$ |
+        |('H', 'Q0')|  $H$   | $\frac{1}{\sqrt{2}}\begin{pmatrix}1 & 1\\1 & -1\end{pmatrix}$ |
+        |('S', 'Q0')|  $S$   | $\begin{pmatrix}1 & 0\\0 & i\end{pmatrix}$ |
+        |('-S', 'Q0')|  $S^{\dagger}$   | $\begin{pmatrix}1 & 0\\0 & -i\end{pmatrix}$ |
+        |('T', 'Q0')|  $T$   | $\begin{pmatrix}1 & 0\\0 & e^{i\pi/4}\end{pmatrix}$ |
+        |('-T', 'Q0')|  $T^{\dagger}$   | $\begin{pmatrix}1 & 0\\0 & e^{-i\pi/4}\end{pmatrix}$ |
+        |(('Rx', theta), 'Q0')|  $R_x(\theta)$   | $\exp\left(-i\frac{\theta}{2}\sigma_x\right)$ |
+        |(('Ry', theta), 'Q0')|  $R_y(\theta)$   | $\exp\left(-i\frac{\theta}{2}\sigma_y\right)$ |
+        |(('Rz', phi), 'Q0')|  $R_z(\theta)$   | $\exp\left(-i\frac{\phi}{2}\sigma_z\right)$ |
+        |('X/2', 'Q0')|  $R_x(\pi/2)$   | $\exp\left(-i\frac{\pi}{4}\sigma_x\right)$ |
+        |('-X/2', 'Q0')|  $R_x(-\pi/2)$   | $\exp\left(i\frac{\pi}{4}\sigma_x\right)$ |
+        |('Y/2', 'Q0')|  $R_y(\pi/2)$   | $\exp\left(-i\frac{\pi}{4}\sigma_y\right)$ |
+        |('-Y/2', 'Q0')|  $R_y(-\pi/2)$   | $\exp\left(i\frac{\pi}{4}\sigma_y\right)$ |
+        |('iSWAP', ('Q0', 'Q1'))|  $i\mathrm{SWAP}$   | $\begin{pmatrix}1&0&0&0\\0&0&i&0\\0&i&0&0\\0&0&0&1\end{pmatrix}$ |
+        |('Cnot', ('Q0', 'Q1'))|  $Cnot$   | $\begin{pmatrix}1&0&0&0\\0&1&0&0\\0&0&0&1\\0&0&1&0\end{pmatrix}$ |
+
+        </div>
+
+    2. :man_raising_hand: 变量定义
+        - list或np.ndarray被视为变量
+        - 所以，rcp['qubits']必须转为tuple
+    3. :man_raising_hand: 切换到qlab目录，打开QuarkCanvas
+        ```bash
+        uv run quark canvas
+        ```
+        ![alt text](quarkcanvas.png) 
+    4. :man_raising_hand: 切换到qlab目录，打开QuarkViewer
+        ```bash
+        uv run quark viewer
+        ```
+        ![alt text](quarkviewer.png) 
+
 - #### 获取结果
-```python
+```python title="数据处理" linenums="1"
 rs = s21.result()
 signal = rs['meta']['other']['signal'].split('|')[0]
 
@@ -287,9 +377,9 @@ for i, q in enumerate(qubits):
             from quark.app import preview
 
             cmds = s21.step(0)
-            wfv = preview(cmds['main'], start=0, end=10e-6, srate=5e9, keys=['Q0'])
+            wfv = preview(cmds['main'], start=0, end=20e-6, srate=5e9, keys=['Q0'])
             ```
-            ![alt text](quark/image/preview.png)
+            ![alt text](preview.png)
 
 
     1.  :man_raising_hand: 查看命令cmds
