@@ -18,7 +18,7 @@ nav:
     - index: usage/index.md
     # - user guide: markdown/qos_tools.md
     # - bayes: markdown/bayes.md
-    - Tutorial: usage/tutorial.md
+    - Tutorial: usage/beginner.md
     - quarkstudio: 
       - usage/quark/index.md
       - server: usage/quark/server.md

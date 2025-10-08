@@ -1,6 +1,6 @@
 import numpy as np
 
-from quark.driver.common import BaseDriver, Quantity
+from quark.driver import BaseDriver, Quantity
 
 
 class Driver(BaseDriver):

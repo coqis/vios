@@ -58,7 +58,7 @@ The following requirements ***MUST*** be met before starting to use:
 </div>
 
 <!-- First, download [**SystemQ**](https://gitee.com/baqis/systemq.git), and it is highly recommended to use :material-git:[git](https://git-scm.com/).  -->
-Then you can install `quarkstudio` and start using from the beginner's [**tutorial**](tutorial.md).
+Then you can install `quarkstudio` and start using from the beginner's [**tutorial**](beginner.md).
 ???+ note "Installation"
     ``` bash
     # install quarkstudio
