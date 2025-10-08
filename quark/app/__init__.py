@@ -69,6 +69,10 @@ class Super(object):
         from quark.remote import SSHClient
         return SSHClient(username, password, host)
 
+    def open(self, command: str | None = None, cwd: str | None = None):
+        from ._terminal import open_terminal
+        open_terminal(command, cwd)
+
     @property
     def addr(self):
         try:
