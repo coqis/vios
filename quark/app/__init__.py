@@ -66,11 +66,11 @@ class Super(object):
         return fig
 
     def ssh(self, username: str, password: str, host: str = '192.168.1.42'):
-        from quark.remote import SSHClient
-        return SSHClient(username, password, host)
+        from quark.terminal import open_ssh
+        return open_ssh(username, password, host)
 
-    def open(self, command: str | None = None, cwd: str | None = None):
-        from ._terminal import open_terminal
+    def terminal(self, command: str | None = None, cwd: str | None = None):
+        from quark.terminal import open_terminal
         open_terminal(command, cwd)
 
     @property
