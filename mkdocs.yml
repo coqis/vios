@@ -199,6 +199,12 @@ plugins:
       enable_creation_date: true
       type: timeago
 
+  - mkdocs-video:
+      is_video: True
+      video_muted: True
+      video_controls: True
+      css_style:
+        width: "100%"
 
 
 extra:
