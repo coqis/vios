@@ -523,8 +523,8 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = True,
     wf, index = {}, 0
     for target, value in deepcopy(cmds).items():
         if isinstance(value[1], Waveform):
-            _target = value[-1]['target']  # .split('.')[0]
-            if _target.startswith(tuple(keys)):
+            _target = value[-1]['target']
+            if _target.split('.')[0] in keys:
                 value[-1]['filter'] = []
 
                 calibration = value[-1].get('calibration', {})
