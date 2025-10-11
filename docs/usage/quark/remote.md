@@ -17,36 +17,34 @@ icon: simple/redmine
 
 <!-- !!! note "适用于自身带有操作系统的设备" -->
 
-**QuarkRemote** runs on the device's built-in operating system(often windows or linux) and mainly implements functions such as device control and remote software updates. Below is a simple user manual:
+**QuarkRemote** runs on the device's built-in operating system(often windows or linux) and mainly implements functions such as device control and remote software updates. Below is a simple user manual.
 
-Clone the [`remote`](https://gitee.com/baqis/driver.git) wherever you want,
+You may place the device driver anywhere. The directory structure is shown below:
 ``` bash title="remote folder"
-driver
-├── dev
+remote
+├── driver
 │   ├── VirtualDevice.py # (1)!
 │   └── __init__.py
 ├── remote.json # (2)!
-├── requirements.txt # (3)!
-└── setup.py # (4)!
+└── requirements.txt # (3)!
 ```
+<!-- └── setup.py # (4)! -->
 
 1. :material-language-python: VirtualDevice
     [driver template](../../code/driver/)
 2. :material-code-json: remote
     ```python title="remote.json"
     {
-        "path":"~/Desktop/driver/dev", # full driver path
-        "host":"192.168.1.42", # IP address of the host computer
         "ADC": { # alias of the device
-            "name": "VirtualDevice", # filename of the driver
-            "addr": "192.168.1.44" #  # IP address of the device
-            "port": 1169 # service port
+            "name": "driver.VirtualDevice", # module path of the driver
+            "addr": "192.168.1.42" #  # IP address of the device
+            "port": 40001 # service port
         }
     }
     ```
 3. :material-text-box:requirements
     ```python title="requirements.txt"
-    waveforms-math
+    waveforms
     quarkstudio[remote]
     ```
 4. :material-language-python: setup
@@ -67,7 +65,7 @@ driver
     )
     ```
 
-Run `pip install -e.` in the `driver` folder (run `pip show driver` to check) and `quark remote remote.json` to start the remote service. 
+Then run `pip install -r requirements.txt` in the `remote` folder and `quark remote remote.json` to start the remote service. 
 
 To connect the device `ADC` on another computer within the same local area network (LAN), please refer to the following example
 ???+ Example "connect to a remote device"

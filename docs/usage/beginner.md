@@ -145,9 +145,13 @@ icon: material/badge-account-horizontal
         - s: 与server进行交互的工具，如
             - 更新参数：`s.update('Q0.Measure.frequency', 5.321e9)`
             - 查询参数：`s.query('Q0.Measure.frequency')`
+            - 删除参数：`s.delete('Q0.Measure.frequency')`
             - 写设备：`s.write('ZW_AD3.CH1.Offset', 0.2)`
             - 读设备：`s.read('ZW_AD3.CH1.Offset')`
-            - `s.submit`: 向server提交Recipe生成的任务描述
+            - 提交任务: `s.submit(rcp.export())`，提交Recipe
+            - 历史记录：`s.lookup()`
+            - 历史数据：`s.result(tid)`，根据任务id获取
+            - 历史参数表：`s.snapshot(tid)`: 根据任务id获取
 
 
 - #### **注册登录**
@@ -159,8 +163,8 @@ icon: material/badge-account-horizontal
 
     1. :material-language-python: signup
         ```python
-        # 注册用户test，并将比特参数存于myexperiment.json（位于~/Desktop/qlab/home/cfg下）
-        # siginup执行一次就好
+        # 注册用户test，siginup执行一次就好
+        # myexperiment.json存于~/Desktop/qlab/home/cfg下
         s.signup('test','myexperiment')
         ```
 
@@ -178,7 +182,7 @@ icon: material/badge-account-horizontal
         'AWG': {  # 任意波形发生器
             "host": "192.168.1.3",  # 设备内操作系统的ip
             "port": 8000,  # 设备remote服务端口
-            "type": "remote",  # 远程设备，通过remote服务连接，需在设备上运行remote服务
+            "type": "remote",  # 远程设备，通过remote服务连接(1)
             "srate": 4e9,
         },
         'Trigger': {  # 触发源
@@ -192,6 +196,9 @@ icon: material/badge-account-horizontal
     for k, v in dev.items():
         s.update(f'dev.{k}', v)
     ```
+
+    1. :material-language-python: 详见[**QuarkRemote**](quark/remote.md)
+        
 
     ```python title="比特" linenums="1"
     # 定义比特

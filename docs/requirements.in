@@ -9,6 +9,7 @@ mkdocs-gen-files
 # mkdocs-callouts
 mkdocs-literate-nav
 mkdocs-git-revision-date-localized-plugin
+mkdocs-video
 
 mkdocs-jupyter
 inset
