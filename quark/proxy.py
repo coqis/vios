@@ -44,12 +44,13 @@ import numpy as np
 from loguru import logger
 
 try:
-    qjs = Path.home() / 'quark.json'
-    if qjs.exists():
-        with open(qjs, 'r') as f:
-            QUARK = json.loads(f.read())
-    else:
-        QUARK = {"server": {"home": Path.home() / "Desktop/home"}}
+    QUARK = {"server": {"home": Path.home() / "Desktop/home"}}
+    for qjs in [Path.cwd() / 'quark.json', Path.home() / 'quark.json']:
+        if qjs.exists():
+            with open(qjs, 'r') as f:
+                print(f'Load settings from {qjs}')
+                QUARK = json.loads(f.read())
+                break
     HOME = Path(QUARK['server']['home']).resolve()
     HOME.mkdir(parents=True, exist_ok=True)
     if str(HOME) not in sys.path:
@@ -516,7 +517,8 @@ class QuarkProxy(object):
         #     after = []
         #     logger.error(f'Failed to extend circuit: {e}!')
         mcq = task['meta']['other']['measure']  # cbits and qubits from Measure
-        task['body']['post'] = [(t, v, 'au') for t, v in self.proxy.clear(mcq)]
+        task['body']['post'] = [(t, v, 'au')
+                                for t, v in self.proxy().clear(mcq)]
         circuit = [self.proxy().circuit(c, mcq) for c in task['body']['cirq']]
         task['body']['cirq'] = circuit
 

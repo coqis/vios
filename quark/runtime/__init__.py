@@ -54,3 +54,74 @@ class Future(object):
 
     def result(self, timeout: float = 3.0):
         return self.quark.result(self.index, timeout=timeout)
+
+
+mdev = '''
+```python
+┌────────────────────────────────────────────────┬────────────────────────────────────────────────┐
+│               dev in QuarkServer               │               dev in QuarkRemote               │
+├────────────────────────────────────────────────┼───driver folder on device──────────────────────┤
+│{'awg':{                                        │ driver                                         │
+│        "addr": "192.168.3.48",                 │ ├── dev                         <─────┐        │
+│        "name": "VirtualDevice", <─────────────>│ │   ├── VirtualDevice.py        <─────┼──┐     │
+│        "srate": 1000000000.0,                  │ │   └── __init__.py                   │  │     │
+│        "type": "driver"                        │ ├── remote.json                       │  │     │
+│        }                                       │ ├── requirements.txt                  │  │     │
+│}                                               │ └── setup.py                          │  │     │
+│                                                │                                       │  │     │
+├────────────────────────────────────────────────┼───contents of remote.json─────────────┼──┼─────┤
+│{'awg':{ <───────────────────────────┐          │{"path": "dev",                  <─────┘  │     │
+│        "host": "192.168.1.42",  <───┼─────────>│ "host": "192.168.1.42",                  │     │
+│        "port": 40052,           <─┐ └─────────>│ "awg":{                                  │     │
+│        "srate": 1000000000.0,     │            │        "addr": "192.168.3.48",           │     │
+│        "type": "remote"           │            │        "name": "VirtualDevice", <────────┘     │
+│        }                          └───────────>│        "port": 40052                           │
+│}                                               │        }                                       │
+│                                                │ "adc":{"addr": "", "name": "", "port": 40053}  │
+│                                                │ }                                              │
+└────────────────────────────────────────────────┴────────────────────────────────────────────────┘
+```
+- > ***For more details see [Quark](https://quarkstudio.readthedocs.io/en/latest/usage/quark/)!!!***
+- > ***If you don't know the current version of Python, read the above!!!***
+- > ***If you don't know how to set up the instrument, read the above!!!***
+'''
+
+
+mdev = '''┌─────────────────────────────────┬─────────────────────────────────┐
+│           local device          │          remote device          │
+├─────────────────────────────────┼─────────────────────────────────┤
+│{                                │{                                │
+│  'awg':{                        │  'awg':{                        │
+│    "addr": "192.168.3.48",      │    "host": "192.168.1.42",      │
+│    "name": "dev.VirtualDevice", │    "port": 40052,               │
+│    "type": "driver"             │    "type": "remote"             │
+│  }                              │  }                              │
+│}                                │}                                │
+└─────────────────────────────────┴─────────────────────────────────┘'''
+
+
+def is_main_process():
+    import multiprocessing as mp
+
+    return mp.current_process().name == 'MainProcess'
+
+
+try:
+    import os
+
+    if is_main_process() and 'DRIVER' in os.environ:
+        from rich.console import Console
+        from rich.panel import Panel
+        from rich.syntax import Syntax
+
+        console = Console()
+
+        def print_code_with_title(code: str, title: str, language: str = "python"):
+            syntax = Syntax(code, language, theme="dracula",
+                            line_numbers=False, background_color=None)
+            console.print(Panel(syntax, title=title,  # style="bold",
+                          border_style="cyan", expand=False, padding=(0, 1)))
+
+        print_code_with_title(mdev, "Device in QuarkServer")
+except Exception as e:
+    pass

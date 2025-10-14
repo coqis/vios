@@ -75,3 +75,5 @@ Then you can install `quarkstudio` and start using from the beginner's [**tutori
 
 :material-email: Contact [fengyl@baqis.ac.cn]()
 
+
+<!-- ![type:video](./Mapping%20the%20qubit%20state%20onto%20the%20Bloch%20Sphere.mp4) -->
