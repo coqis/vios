@@ -132,7 +132,7 @@ icon: material/badge-account-horizontal
         ├── home
         │   ├── cfg # cfg表目录
         │   ├── dev # 设备驱动
-        │   ├── lib # arch和门定义
+        │   ├── glib # arch和门定义
         │   ├── run # 云相关函数及s21范例
         │   └── ...
         ├── .python-version # Python版本文件
@@ -226,7 +226,7 @@ icon: material/badge-account-horizontal
     ```python title="比特" linenums="1"
     # 定义比特
     Q0 = {
-        "Measure": {  # 调用lib.gates中的Measure，生成读取波形，送入probe通道
+        "Measure": {  # 调用glib.gates中的Measure，生成读取波形，送入probe通道
             "duration": 4e-06,
             "amp": 0.019,
             "frequency": 6964370000.0,
@@ -256,7 +256,7 @@ icon: material/badge-account-horizontal
     station = {
         "sample": "test_111",  # 样品名，仅记录用
         "triggercmds": ["Trigger.CH1.TRIG"],  # 触发命令
-        "lib": "lib.gates.u3rcp",  # gate库路径
+        "lib": "glib.gates.u3rcp",  # gate库路径
         "arch": "rcp",  # 体系结构，位于lib.arch
         "align_right": True,  # 波形对齐右侧
         "waveform_length": 18e-6,  # 波形长度
@@ -454,7 +454,7 @@ for i, q in enumerate(qubits):
 
             2. 线路编译错误？
                 - 检查线路编写是否有误！
-                - 检查`lib.gates.__init__`中导入的门模块是否正确，或cfg表中填写的参数是否匹配！
+                - 检查`glib.gates.__init__`中导入的门模块是否正确，或cfg表中填写的参数是否匹配！
 
             3. 实验没有数据或采集设备显示超时？
                 - 检查触发设备是否输出或`shots`设置和采集设备设置是否一致！
