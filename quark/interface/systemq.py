@@ -45,7 +45,7 @@ except Exception as e:
 
 try:
     try:
-        from lib import DictDriver, get_arch, qcompile, sample_waveform
+        from glib import DictDriver, get_arch, qcompile, sample_waveform
     except ImportError as e:
         from qlispc import get_arch
         from qlispc.kernel_utils import qcompile, sample_waveform

@@ -93,10 +93,28 @@ icon: material/badge-account-horizontal
 
 - 安装**quarkstudio**
     ```bash
-    uv add quarkstudio --default-index=https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+    uv add quarkstudio jupyterlab --default-index=https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
     ```
 
-    下载驱动等文件到指定目录，如./home
+    下载驱动等文件到指定目录，如***./home*** (1)
+    { .annotate }
+    
+    1. **home配置**
+        - `quark init`命令会在用户目录下生成全局配置文件**quark.json**
+        - 将此配置文件复制到**qlab**目录下，则仅对当前环境生效
+        ```json title="quark.json"
+        {
+            "server": {
+                "home": "C:\\Users\\***\\Desktop\\home",
+                "repo": "https://gitee.com/baqis/systemq.git"
+            },
+            "studio": {
+                "theme": "light",
+                "console": false
+            }
+        }
+        ```
+
     ```bash
     uv run quark init --home ./home -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
     ```
@@ -128,7 +146,7 @@ icon: material/badge-account-horizontal
 ## **实验过程**
 ### **启动服务**
 - 打开终端，确保切换到**qlab**目录下，执行`uv run quark server`以启动[**QuarkServer**](quark/server.md)(后以**server**代称)。启动成功如下图所示，![](quarkserver0.png)
-- 打开另一终端，确保切换到**qlab**目录下，执行`uv run jupyter notebook`![](notebook.png)
+- 打开另一终端，确保切换到**qlab**目录下，执行`uv run jupyter lab`![](notebook.png)
 - 新建一个notebook，后续所有操作均在此notebook中进行
 
 
@@ -138,6 +156,8 @@ icon: material/badge-account-horizontal
     import matplotlib.pyplot as plt
     import numpy as np
     from quark.app import Recipe, s#(1)!
+
+    # s.init('path/to/quark.json') (2)
     ```
 
     1. :material-language-python: quark.app
@@ -148,10 +168,13 @@ icon: material/badge-account-horizontal
             - 删除参数：`s.delete('Q0.Measure.frequency')`
             - 写设备：`s.write('ZW_AD3.CH1.Offset', 0.2)`
             - 读设备：`s.read('ZW_AD3.CH1.Offset')`
-            - 提交任务: `s.submit(rcp.export())`，提交Recipe
+            - 提交任务: `s.submit(rcp.export())`
             - 历史记录：`s.lookup()`
             - 历史数据：`s.result(tid)`，根据任务id获取
-            - 历史参数表：`s.snapshot(tid)`: 根据任务id获取
+            - 历史参数表：`s.snapshot(tid)`，根据任务id获取
+    2. :material-language-python: 更改配置
+        - **可选操作，默认读取~/quark.json**，
+        - 如果在**qlab**中有一个**quark.json**文件，执行`s.init`可将**s**的操作路径指向其中的**home**
 
 
 - #### **注册登录**

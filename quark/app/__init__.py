@@ -49,18 +49,6 @@ class Super(object):
     def __init__(self):
         pass
 
-    def __repr__(self):
-        try:
-            return f'connection to {self.addr}'
-        except Exception as e:
-            return ''
-
-    def qs(self):
-        try:
-            return self._s
-        except Exception as e:
-            raise AttributeError('Please login first!')
-
     def fig(self):
         from ._viewer import fig
         return fig
@@ -72,6 +60,22 @@ class Super(object):
     def terminal(self, command: str | None = None, cwd: str | None = None):
         from quark.terminal import open_terminal
         open_terminal(command, cwd)
+
+    def init(self, path: str | Path = Path.cwd() / 'quark.json'):
+        from quark.proxy import init
+        init(path)
+
+    def __repr__(self):
+        try:
+            return f'connection to {self.addr}'
+        except Exception as e:
+            return ''
+
+    def qs(self):
+        try:
+            return self._s
+        except Exception as e:
+            raise AttributeError('Please login first!')
 
     @property
     def addr(self):

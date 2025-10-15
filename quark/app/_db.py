@@ -28,9 +28,17 @@ import numpy as np
 from loguru import logger
 from srpc import loads
 
-from quark.proxy import HOME
+sql = {}
 
-sql = sqlite3.connect(HOME / 'checkpoint.db', check_same_thread=False)
+
+def db():
+    from quark.proxy import HOME
+    path: str = str(HOME / 'checkpoint.db')
+    try:
+        return sql[path]
+    except KeyError:
+        print(f'Database path: {path}')
+        return sql.setdefault(path, sqlite3.connect(path, check_same_thread=False))
 
 
 def reshape(raw: np.ndarray | list, shape: tuple | list):
@@ -92,8 +100,9 @@ def get_commit_by_tid(tid: int = 0):
         # else:
         #     home = Path.home() / 'Desktop/home'
 
+        from quark.proxy import HOME
         file = (HOME / f'cfg/{ckpt}').with_suffix('.json')
-        # print(file)
+        print(file)
 
         repo = git.Repo(file.resolve().parent)
         if not tid:
@@ -112,27 +121,27 @@ def get_tid_by_rid(rid: int):
 
 def get_record_by_tid(tid: int, table: str = 'task'):
     try:
-        return sql.execute(f'select * from {table} where tid="{tid}"').fetchall()[0]
+        return db().execute(f'select * from {table} where tid="{tid}"').fetchall()[0]
     except Exception as e:
         logger.error(f'Record not found: {e}!')
 
 
 def get_record_by_rid(rid: int, table: str = 'task'):
     try:
-        return sql.execute(f'select * from {table} where id="{rid}"').fetchall()[0]
+        return db().execute(f'select * from {table} where id="{rid}"').fetchall()[0]
     except Exception as e:
         logger.error(f'Record not found: {e}!')
 
 
 def get_record_list_by_name(task: str, start: str, end: str, table: str = 'task'):
     try:
-        return sql.execute(f'select * from {table} where name like "%{task}%" and created between "{start}" and "{end}" limit -1').fetchall()
+        return db().execute(f'select * from {table} where name like "%{task}%" and created between "{start}" and "{end}" limit -1').fetchall()
     except Exception as e:
         logger.error(f'Records not found: {e}!')
 
 
 def get_record_set_by_name():
     try:
-        return sql.execute('select distinct task.name from task').fetchall()
+        return db().execute('select distinct task.name from task').fetchall()
     except Exception as e:
         logger.error(f'Records not found: {e}!')

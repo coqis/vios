@@ -43,24 +43,31 @@ from threading import Thread, current_thread
 import numpy as np
 from loguru import logger
 
-try:
-    QUARK = {"server": {"home": Path.home() / "Desktop/home"}}
-    for qjs in [Path.cwd() / 'quark.json', Path.home() / 'quark.json']:
-        if qjs.exists():
-            with open(qjs, 'r') as f:
-                print(f'Load settings from {qjs}')
-                QUARK = json.loads(f.read())
-                break
-    HOME = Path(QUARK['server']['home']).resolve()
-    HOME.mkdir(parents=True, exist_ok=True)
-    if str(HOME) not in sys.path:
-        sys.path.append(str(HOME))
-except Exception as e:
-    # logger.error(str(e))
-    os.remove(qjs)
-    logger.critical('Restart and try again!!!')
-    raise KeyboardInterrupt
-    QUARK = {}
+
+def init(path: str | Path = Path.cwd() / 'quark.json'):
+    global QUARK, HOME
+
+    try:
+        QUARK = {"server": {"home": Path.home() / "Desktop/home"}}
+        for qjs in [Path(path), Path.home() / 'quark.json']:
+            if qjs.exists():
+                with open(qjs, 'r') as f:
+                    print(f'Load settings from {qjs}')
+                    QUARK = json.loads(f.read())
+                    break
+        HOME = Path(QUARK['server']['home']).resolve()
+        HOME.mkdir(parents=True, exist_ok=True)
+        if str(HOME) not in sys.path:
+            sys.path.append(str(HOME))
+
+        return QUARK, HOME
+    except Exception as e:
+        os.remove(qjs)
+        logger.critical('Restart and try again!!!')
+        raise KeyboardInterrupt
+
+
+QUARK, HOME = init()
 
 
 def setlog(prefix: str = ''):
