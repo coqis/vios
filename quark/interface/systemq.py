@@ -37,7 +37,7 @@ from qlispc.arch.baqis import QuarkLocalConfig
 from waveforms import Waveform, WaveVStack, square, wave_eval
 
 try:
-    from lib import stdlib
+    from glib import stdlib
 except Exception as e:
     logger.critical('systemq may not be installed', e)
     raise e
