@@ -161,7 +161,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                         _target = decode(target, context, mapping)
                         # kwds.update({"context": context})
                 except Exception as e:  # (ValueError, KeyError, AttributeError)
-                    logger.error(f'Failed to map {target}: {e}!')
+                    # logger.error(f'Failed to map {target}: {e}!')
                     continue
 
             if not (isinstance(_target, str) and _target and _target.count('.') == 2):
@@ -178,7 +178,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                     'srate': srate,
                     'end': context['waveform']['LEN'],
                     'offset': context.get('setting', {}).get('OFFSET', 0)
-                } | context['calibration'][channel]
+                } | context['calibration'][target.split('.')[-1]]
                 # kwds['setting'] = context['setting']
             except Exception as e:
                 end = None
