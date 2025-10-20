@@ -105,6 +105,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
     """
 
     try:
+        # for s.write and s.read
         query = kw.get('ctx', ctx).query
         ctx.bypass = {}  # clear bypass cache
     except AttributeError as e:
@@ -133,8 +134,10 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                 continue
 
             kwds = {'sid': sid, 'target': target,
-                    'shared': query('etc.server.shared'),
-                    'filter': query('etc.driver.filter')}
+                    'shared': ctx.correct(query('etc.server.shared'), 0),
+                    'filter': ctx.correct(query('etc.driver.filter'), [])}
+
+            context = {}
             if 'CH' in target or ctype == 'WAIT':
                 _target = target
             else:
@@ -150,43 +153,44 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                             pass
                         context = deepcopy(query(target))
                         _target = context.pop('address', f'address: {target}')
-                        kwds['context'] = context
+                        # kwds['context'] = context
                     else:
                         # old
                         context = query(target.split('.', 1)[0])
                         mapping = query('etc.driver.mapping')
                         _target = decode(target, context, mapping)
-                        kwds.update({"context": context})
+                        # kwds.update({"context": context})
                 except Exception as e:  # (ValueError, KeyError, AttributeError)
                     logger.error(f'Failed to map {target}: {e}!')
                     continue
 
-            # save initial value to restore
-            # if sid == 0 and not kw.get('hold', False):
-            #     # init = query(target.removesuffix(
-            #     #     '.I').removesuffix('.Q'))
-            #     if 'waveform' in _target.lower():
-            #         init = (ctype, _target, 'zero()', unit)
-            #         ctx.initial['restore'].append(init)
-            if not (isinstance(_target, str) and _target):
+            if not (isinstance(_target, str) and _target and _target.count('.') == 2):
                 logger.error(f'wrong target: {target}({_target})')
                 continue
 
             # get sample rate from device
-            if ctype != 'WAIT':
-                if _target.count('.') != 2:
-                    logger.critical(f'wrong address: {_target}')
-                    continue
-                dev = _target.split('.', 1)[0]
-                kwds.setdefault('context', {})[
-                    'srate'] = query(f'dev.{dev}.srate')
-                # if not isinstance(kwds['srate'], (float, int)):  # None, str
-                #     logger.critical(f'Failed to get srate: {dev}({target})!')
+            dev, channel, quantity = _target.split('.')
+            srate = query(f'dev.{dev}.srate')
+
+            # context设置, 用于calculator.calculate
+            try:
+                kwds['calibration'] = {
+                    'srate': srate,
+                    'end': context['waveform']['LEN'],
+                    'offset': context.get('setting', {}).get('OFFSET', 0)
+                } | context['calibration'][channel]
+                # kwds['setting'] = context['setting']
+            except Exception as e:
+                end = None
+                if quantity == 'Waveform':
+                    end = ctx.query('station', {}).get(
+                        'waveform_length', 98e-6)
+                kwds['calibration'] = context | {'end': end, 'srate': srate}
             cmd = [ctype, value, unit, kwds]
 
             # Merge commands with the same channel
             try:
-                if _target in scmd and 'waveform' in _target.lower():
+                if _target in scmd and quantity == 'Waveform':
                     if isinstance(scmd[_target][1], str):
                         scmd[_target][1] = Pulse.fromstr(scmd[_target][1])
                     if isinstance(cmd[1], str):
@@ -302,29 +306,31 @@ def preprocess(sid: int, instruction: dict[str, dict[str, list[str, Any, str, di
                         continue
                     bypass[target] = (cmd[1], kwds['target'])
 
-                # context设置, 用于calculator.calculate
-                context = kwds.pop('context', {})  # 即cfg表中的Qubit、Coupler等
-                # if context:
-                try:
-                    channel = kwds['target'].split('.')[-1]
-                    # length = context['waveform']['LEN']
-                    kwds['calibration'] = {
-                        'srate': context['srate'],
-                        'end': context['waveform']['LEN'],
-                        'offset': context.get('setting', {}).get('OFFSET', 0)
-                    } | context['calibration'][channel]
-                    # kwds['setting'] = context['setting']
-                except Exception as e:
-                    if target.lower().endswith('waveform'):
-                        context['end'] = ctx.query('station', {}).get(
-                            'waveform_length', 98e-6)
-                    kwds['calibration'] = context
-
-                # if isinstance(cmd[1], Waveform):
-                #     cmd[1].sample_rate = kwds['srate']
+                # if not target.startswith(tuple(kwds['filter'])) and Pulse.typeof(cmd[1]) == 'object':
+                #     cali = kwds['calibration']
+                #     cmd[1] >>= cali.get('delay', 0)
+                #     cmd[1].sample_rate = cali['srate']
                 #     cmd[1].start = 0
-                #     cmd[1].stop = 1e-3  # kwds['LEN']
+                #     cmd[1].stop = cali['end']
                 #     cmd[1] = cmd[1].sample()
+
+                # # context设置, 用于calculator.calculate
+                # context = kwds.pop('context', {})  # 即cfg表中的Qubit、Coupler等
+                # # if context:
+                # try:
+                #     channel = kwds['target'].split('.')[-1]
+                #     # length = context['waveform']['LEN']
+                #     kwds['calibration'] = {
+                #         'srate': context['srate'],
+                #         'end': context['waveform']['LEN'],
+                #         'offset': context.get('setting', {}).get('OFFSET', 0)
+                #     } | context['calibration'][channel]
+                #     # kwds['setting'] = context['setting']
+                # except Exception as e:
+                #     if target.lower().endswith('waveform'):
+                #         context['end'] = ctx.query('station', {}).get(
+                #             'waveform_length', 98e-6)
+                #     kwds['calibration'] = context
 
                 if kwds['shared']:
                     sm, value = dumpv(cmd[1])

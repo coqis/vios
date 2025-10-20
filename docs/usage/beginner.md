@@ -257,7 +257,7 @@ icon: material/badge-account-horizontal
         "sample": "test_111",  # 样品名，仅记录用
         "triggercmds": ["Trigger.CH1.TRIG"],  # 触发命令
         "lib": "glib.gates.u3rcp",  # gate库路径
-        "arch": "rcp",  # 体系结构，位于lib.arch
+        "arch": "rcp",  # 体系结构，位于glib.arch
         "align_right": True,  # 波形对齐右侧
         "waveform_length": 18e-6,  # 波形长度
         "auto_clear": {  # 自动清空的命令

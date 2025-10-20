@@ -121,11 +121,16 @@ class Context(QuarkLocalConfig):
 
     def query(self, q, default=None):
         qr = super().query(q)
+        return self.correct(qr, default)
+
+    def correct(self, old, default=None):
+        """set default value for key
+        """
         if default is None:
-            return qr
-        if isinstance(qr, tuple) or (isinstance(qr, str) and qr.startswith('Failed')):
+            return old
+        if isinstance(old, tuple) or (isinstance(old, str) and old.startswith('Failed')):
             return default
-        return qr
+        return old
 
     def iscmd(self, target: str):
         """check if target is a command
@@ -209,6 +214,10 @@ class Pulse(object):
 
     def __init__(self):
         pass
+
+    @classmethod
+    def typeof(cls, pulse: Waveform | np.ndarray):
+        return 'object' if isinstance(pulse, Waveform) else 'array'
 
     @classmethod
     def fromstr(cls, pulse: str):

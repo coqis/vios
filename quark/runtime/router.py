@@ -94,7 +94,7 @@ def transfer(tid: int, status: str, result: dict, station: str, left: int, **kwd
         print(tid, status, result, station, left, kwds)
 
     try:
-        print('response', json.loads(resp.content.decode()))
+        return f'response: {json.loads(resp.content.decode())}'
     except Exception as e:
         raise Exception(f'response: {e}, {resp.text}')
 
