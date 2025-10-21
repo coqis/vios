@@ -307,37 +307,19 @@ def preprocess(sid: int, instruction: dict[str, dict[str, list[str, Any, str, di
                         continue
                     bypass[target] = (cmd[1], kwds['target'])
 
-                # if not target.startswith(tuple(kwds['filter'])) and Pulse.typeof(cmd[1]) == 'object':
-                #     cali = kwds['calibration']
-                #     cmd[1] >>= cali.get('delay', 0)
-                #     cmd[1].sample_rate = cali['srate']
-                #     cmd[1].start = 0
-                #     cmd[1].stop = cali['end']
-                #     cmd[1] = cmd[1].sample()
+                if not target.startswith(tuple(kwds['filter'])) and Pulse.typeof(cmd[1]) == 'object':
+                    cali = kwds['calibration']
+                    cmd[1] >>= cali.get('delay', 0)
+                    cmd[1].sample_rate = cali['srate']
+                    cmd[1].start = 0
+                    cmd[1].stop = cali['end']
+                    cmd[1] = cmd[1].sample()
 
-                # # context设置, 用于calculator.calculate
-                # context = kwds.pop('context', {})  # 即cfg表中的Qubit、Coupler等
-                # # if context:
-                # try:
-                #     channel = kwds['target'].split('.')[-1]
-                #     # length = context['waveform']['LEN']
-                #     kwds['calibration'] = {
-                #         'srate': context['srate'],
-                #         'end': context['waveform']['LEN'],
-                #         'offset': context.get('setting', {}).get('OFFSET', 0)
-                #     } | context['calibration'][channel]
-                #     # kwds['setting'] = context['setting']
-                # except Exception as e:
-                #     if target.lower().endswith('waveform'):
-                #         context['end'] = ctx.query('station', {}).get(
-                #             'waveform_length', 98e-6)
-                #     kwds['calibration'] = context
-
-                if kwds['shared']:
-                    sm, value = dumpv(cmd[1])
-                    if sm:
-                        shared.append(sm)
-                        cmd[1] = value
+                    if kwds['shared']:
+                        sm, value = dumpv(cmd[1], name=target)
+                        if sm:
+                            shared.append(sm)
+                            cmd[1] = value
             except Exception as e:
                 logger.error(f'Failed to preprocess {target}, {e}!')
             scmd[target] = cmd

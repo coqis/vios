@@ -379,8 +379,6 @@ class Workflow(object):
         delay = 0
         offset = 0  # kwds.get('setting', {}).get('OFFSET', 0)
 
-        # sm, _value = loadv(func) # _value[:] = _value*10
-
         if isinstance(func, Waveform):
             try:
                 # ch = kwds['target'].split('.')[-1]

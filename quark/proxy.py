@@ -105,25 +105,21 @@ def baser(number: str, base: int, table: str = TABLE):
     return sum([table.index(c) * base**i for i, c in enumerate(reversed(number))])
 
 
-def dumpv(value):
-    # print('ccccccccccccccccccccccc', value)
-    # if type(value).__name__ in ['Waveform', 'WaveVStack']:
-    #     sl = ShareableList([dump(value)])
-    #     result = ('ShareableList', sl.shm.name)
-    if isinstance(value, np.ndarray):
-        sm = SharedMemory(create=True, size=value.nbytes)
-        buf = np.ndarray(value.shape, dtype=value.dtype, buffer=sm.buf)
-        buf[:] = value[:]
-        result = sm, ('SharedMemory', sm.name, buf.shape, buf.dtype.str)
-        # sm.close()
-    else:
-        result = '', value
+def dumpv(value: np.ndarray, name: str | None = None):
+    try:
+        sm = SharedMemory(name=f'&{name}', create=True, size=value.nbytes)
+    except FileExistsError as e:
+        sm = SharedMemory(name=f'&{name}')
+    buf = np.ndarray(value.shape, dtype=value.dtype, buffer=sm.buf)
+    buf[:] = value[:]
+    result = sm, (sm.name, buf.shape, buf.dtype.str)
+    # sm.close()
     return result
 
 
 def loadv(value):
-    if isinstance(value, tuple) and value[0] == 'SharedMemory':
-        name, shape, dtype = value[1:]
+    if isinstance(value, tuple) and value[0].startswith('&'):
+        name, shape, dtype = value
         shm = SharedMemory(name=name)
         buf = np.ndarray(shape=shape, dtype=dtype, buffer=shm.buf)
         return shm, buf
