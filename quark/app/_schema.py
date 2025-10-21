@@ -79,7 +79,7 @@ class Template(object):
                              'multfit': []
                          }
                          },
-                },
+                }
 
     @classmethod
     def validate(cls, instance: dict):
