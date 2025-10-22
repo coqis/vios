@@ -221,7 +221,7 @@ class Task(object):
     def circuit(self, sid: int = 0):
         return self.step(sid, 'cirq')[0][-1]
 
-    def step(self, index: int, stage: str = 'raw') -> dict:
+    def step(self, index: int, stage: str = 'ini') -> dict:
         """step details
 
         Args:

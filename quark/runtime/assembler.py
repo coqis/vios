@@ -132,7 +132,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                 continue
 
             kwds = {'sid': sid, 'target': target,
-                    'shared': ctx.correct(query('etc.server.shared'), 0),
+                    # 'shared': ctx.correct(query('etc.server.shared'), 0),
                     'filter': ctx.correct(query('etc.driver.filter'), [])}
 
             context = {}

@@ -56,6 +56,8 @@ def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
     cmd[1], delay, offset, srate = Workflow.calculate(
         value, **(kwds | {'isobject': isobject}))
 
+    # _value[:] = _value * 1000
+
     cmd[-1] = {'sid': kwds['sid'], 'target': kwds['target']}
 
     try:
