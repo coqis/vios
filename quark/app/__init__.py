@@ -509,7 +509,7 @@ def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, tid: 
     from quark.runtime import initialize, schedule
 
     ctx = initialize(cfg if cfg else get_config_by_tid(tid), main=True, **kwds)
-    return ctx, schedule(0, {}, circuit, signal='iq', prep=True, **kwds)
+    return ctx, schedule(0, {}, circuit, signal='iq', **kwds)
 
 
 def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = True,
@@ -565,25 +565,3 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = True,
     # plt.axis('off')
     # plt.legend(tuple(wf))
     return wf
-
-
-def profile(functions: list[Callable] = []):
-    # pycallgraph
-    try:
-        from line_profiler import LineProfiler
-    except ImportError as e:
-        return print(e)
-    lp = LineProfiler()
-    [lp.add_function(f) for f in functions]
-
-    def wrapper(func):
-        @wraps(func)
-        def wrapped(*args, **kwargs):
-            print(f'{func.__name__} started ...')
-            lpf = lp(func=func)
-            result = lpf(*args, **kwargs)
-            lp.print_stats()
-            print(f'{func.__name__} finished !!!')
-            return result
-        return wrapped
-    return wrapper

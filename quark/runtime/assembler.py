@@ -27,7 +27,6 @@ from typing import Any
 from loguru import logger
 
 from quark.interface import Pulse, Workflow, create_context
-from quark.proxy import dumpv
 
 ctx = None  # create_context('baqis', {})
 
@@ -82,9 +81,7 @@ def schedule(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
         else:
             instruction[step] = _cmds
 
-    assemble(sid, instruction,
-             prep=kwds.get('prep', False),
-             hold=kwds.get('hold', False))
+    assemble(sid, instruction)
 
     if sid == 0:
         # kwds['restore'] = ctx.initial
@@ -205,10 +202,6 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                 scmd[_target] = cmd
         instruction[step] = scmd
 
-    # preprocess if True
-    if kw.get('prep', True):
-        return preprocess(sid, instruction)
-
 
 # mapping logical channel to hardware channel
 MAPPING = {
@@ -266,66 +259,6 @@ def decode(target: str, context: dict, mapping: dict = MAPPING) -> str:
         channel = '.'.join((channel, quantity))
 
     return channel
-
-
-def preprocess(sid: int, instruction: dict[str, dict[str, list[str, Any, str, dict]]]):
-    """filters and paramters 
-
-    Args:
-        sid (int): step index
-        instruction (dict):instruction set like **{step: {target: [ctype, value, unit, kwds]}}**
-
-    Example: instruction structure
-        - step (str): step name, e.g., main/step1/step2
-        - target (list): hardware channel, e.g., AWG.CH1.Waveform、AD.CH2.TraceIQ
-            - ctype (str): command type, must be one of READ/WRITE/WAIT
-            - value (Any): command value, None for READ, seconds for WAIT, arbitary for WRITE, see corresponding driver
-            - unit (str): command unit, useless for now
-            - kwds (dict):
-                - sid (int): step index
-                - track (list): list of sid to be tracked
-                - target (str): original target like Q0101.waveform.Z
-                - filter (list): sample waveform in the filter list to show in `QuarkCanvas`
-                - srate (float): sampling rate
-                - context (dict): calibration parameters of target
-    """
-    if sid == -2:
-        ctx.bypass.clear()
-    bypass = ctx.bypass
-
-    shared = []
-    for step, operations in instruction.items():
-        if not isinstance(operations, dict):
-            break
-        scmd = {}
-        for target, cmd in operations.items():
-            try:
-                kwds = cmd[-1]
-                # 重复指令缓存比较, 如果与上一步相同, 则跳过执行
-                if target.endswith(SUFFIX):
-                    if target in bypass and Pulse.compare(bypass[target][0], cmd[1]):
-                        continue
-                    bypass[target] = (cmd[1], kwds['target'])
-
-                if not target.startswith(tuple(kwds['filter'])) and Pulse.typeof(cmd[1]) == 'object':
-                    cali = kwds['calibration']
-                    cmd[1] >>= cali.get('delay', 0)
-                    cmd[1].sample_rate = cali['srate']
-                    cmd[1].start = 0
-                    cmd[1].stop = cali['end']
-                    cmd[1] = cmd[1].sample()
-
-                    if kwds['shared']:
-                        sm, value = dumpv(cmd[1], name=target)
-                        if sm:
-                            shared.append(sm)
-                            cmd[1] = value
-            except Exception as e:
-                logger.error(f'Failed to preprocess {target}, {e}!')
-            scmd[target] = cmd
-        instruction[step] = scmd
-
-    return shared
 
 
 # %%

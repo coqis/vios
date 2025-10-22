@@ -224,11 +224,16 @@ class Pulse(object):
         return wave_eval(pulse)
 
     @classmethod
-    def sample(cls, pulse: Waveform | np.ndarray):
+    def sample(cls, pulse: Waveform | np.ndarray, cali: dict = {}):
+        if isinstance(pulse, Waveform) and cali:
+            pulse >>= cali.get('delay', 0)
+            pulse.sample_rate = cali['srate']
+            pulse.start = 0
+            pulse.stop = cali['end']
         return pulse.sample() if isinstance(pulse, Waveform) else pulse
 
     @classmethod
-    def compare(cls, a, b):
+    def equal(cls, a, b):
         try:
             if isinstance(a, WaveVStack) or isinstance(b, WaveVStack):
                 return False

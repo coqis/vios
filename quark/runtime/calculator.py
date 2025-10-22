@@ -24,7 +24,6 @@ import numpy as np
 from loguru import logger
 
 from quark.interface import Pulse, Workflow
-from quark.proxy import loadv
 
 
 def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
@@ -54,19 +53,8 @@ def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
 
     isobject = target.startswith(tuple(kwds.get('filter', ['Waveform'])))
 
-    sm, _value = loadv(value)  #
-    if sm:
-        _value[:] = _value * 1000
-
-    new, delay, offset, srate = Workflow.calculate(
-        _value, **(kwds | {'isobject': isobject}))
-
-    if sm:
-        print(value, 'ccccccccccccccccccccccccccc',_value)
-        print(cmd[1], 'cmcmcmcmcmcmcmcmcmcmcmccmmcmmc')
-        sm.close()
-    else:
-        cmd[1] = new
+    cmd[1], delay, offset, srate = Workflow.calculate(
+        value, **(kwds | {'isobject': isobject}))
 
     cmd[-1] = {'sid': kwds['sid'], 'target': kwds['target']}
 
