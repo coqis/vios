@@ -441,7 +441,9 @@ class Workflow(object):
                 raise e
         elif isinstance(func, np.ndarray):
             # 失真校准
-            pulse[:] = Pulse.correct(func, cali=cali)
+            # logger.debug(f"Calculate waveform distortion for {kwds['target']}")
+            func[:] = Pulse.correct(func, cali=cali)
+            pulse = func
         else:
             pulse = func
 
