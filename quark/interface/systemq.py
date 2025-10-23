@@ -225,7 +225,7 @@ class Pulse(object):
 
     @classmethod
     def correct(cls, points: np.ndarray, cali: dict = {}) -> np.ndarray:
-        """失真校准，从 qlispc.kernel_utils 复制而来
+        """失真校准，从 `qlispc.kernel_utils` 复制而来
 
         Args:
             points (np.ndarray): 输入信号
@@ -237,6 +237,9 @@ class Pulse(object):
         from wath.signal import correct_reflection, exp_decay_filter, predistort
 
         distortion_params = cali.get('distortion', {})
+        if not distortion_params:
+            return points
+
         if not isinstance(distortion_params, dict):
             distortion_params = {}
 
@@ -436,6 +439,9 @@ class Workflow(object):
                 # KeyError: 'calibration'
                 logger.error(f"Failed to sample: {e}(@{kwds['target']})")
                 raise e
+        elif isinstance(func, np.ndarray):
+            # 失真校准
+            pulse[:] = Pulse.correct(func, cali=cali)
         else:
             pulse = func
 
