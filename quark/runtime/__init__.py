@@ -36,6 +36,7 @@ Abstract: about envelope
 
 import dill
 
+from quark.driver import compress, decompress
 from quark.interface import Pulse
 
 from .assembler import MAPPING, assemble, decode, initialize, schedule
