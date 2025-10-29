@@ -156,10 +156,11 @@ class Context(QuarkLocalConfig):
 
         return cmds
 
-    def getGate3(self, name, *qubits):
+    def getGate(self, name, *qubits):
         # ------------------------- added -------------------------
         if name in self.__skip:
-            raise Exception(f"gate {name} of {qubits} not calibrated.")
+            return {}
+        return super().getGate(name, *qubits)
 
         if len(qubits) > 1:
             order_senstive = self.query(f"gate.{name}.__order_senstive__")
