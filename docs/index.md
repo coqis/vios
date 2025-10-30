@@ -101,6 +101,10 @@ task = {
   'name': 'MyJob',  # task name
   'circuit':circuit, # circuit written in OpenQASM2.0
   'compile': True, # transpile to native gate sets if True
+  'options':{
+    'correct': False, # readout error correction 
+    'target_qubits': [] # ['Q0','Q1']
+  }
 }
 ```
 
