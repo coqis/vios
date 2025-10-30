@@ -103,7 +103,7 @@ task = {
   'compile': True, # transpile to native gate sets if True
   'options':{
     'correct': False, # readout error correction 
-    'target_qubits': [] # ['Q0','Q1']
+    'target_qubits': [] # [0, 1], effective only when compile is True
   }
 }
 ```
