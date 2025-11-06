@@ -72,6 +72,9 @@ def process(raw_data, **kwds):
 
     result = {}
 
+    if kwds.get('mode', 'run') == 'debug':
+        return result
+
     try:
 
         if 'arch' in dataMap and dataMap['arch'] == 'general':
