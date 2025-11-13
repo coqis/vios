@@ -25,6 +25,7 @@ from pathlib import Path
 
 import h5py
 import numpy as np
+import zarr
 from loguru import logger
 from srpc import loads
 
@@ -58,32 +59,76 @@ def get_dataset_by_tid(tid: int, task: bool = False):
     filename, dataset = get_record_by_tid(tid)[7:9]
 
     info, data = {}, {}
-    with h5py.File(filename) as f:
-        group = f[dataset]
-        info = loads(dict(group.attrs).get('snapshot', '{}'))
-        if task:
-            return info.get('task', {})
+    if filename.endswith('hdf5'):
+        f = h5py.File(filename, 'r')
+    else:
+        f = zarr.open_group(filename.replace('hdf5', 'zarr'), mode='r')
+    group = f[dataset]
+    info = loads(dict(group.attrs).get('snapshot', '{}'))
+    if task:
+        return info.get('task', {})
 
-        if not info:
-            shape = -1
-            info['meta'] = {}
-        else:
-            shape = []
-            try:
-                shape = info['meta']['other']['shape']
-            except Exception as e:
-                for k, v in info['meta']['axis'].items():
-                    shape.extend(tuple(v.values())[0].shape)
+    if not info:
+        shape = -1
+        info['meta'] = {}
+    else:
+        shape = []
+        try:
+            shape = info['meta']['other']['shape']
+        except Exception as e:
+            for k, v in info['meta']['axis'].items():
+                shape.extend(tuple(v.values())[0].shape)
 
-        for k in group.keys():
-            ds = group[f'{k}']
-            if shape == -1:
-                data[k] = ds[:]
-                continue
+    for k in group.keys():
+        ds = group[f'{k}']
+        if shape == -1:
+            data[k] = ds[:]
+            continue
 
-            data[k] = reshape(ds[:], shape)
+        if isinstance(ds, zarr.core.array.Array):
+            shape = (*shape, *ds.chunks)
+        print(f'Loading dataset: {k}, shape: {shape}, dtype: {ds.shape}')
+        data[k] = reshape(ds[:], shape)
+
+    if isinstance(f, h5py.File):
+        f.close()
 
     return info, data
+
+
+def tree_of_file(filename: str):
+    """Get HDF5 dataset as a dict
+
+    Args:
+        filename (str): filename of an h5 file.
+        d (dict, optional): [description]. Defaults to {}.
+
+    Returns:
+        dict: dict contains all dataset
+    """
+
+    if filename.endswith('zarr'):
+        f = zarr.open_group(filename, mode='r')
+        return print(f.tree())
+
+    def file_to_dict(file, d: dict = {}):
+        v = {}
+        for key, val in file.items():
+            if isinstance(val, h5py.Group):
+                file_to_dict(val, v)
+            else:
+                v = f'{str(val.dtype)} {val.shape} {val.nbytes}'  # val.name
+            d[key] = v
+            v = {}
+        return d
+
+    with h5py.File(filename, 'r') as file:
+        d = {}
+        file_to_dict(file, d)
+        # file.close()
+        if not d:
+            d['data'] = 'dataset not found!'
+        return d
 
 
 def get_commit_by_tid(tid: int = 0):

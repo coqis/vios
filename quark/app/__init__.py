@@ -49,6 +49,44 @@ class Super(object):
     def __init__(self):
         pass
 
+    def tree(self, filename: str = '', d: dict = {}, name="root"):
+        from rich.console import Console
+        from rich.tree import Tree
+
+        """print nested dict as a tree structure
+
+        Args:
+            d (dict): dict
+            name (str, optional): root name. Defaults to "root".
+
+        Returns:
+            _type_: _description_
+        """
+        if filename and filename.endswith(('hdf5', 'zarr')):
+            from ._db import tree_of_file
+
+            d = tree_of_file(filename)
+            if not d:
+                return
+            name = 'hdf5'
+
+        root = Tree(f"[bold]{name}[/bold]")
+
+        def add_nodes(parent, node):
+            for k, v in node.items():
+                if isinstance(v, dict):
+                    # 递归添加子节点
+                    child = parent.add(f"{k}")
+                    add_nodes(child, v)
+                else:
+                    # 叶子普通值
+                    parent.add(f"{k}: {v}")
+
+        add_nodes(root, d)
+
+        console = Console()
+        console.print(root)
+
     def fig(self):
         from ._viewer import fig
         return fig
