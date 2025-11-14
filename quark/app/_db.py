@@ -119,6 +119,9 @@ def get_tree_of_file(filename: str):
     Returns:
         dict: dict contains all dataset
     """
+    assert Path(filename).exists(), f'File not found: {filename}'
+    assert filename.endswith(
+        ('hdf5', 'zarr')), f'Unsupported file format: {filename}'
 
     if filename.endswith('zarr'):
         f = zarr.open_group(filename, mode='r')
