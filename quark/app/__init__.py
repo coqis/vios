@@ -140,12 +140,16 @@ class Super(object):
 
     def snapshot(self, tid: int = 0):
         if tid and self.addr[0] == '127.0.0.1':
+            if tid < 1e10:
+                return get_config_by_rid(tid)
             return get_config_by_tid(tid)
         else:
             return self.qs().snapshot(tid=tid)
 
     def result(self, tid: int, **kwds):
         if self.addr[0] == '127.0.0.1':
+            if tid < 1e10:
+                return get_data_by_rid(tid, **kwds)
             return get_data_by_tid(tid, **kwds)
         else:
             data = self.qs().load(tid)
