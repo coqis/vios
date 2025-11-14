@@ -25,6 +25,12 @@ from typing import Any
 from quark.driver.common import BaseDriver
 
 
+def fibonacci(n: int = 35) -> int:
+    if n < 2:
+        return n
+    return fibonacci(n - 1) + fibonacci(n - 2)
+
+
 def read(device: BaseDriver, quantity: str, channel: str = 'CH1', **kwds) -> Any:
     """read from the device
 
