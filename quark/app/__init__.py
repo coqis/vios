@@ -63,9 +63,9 @@ class Super(object):
             _type_: _description_
         """
         if filename and filename.endswith(('hdf5', 'zarr')):
-            from ._db import tree_of_file
+            from ._db import get_tree_of_file
 
-            d = tree_of_file(filename)
+            d = get_tree_of_file(filename)
             if not d:
                 return
             name = 'hdf5'
@@ -486,7 +486,8 @@ def get_data_by_tid(tid: int, **kwds) -> dict:
     from ._db import get_dataset_by_tid
     from ._viewer import plot
 
-    while True:
+    retry = 3
+    while retry > 0:
         # Windows: OSError: [Errno 0] Unable to synchronously open file (unable to lock file, errno = 0, error message = 'No error', Win32 GetLastError() = 33)
         # MacOSX: BlockingIOError: [Errno 35] Unable to synchronously open file (unable to lock file, errno = 35, error message = 'Resource Temporarily unavailable')
         try:
@@ -495,6 +496,7 @@ def get_data_by_tid(tid: int, **kwds) -> dict:
         except Exception as e:
             logger.error(str(e))
             time.sleep(1)
+            retry -= 1
             continue
 
     if kwds.get('plot', False):

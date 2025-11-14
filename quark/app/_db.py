@@ -43,6 +43,16 @@ def db():
 
 
 def reshape(raw: np.ndarray | list, shape: tuple | list):
+    '''Reshape raw data to original shape and fill zero if shape is larger than raw.
+
+    Args:
+        raw (np.ndarray | list): raw data
+        shape (tuple | list): sweep shape
+
+    Returns:
+        np.ndarray | list: reshaped data
+
+    '''
     try:
         raw = np.asarray(raw)
         idx = np.unravel_index(np.arange(raw.shape[0]), shape)
@@ -58,12 +68,16 @@ def reshape(raw: np.ndarray | list, shape: tuple | list):
 def get_dataset_by_tid(tid: int, task: bool = False):
     filename, dataset = get_record_by_tid(tid)[7:9]
 
-    info, data = {}, {}
     if filename.endswith('hdf5'):
         f = h5py.File(filename, 'r')
+    elif filename.endswith('zarr'):
+        f = zarr.open_group(filename, mode='r')
     else:
-        f = zarr.open_group(filename.replace('hdf5', 'zarr'), mode='r')
+        logger.error(f'Unsupported file format: {filename}')
+        return {}, {}
     group = f[dataset]
+
+    info, data = {}, {}
     info = loads(dict(group.attrs).get('snapshot', '{}'))
     if task:
         return info.get('task', {})
@@ -81,14 +95,13 @@ def get_dataset_by_tid(tid: int, task: bool = False):
 
     for k in group.keys():
         ds = group[f'{k}']
+        data[k] = ds[:]
         if shape == -1:
-            data[k] = ds[:]
             continue
 
-        if isinstance(ds, zarr.core.array.Array):
-            shape = (*shape, *ds.chunks)
-        print(f'Loading dataset: {k}, shape: {shape}, dtype: {ds.shape}')
-        data[k] = reshape(ds[:], shape)
+        if filename.endswith('zarr'):
+            data[k] = data[k].reshape(-1, *ds.chunks)
+        data[k] = reshape(data[k], shape)
 
     if isinstance(f, h5py.File):
         f.close()
@@ -96,7 +109,7 @@ def get_dataset_by_tid(tid: int, task: bool = False):
     return info, data
 
 
-def tree_of_file(filename: str):
+def get_tree_of_file(filename: str):
     """Get HDF5 dataset as a dict
 
     Args:
