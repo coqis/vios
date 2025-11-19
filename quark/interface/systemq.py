@@ -266,6 +266,7 @@ class Pulse(object):
 
     @classmethod
     def sample(cls, pulse: Waveform | np.ndarray, cali: dict = {}):
+        cali = cali.get('calibration', cali)
         if isinstance(pulse, Waveform) and cali:
             pulse >>= cali.get('delay', 0)
             pulse.sample_rate = cali['srate']
