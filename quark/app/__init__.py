@@ -64,7 +64,6 @@ class Super(object):
         """
         if filename and filename.endswith(('hdf5', 'zarr')):
             from ._db import get_tree_of_file
-
             d = get_tree_of_file(filename)
             if not d:
                 return
@@ -191,6 +190,9 @@ class Super(object):
             qs.delete(path)
         else:
             qs.remove(path)
+
+    def profile(self):
+        return self.qs().progress(profile=True)
 
 
 _sp = {}  # defaultdict(lambda: connect('QuarkServer', host, port))
