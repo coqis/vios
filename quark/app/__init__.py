@@ -25,6 +25,7 @@ Abstract: about app
     usefull functions for users to interact with `QuarkServer` and database
 """
 
+import subprocess
 import sys
 import time
 from collections import defaultdict
@@ -102,6 +103,23 @@ class Super(object):
         from quark.proxy import init
         init(path)
 
+    def sysinfo(self):
+        try:
+            msg = {}
+            result = subprocess.run([sys.executable, "-m", "pip", "list"],
+                                    timeout=5.0,
+                                    capture_output=True,
+                                    text=True)
+            if result.stdout:
+                msg = dict([tuple(l.split())[:2]  # ignore editable message
+                           for l in result.stdout.splitlines()[2:]])
+            if result.stderr:
+                logger.error(result.stderr)
+        except Exception as e:
+            logger.error(str(e))
+
+        return msg
+
     def __repr__(self):
         try:
             return f'connection to {self.addr}'
@@ -128,11 +146,13 @@ class Super(object):
 
         self._s = login(user, host, port)
 
-        for mth in ['start', 'query', 'write', 'read', 'checkpoint', 'track', 'getid', 'cancel', 'report', 'review']:
+        for mth in ['start', 'query', 'write', 'read', 'checkpoint', 'track', 'getid', 'cancel', 'report', 'review', 'tail']:
             setattr(self, mth, getattr(self._s, mth))
 
         for name in ['signup', 'submit']:
             setattr(self, name, globals()[name])
+
+        self.update('sys.info', self.sysinfo())
 
     def ping(self):
         return ping(self.qs())
