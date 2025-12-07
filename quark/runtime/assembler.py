@@ -53,7 +53,7 @@ def initialize(snapshot, **kwds):
     # ctx.reset(snapshot)
     # ctx.initial = kwds.get('initial', {'restore': []})
     ctx.bypass = kwds.get('bypass', {})
-    ctx._keys = kwds.get('keys', [])
+    # ctx._keys = kwds.get('keys', [])
     if kwds.get('main', False):
         return ctx
 

@@ -35,6 +35,7 @@ import numpy as np
 from loguru import logger
 from qlispc.arch.baqis import QuarkLocalConfig
 from waveforms import Waveform, WaveVStack, square, wave_eval
+from zee import query_dict_from_string
 
 try:
     from glib import stdlib
@@ -91,14 +92,28 @@ def split_circuit(circuit: list):
     return cmds, circ
 
 
+class Registry(object):
+    def __init__(self, source: dict):
+        self.source = source
+
+    def keys(self):
+        return list(self.source.keys())
+
+    def query(self, path: str):
+        try:
+            return query_dict_from_string(path, self.source)
+        except Exception as e:
+            return str(e)
+
+
 class Context(QuarkLocalConfig):
 
     def __init__(self, data) -> None:
         super().__init__(data)
         self.reset(data)
-        self.initial = {}
+        # self.initial = {}
         self.bypass = {}
-        self._keys = []
+        # self._keys = []
         self.opaques = stdlib.opaques
 
         self.__skip = ['Barrier', 'Delay', 'setBias', 'Pulse']
@@ -106,9 +121,11 @@ class Context(QuarkLocalConfig):
     def reset(self, snapshot):
         self._getGateConfig.cache_clear()
         if isinstance(snapshot, dict):
-            self._QuarkLocalConfig__driver = DictDriver(deepcopy(snapshot))
+            self._QuarkLocalConfig__driver = Registry(deepcopy(snapshot))
+            self._keys = list(snapshot.keys())
         else:
             self._QuarkLocalConfig__driver = snapshot
+            self._keys = list(snapshot().nodes)
 
     def snapshot(self):
         return self._QuarkLocalConfig__driver
@@ -235,7 +252,8 @@ class Pulse(object):
         Returns:
             np.ndarray: 校准后信号
         """
-        from wath.signal import correct_reflection, exp_decay_filter, predistort
+        from wath.signal import (correct_reflection, exp_decay_filter,
+                                 predistort)
 
         distortion_params = cali.get('distortion', {})
         if not distortion_params:
