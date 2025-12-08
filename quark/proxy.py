@@ -218,8 +218,12 @@ class Task(object):
         self.server.cancel(self.tid)
         # self.clear()
 
-    def circuit(self, sid: int = 0):
-        return self.step(sid, 'cirq')[0][-1]
+    def circuit(self, sid: int = 0, draw: bool = True):
+        circ = self.step(sid, 'cirq')[0][-1]
+        if draw:
+            from quark.circuit import QuantumCircuit
+            QuantumCircuit().from_qlisp(circ).draw()
+        return circ
 
     def step(self, index: int, stage: str = 'ini') -> dict:
         """step details
@@ -229,17 +233,18 @@ class Task(object):
             stage (str, optional): stage name. Defaults to 'raw'.
 
         Examples: stage values
+            - cirq: original qlisp circuit
             - ini: original instruction
             - raw: preprocessed instruction
             - ctx: compiler context
-            - debug: raw data returned from devices
+            - byp: filtered commands
             - trace: time consumption for each channel
 
         Returns:
             dict: _description_
         """
         review = ['cirq', 'ini', 'raw', 'ctx', 'byp']
-        track = ['debug', 'trace']
+        track = ['trace']
         if stage in review:
             r = self.server.review(self.tid, index)
         elif stage in track:

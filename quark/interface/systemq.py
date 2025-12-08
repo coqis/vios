@@ -1,6 +1,6 @@
 # MIT License
 
-# Copyright (c) 2021 YL Feng
+# Copyright (c) 2024 YL Feng
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,8 @@ import numpy as np
 from loguru import logger
 from qlispc.arch.baqis import QuarkLocalConfig
 from waveforms import Waveform, WaveVStack, square, wave_eval
-from zee import query_dict_from_string
+
+from .base import Registry
 
 try:
     from glib import stdlib
@@ -92,20 +93,6 @@ def split_circuit(circuit: list):
     return cmds, circ
 
 
-class Registry(object):
-    def __init__(self, source: dict):
-        self.source = source
-
-    def keys(self):
-        return list(self.source.keys())
-
-    def query(self, path: str):
-        try:
-            return query_dict_from_string(path, self.source)
-        except Exception as e:
-            return str(e)
-
-
 class Context(QuarkLocalConfig):
 
     def __init__(self, data) -> None:
@@ -134,7 +121,7 @@ class Context(QuarkLocalConfig):
         try:
             return self.snapshot().todict()
         except Exception as e:
-            return self.snapshot().dct
+            return self.snapshot().source
 
     def query(self, q, default=None):
         qr = super().query(q)
