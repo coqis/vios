@@ -22,21 +22,6 @@
 
 from zee import query_dict_from_string
 
-
-class Registry(object):
-    def __init__(self, source: dict):
-        self.source = source
-
-    def keys(self):
-        return list(self.source.keys())
-
-    def query(self, path: str):
-        try:
-            return query_dict_from_string(path, self.source)
-        except Exception as e:
-            return str(e)
-
-
 SCHEMA = {
     'type': 'object',
     'properties': {}
@@ -54,12 +39,21 @@ for k in ['drive', 'probe', 'acquire']:
                                }
 
 
-class Template(object):
-    def __init__(self):
-        pass
+class Registry(object):
+    def __init__(self, source: dict):
+        self.source = source
+
+    def keys(self):
+        return list(self.source.keys())
+
+    def query(self, path: str):
+        try:
+            return query_dict_from_string(path, self.source)
+        except Exception as e:
+            return str(e)
 
     @classmethod
-    def node(self):
+    def node(cls):
         return {'Measure': {'duration': 4e-06,
                             'amp': 0.019,
                             'frequency': 6964370000.0,
