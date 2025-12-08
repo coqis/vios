@@ -26,19 +26,12 @@ Abstract: **about proxy**
 """
 
 
-import asyncio
 import json
 import os
 import string
 import sys
-import textwrap
-import time
-from collections import defaultdict
-from functools import cached_property
-from multiprocessing.shared_memory import SharedMemory
 from pathlib import Path
 from queue import Empty, Queue
-from threading import Thread, current_thread
 
 import numpy as np
 from loguru import logger
@@ -105,46 +98,6 @@ def baser(number: str, base: int, table: str = TABLE):
     return sum([table.index(c) * base**i for i, c in enumerate(reversed(number))])
 
 
-try:
-    from IPython import get_ipython
-
-    shell = get_ipython().__class__.__name__
-    if shell == 'ZMQInteractiveShell':
-        from tqdm.notebook import tqdm  # jupyter notebook or qtconsole
-    else:
-        # ipython in terminal(TerminalInteractiveShell)
-        # None(Win)
-        # Nonetype(Mac)
-        from tqdm import tqdm
-except Exception as e:
-    # not installed or Probably IDLE
-    from tqdm import tqdm
-
-
-class Progress(tqdm):
-    bar_format = '{desc} {percentage:3.0f}%|{bar}|{n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}{postfix}]'
-
-    def __init__(self, desc='test', total=100, postfix='running', disable: bool = False, leave: bool = True):
-        super().__init__([], desc, total, postfix=postfix, disable=disable, leave=leave,
-                         ncols=None, colour='blue', bar_format=self.bar_format, position=0)
-
-    @property
-    def max(self):
-        return self.total
-
-    @max.setter
-    def max(self, value: int):
-        self.reset(value)
-
-    def goto(self, index: int):
-        self.n = index
-        self.refresh()
-
-    def finish(self, success: bool = True):
-        self.colour = 'green' if success else 'red'
-        # self.set_description_str(str(success))
-
-
 def math_demo(x, y):
     r"""Look at these formulas:
 
@@ -169,266 +122,6 @@ def math_demo(x, y):
 
     $P(A_i|B)=\frac{P(B|A_i)P(A_i)}{\sum_j P(B|A_j)P(A_j)}$
     """
-
-
-class Task(object):
-    """Interact with `QuarkServer` from the view of a `Task`, including tracking progress, getting result, plotting and debugging
-    """
-
-    handles = {}
-    counter = defaultdict(lambda: 0)
-    server = None
-
-    def __init__(self, task: dict, timeout: float | None = None, plot: bool = False) -> None:
-        """instantiate a task
-
-        Args:
-            task (dict): see **quark.app.submit**
-            timeout (float | None, optional): timeout for the task. Defaults to None.
-            plot (bool, optional): plot result in `quark studio` if True. Defaults to False.
-        """
-        self.task = task
-        self.timeout = timeout
-        self.plot = plot
-
-        self.data: dict[str, np.ndarray] = {}  # retrieved data from server
-        self.meta = {}  # meta info like axis
-        self.index = 0  # index of data already retrieved
-        self.last = 0  # last index of retrieved data
-
-    @cached_property
-    def name(self):
-        return self.task['meta'].get('name', 'Unknown')
-
-    @cached_property
-    def ctx(self):
-        return self.step(-9, 'ctx')
-
-    @cached_property
-    def rid(self):
-        from .app._db import get_record_by_tid
-        return get_record_by_tid(self.tid)[0]
-
-    def __repr__(self):
-        return f'{self.name}(tid={self.tid})'  # rid={self.rid},
-
-    def cancel(self):
-        """cancel the task
-        """
-        self.server.cancel(self.tid)
-        # self.clear()
-
-    def circuit(self, sid: int = 0, draw: bool = True):
-        circ = self.step(sid, 'cirq')[0][-1]
-        if draw:
-            from quark.circuit import QuantumCircuit
-            QuantumCircuit().from_qlisp(circ).draw()
-        return circ
-
-    def step(self, index: int, stage: str = 'ini') -> dict:
-        """step details
-
-        Args:
-            index (int): step index
-            stage (str, optional): stage name. Defaults to 'raw'.
-
-        Examples: stage values
-            - cirq: original qlisp circuit
-            - ini: original instruction
-            - raw: preprocessed instruction
-            - ctx: compiler context
-            - byp: filtered commands
-            - trace: time consumption for each channel
-
-        Returns:
-            dict: _description_
-        """
-        review = ['cirq', 'ini', 'raw', 'ctx', 'byp']
-        track = ['trace']
-        if stage in review:
-            r = self.server.review(self.tid, index)
-        elif stage in track:
-            r = self.server.track(self.tid, index)
-
-        try:
-            assert stage in review + track, f'stage should be {review + track}'
-            return r[stage]
-        except (AssertionError, KeyError) as e:
-            return f'{type(e).__name__}: {e}'
-        except Exception as e:
-            return r
-
-    def result(self):
-        try:
-            from .app._db import reshape
-            shape = self.meta['other']['shape']
-            data = {k: reshape(np.asarray(v), shape)
-                    for k, v in self.data.items()}
-        except Exception as e:
-            logger.error(f'Failed to reshape data: {e}')
-            data = self.data
-        return {'data': data} | {'meta': self.meta}
-
-    def run(self):
-        """submit the task to the `QuarkServer`
-        """
-        self.stime = time.time()  # start time
-        self.tid = self.server.submit(self.task)  # , keep=True)
-
-    def raw(self, sid: int):
-        return self.server.track(self.tid, sid, raw=True)
-
-    def status(self, key: str = 'runtime'):
-        if key == 'runtime':
-            return self.server.track(self.tid)
-        elif key == 'compile':
-            return self.server.apply('status', user='task')
-        else:
-            return 'supported arguments are: {rumtime, compile}'
-
-    def report(self, show=True):
-        r: dict = self.server.report(self.tid)
-        if show:
-            for k, v in r.items():
-                if k == 'size':
-                    continue
-                if k == 'exec':
-                    fv = ['error traceback']
-                    for sk, sv in v.items():
-                        _sv = sv.replace("\n", "\n    ")
-                        fv.append(f'--> {sk}: {_sv}')
-                    msg = '\r\n'.join(fv)
-                elif k == 'cirq':
-                    msg = v.replace("\n", "\n    ")
-                print(textwrap.fill(f'{k}: {msg}',
-                                    width=120,
-                                    replace_whitespace=False))
-        return r
-
-    def process(self, data: list[dict]):
-        for dat in data:
-            for k, v in dat.items():
-                if k in self.data:
-                    self.data[k].append(v)
-                else:
-                    self.data[k] = [v]
-
-    def fetch(self):
-        """result of the task
-        """
-        meta = True if not self.meta else False
-        res = self.server.fetch(self.tid, start=self.index, meta=meta)
-
-        if isinstance(res, str):
-            return self.data
-        elif isinstance(res, tuple):
-            if isinstance(res[0], str):
-                return self.data
-            data, self.meta = res
-        else:
-            data = res
-        self.last = self.index
-        self.index += len(data)
-        # data.clear()
-        self.process(data)
-
-        if self.plot:
-            from .app._viewer import plot
-            plot(self, not meta)
-
-        return self.data
-
-    def update(self):
-        try:
-            self.fetch()
-        except Exception as e:
-            logger.error(f'Failed to fetch result: {e}')
-
-        status = self.status()['status']
-
-        if status in ['Failed', 'Canceled']:
-            self.stop(self.tid, False)
-            return True
-        elif status in ['Running']:
-            self.progress.goto(self.index)
-            return False
-        elif status in ['Finished', 'Archived']:
-            self.progress.goto(self.progress.max)
-            if hasattr(self, 'app'):
-                self.app.save()
-            self.stop(self.tid)
-            self.fetch()
-            return True
-
-    def clear(self):
-        self.counter.clear()
-        for tid, handle in self.handles.items():
-            self.stop(tid)
-
-    def stop(self, tid: int, success: bool = True):
-        try:
-            self.progress.finish(success)
-            self.handles[tid].cancel()
-        except Exception as e:
-            pass
-
-    def bar(self, interval: float = 2.0, disable: bool = False, leave: bool = True):
-        """task progress. 
-
-        Tip: tips
-            - Reduce the interval if result is empty.
-            - If timeout is not None or not 0, task will be blocked, otherwise, the task will be executed asynchronously.
-
-        Args:
-            interval (float, optional): time period to retrieve data from `QuarkServer`. Defaults to 2.0.
-            disable (bool, optional): disable the progress bar. Defaults to False.
-            leave (bool, optional): whether to leave the progress bar after completion. Defaults to True
-
-        Raises:
-            TimeoutError: if TimeoutError is raised, the task progress bar will be stopped.
-        """
-        while True:
-            try:
-                status = self.status()['status']
-                if status in ['Pending']:
-                    time.sleep(interval)
-                    continue
-                elif status == 'Canceled':
-                    return 'Task canceled!'
-                else:
-                    self.progress = Progress(desc=str(self),
-                                             total=self.report(False)['size'],
-                                             postfix=current_thread().name,
-                                             disable=disable,
-                                             leave=leave)
-                    break
-            except Exception as e:
-                logger.error(
-                    f'Failed to get status: {e},{self.report(False)}')
-                if not hasattr(self.progress, 'disp'):
-                    break
-
-        if isinstance(self.timeout, float):
-            while True:
-                if self.timeout > 0 and (time.time() - self.stime > self.timeout):
-                    msg = f'Timeout: {self.timeout}'
-                    logger.warning(msg)
-                    raise TimeoutError(msg)
-                time.sleep(interval)
-                if self.update():
-                    break
-        else:
-            self.progress.clear()
-            self.refresh(interval)
-        self.progress.close()
-
-    def refresh(self, interval: float = 2.0):
-        self.progress.display()
-        if self.update():
-            self.progress.display()
-            return
-        self.handles[self.tid] = asyncio.get_running_loop(
-        ).call_later(interval, self.refresh, *(interval,))
 
 
 class QuarkProxy(object):
@@ -464,8 +157,9 @@ class QuarkProxy(object):
 
     @classmethod
     def proxy(cls):
-        import run.proxy as rp
         from importlib import reload
+
+        import run.proxy as rp
         return reload(rp)
 
     def get_circuit(self, timeout: float = 1.0):
@@ -512,7 +206,7 @@ class QuarkProxy(object):
         qasm = task['meta']['coqis']['qasm']
         logger.info(f"\n{'>' * 36}qasm:\n{qasm}\n{'>' * 36}qlisp:\n[{qlisp}]")
 
-        t: Task = submit(task)  # local machine
+        t = submit(task)  # local machine
         eid = task['meta']['coqis']['eid']
         user = task['meta']['coqis']['user']
         logger.warning(f'task {t.tid}[{eid}, {user}] will be executed!')

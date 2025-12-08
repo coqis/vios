@@ -20,21 +20,316 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-"""扩展各Scanner以用于submit
-"""
-
+import asyncio
+import textwrap
+import time
 from abc import ABC, abstractmethod
-from pathlib import Path
+from collections import defaultdict
+from functools import cached_property
+from threading import current_thread
 
-import dill
 import numpy as np
-from kernel.terminal.scan import App
-from kernel.terminal.scan import Scan as _Scan
 from loguru import logger
-from qos_tools.experiment.scanner2 import Scanner as _Scanner
 from tqdm import tqdm
-from waveforms.dicttree import flattenDictIter
-from waveforms.scan_iter import StepStatus
+
+try:
+    from IPython import get_ipython
+
+    shell = get_ipython().__class__.__name__
+    if shell == 'ZMQInteractiveShell':
+        from tqdm.notebook import tqdm  # jupyter notebook or qtconsole
+    else:
+        # ipython in terminal(TerminalInteractiveShell)
+        # None(Win)
+        # Nonetype(Mac)
+        from tqdm import tqdm
+except Exception as e:
+    # not installed or Probably IDLE
+    from tqdm import tqdm
+
+
+class Progress(tqdm):
+    bar_format = '{desc} {percentage:3.0f}%|{bar}|{n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}{postfix}]'
+
+    def __init__(self, desc='test', total=100, postfix='running', disable: bool = False, leave: bool = True):
+        super().__init__([], desc, total, postfix=postfix, disable=disable, leave=leave,
+                         ncols=None, colour='blue', bar_format=self.bar_format, position=0)
+
+    @property
+    def max(self):
+        return self.total
+
+    @max.setter
+    def max(self, value: int):
+        self.reset(value)
+
+    def goto(self, index: int):
+        self.n = index
+        self.refresh()
+
+    def finish(self, success: bool = True):
+        self.colour = 'green' if success else 'red'
+        # self.set_description_str(str(success))
+
+
+class Task(object):
+    """Interact with `QuarkServer` from the view of a `Task`, including tracking progress, getting result, plotting and debugging
+    """
+
+    handles = {}
+    counter = defaultdict(lambda: 0)
+    server = None
+
+    def __init__(self, task: dict, timeout: float | None = None, plot: bool = False) -> None:
+        """instantiate a task
+
+        Args:
+            task (dict): see **quark.app.submit**
+            timeout (float | None, optional): timeout for the task. Defaults to None.
+            plot (bool, optional): plot result in `quark studio` if True. Defaults to False.
+        """
+        self.task = task
+        self.timeout = timeout
+        self.plot = plot
+
+        self.data: dict[str, np.ndarray] = {}  # retrieved data from server
+        self.meta = {}  # meta info like axis
+        self.index = 0  # index of data already retrieved
+        self.last = 0  # last index of retrieved data
+
+    @cached_property
+    def name(self):
+        return self.task['meta'].get('name', 'Unknown')
+
+    @cached_property
+    def ctx(self):
+        return self.step(-9, 'ctx')
+
+    @cached_property
+    def rid(self):
+        from ._db import get_record_by_tid
+        return get_record_by_tid(self.tid)[0]
+
+    def __repr__(self):
+        return f'{self.name}(tid={self.tid})'  # rid={self.rid},
+
+    def cancel(self):
+        """cancel the task
+        """
+        self.server.cancel(self.tid)
+        # self.clear()
+
+    def circuit(self, sid: int = 0, draw: bool = True):
+        circ = self.step(sid, 'cirq')[0][-1]
+        if draw:
+            from quark.circuit import QuantumCircuit
+            QuantumCircuit().from_qlisp(circ).draw_simply()
+        return circ
+
+    def step(self, index: int, stage: str = 'ini') -> dict:
+        """step details
+
+        Args:
+            index (int): step index
+            stage (str, optional): stage name. Defaults to 'raw'.
+
+        Examples: stage values
+            - cirq: original qlisp circuit
+            - ini: original instruction
+            - raw: preprocessed instruction
+            - ctx: compiler context
+            - byp: filtered commands
+            - trace: time consumption for each channel
+
+        Returns:
+            dict: _description_
+        """
+        review = ['cirq', 'ini', 'raw', 'ctx', 'byp']
+        track = ['trace']
+        if stage in review:
+            r = self.server.review(self.tid, index)
+        elif stage in track:
+            r = self.server.track(self.tid, index)
+
+        try:
+            assert stage in review + track, f'stage should be {review + track}'
+            return r[stage]
+        except (AssertionError, KeyError) as e:
+            return f'{type(e).__name__}: {e}'
+        except Exception as e:
+            return r
+
+    def result(self):
+        try:
+            from ._db import reshape
+            shape = self.meta['other']['shape']
+            data = {k: reshape(np.asarray(v), shape)
+                    for k, v in self.data.items()}
+        except Exception as e:
+            logger.error(f'Failed to reshape data: {e}')
+            data = self.data
+        return {'data': data} | {'meta': self.meta}
+
+    def run(self):
+        """submit the task to the `QuarkServer`
+        """
+        self.stime = time.time()  # start time
+        self.tid = self.server.submit(self.task)  # , keep=True)
+
+    def raw(self, sid: int):
+        return self.server.track(self.tid, sid, raw=True)
+
+    def status(self, key: str = 'runtime'):
+        if key == 'runtime':
+            return self.server.track(self.tid)
+        elif key == 'compile':
+            return self.server.apply('status', user='task')
+        else:
+            return 'supported arguments are: {rumtime, compile}'
+
+    def report(self, show=True):
+        r: dict = self.server.report(self.tid)
+        if show:
+            for k, v in r.items():
+                if k == 'size':
+                    continue
+                if k == 'exec':
+                    fv = ['error traceback']
+                    for sk, sv in v.items():
+                        _sv = sv.replace("\n", "\n    ")
+                        fv.append(f'--> {sk}: {_sv}')
+                    msg = '\r\n'.join(fv)
+                elif k == 'cirq':
+                    msg = v.replace("\n", "\n    ")
+                print(textwrap.fill(f'{k}: {msg}',
+                                    width=120,
+                                    replace_whitespace=False))
+        return r
+
+    def process(self, data: list[dict]):
+        for dat in data:
+            for k, v in dat.items():
+                if k in self.data:
+                    self.data[k].append(v)
+                else:
+                    self.data[k] = [v]
+
+    def fetch(self):
+        """result of the task
+        """
+        meta = True if not self.meta else False
+        res = self.server.fetch(self.tid, start=self.index, meta=meta)
+
+        if isinstance(res, str):
+            return self.data
+        elif isinstance(res, tuple):
+            if isinstance(res[0], str):
+                return self.data
+            data, self.meta = res
+        else:
+            data = res
+        self.last = self.index
+        self.index += len(data)
+        # data.clear()
+        self.process(data)
+
+        if self.plot:
+            from ._viewer import plot
+            plot(self, not meta)
+
+        return self.data
+
+    def update(self):
+        try:
+            self.fetch()
+        except Exception as e:
+            logger.error(f'Failed to fetch result: {e}')
+
+        status = self.status()['status']
+
+        if status in ['Failed', 'Canceled']:
+            self.stop(self.tid, False)
+            return True
+        elif status in ['Running']:
+            self.progress.goto(self.index)
+            return False
+        elif status in ['Finished', 'Archived']:
+            self.progress.goto(self.progress.max)
+            if hasattr(self, 'app'):
+                self.app.save()
+            self.stop(self.tid)
+            self.fetch()
+            return True
+
+    def clear(self):
+        self.counter.clear()
+        for tid, handle in self.handles.items():
+            self.stop(tid)
+
+    def stop(self, tid: int, success: bool = True):
+        try:
+            self.progress.finish(success)
+            self.handles[tid].cancel()
+        except Exception as e:
+            pass
+
+    def bar(self, interval: float = 2.0, disable: bool = False, leave: bool = True):
+        """task progress. 
+
+        Tip: tips
+            - Reduce the interval if result is empty.
+            - If timeout is not None or not 0, task will be blocked, otherwise, the task will be executed asynchronously.
+
+        Args:
+            interval (float, optional): time period to retrieve data from `QuarkServer`. Defaults to 2.0.
+            disable (bool, optional): disable the progress bar. Defaults to False.
+            leave (bool, optional): whether to leave the progress bar after completion. Defaults to True
+
+        Raises:
+            TimeoutError: if TimeoutError is raised, the task progress bar will be stopped.
+        """
+        while True:
+            try:
+                status = self.status()['status']
+                if status in ['Pending']:
+                    time.sleep(interval)
+                    continue
+                elif status == 'Canceled':
+                    return 'Task canceled!'
+                else:
+                    self.progress = Progress(desc=str(self),
+                                             total=self.report(False)['size'],
+                                             postfix=current_thread().name,
+                                             disable=disable,
+                                             leave=leave)
+                    break
+            except Exception as e:
+                logger.error(
+                    f'Failed to get status: {e},{self.report(False)}')
+                if not hasattr(self.progress, 'disp'):
+                    break
+
+        if isinstance(self.timeout, float):
+            while True:
+                if self.timeout > 0 and (time.time() - self.stime > self.timeout):
+                    msg = f'Timeout: {self.timeout}'
+                    logger.warning(msg)
+                    raise TimeoutError(msg)
+                time.sleep(interval)
+                if self.update():
+                    break
+        else:
+            self.progress.clear()
+            self.refresh(interval)
+        self.progress.close()
+
+    def refresh(self, interval: float = 2.0):
+        self.progress.display()
+        if self.update():
+            self.progress.display()
+            return
+        self.handles[self.tid] = asyncio.get_running_loop(
+        ).call_later(interval, self.refresh, *(interval,))
 
 
 class TaskMixin(ABC):
@@ -79,197 +374,66 @@ class TaskMixin(ABC):
         """
         yield
 
-    def run(self, dry_run=False, quiet=False):
-        try:
-            self.toserver.run()
-        except:
-            import kernel
-            from kernel.sched.sched import generate_task_id, get_system_info
-            self.runtime.prog.task_arguments = (), {}
-            self.runtime.prog.meta_info['arguments'] = {}
-            self.runtime.id = generate_task_id()
-            self.runtime.user = None
-            self.runtime.system_info = {}  # get_system_info()
-            kernel.submit(self, dry_run=dry_run)
-            if not dry_run and not quiet:
-                self.bar()
+    def run(self):
+        pass
 
-    def result(self, reshape=True):
-        d = super(App, self).result(reshape)
-        try:
-            if self.toserver:
-                for k, v in self.toserver.result().items():
-                    try:
-                        dk = np.asarray(v)
-                        d[k] = dk.reshape([*self.shape, *dk[0].shape])
-                    except Exception as e:
-                        logger.error(f'Failed to fill result: {e}')
-                        d[k] = v
-                d['mqubits'] = self.toserver.title
-        except Exception as e:
-            logger.error(f'Failed to get result: {e}')
-        return d
+    # def result(self, reshape=True):
+    #     d = super(App, self).result(reshape)
+    #     try:
+    #         if self.toserver:
+    #             for k, v in self.toserver.result().items():
+    #                 try:
+    #                     dk = np.asarray(v)
+    #                     d[k] = dk.reshape([*self.shape, *dk[0].shape])
+    #                 except Exception as e:
+    #                     logger.error(f'Failed to fill result: {e}')
+    #                     d[k] = v
+    #             d['mqubits'] = self.toserver.title
+    #     except Exception as e:
+    #         logger.error(f'Failed to get result: {e}')
+    #     return d
 
-    def cancel(self):
-        try:
-            self.toserver.cancel()
-        except:
-            super(App, self).cancel()
+    # def cancel(self):
+    #     try:
+    #         self.toserver.cancel()
+    #     except:
+    #         super(App, self).cancel()
 
-    def bar(self, interval: float = 2.0):
-        try:
-            self.toserver.bar(interval)
-        except:
-            super(App, self).bar()
+    # def bar(self, interval: float = 2.0):
+    #     try:
+    #         self.toserver.bar(interval)
+    #     except:
+    #         super(App, self).bar()
 
-    def save(self):
-        from kernel.sched.sched import session
-        from storage.models import Record
-        with session() as db:
-            record = db.get(Record, self.record_id)
-            record.data = self.result(self.reshape_record)
+    # def dumps(self, filepath: Path, localhost: bool = True):
+    #     """将线路写入文件
 
-    def dumps(self, filepath: Path, localhost: bool = True):
-        """将线路写入文件
+    #     Args:
+    #         filepath (Path): 线路待写入的文件路径
 
-        Args:
-            filepath (Path): 线路待写入的文件路径
+    #     Raises:
+    #         TypeError: 线路由StepStatus得到
 
-        Raises:
-            TypeError: 线路由StepStatus得到
+    #     Returns:
+    #         list: 线路中的比特列表
+    #     """
+    #     qubits = []
+    #     circuits = []
+    #     with open(filepath, 'w', encoding='utf-8') as f:
+    #         for step in tqdm(self.circuits(), desc='CircuitExpansion'):
+    #             if isinstance(step, StepStatus):
+    #                 cc = step.kwds['circuit']
+    #                 if localhost:
+    #                     f.writelines(str(dill.dumps(cc)) + '\n')
+    #                 else:
+    #                     circuits.append(cc)
 
-        Returns:
-            list: 线路中的比特列表
-        """
-        qubits = []
-        circuits = []
-        with open(filepath, 'w', encoding='utf-8') as f:
-            for step in tqdm(self.circuits(), desc='CircuitExpansion'):
-                if isinstance(step, StepStatus):
-                    cc = step.kwds['circuit']
-                    if localhost:
-                        f.writelines(str(dill.dumps(cc))+'\n')
-                    else:
-                        circuits.append(cc)
-
-                    if step.iteration == 0:
-                        # 获取线路中读取比特列表
-                        for ops in cc:
-                            if isinstance(ops[0], tuple) and ops[0][0] == 'Measure':
-                                qubits.append((ops[0][1], ops[1]))
-                else:
-                    raise TypeError('Wrong type of step!')
-            self.shape = [i+1 for i in step.index]
-        return qubits, circuits
-
-
-class Scan(_Scan, TaskMixin):
-    """扩展Scanner3, 可直接替换原Scanner3
-    """
-    def __init__(self, name, *args, mixin=None, **kwds):
-        super().__init__(name, *args, mixin=mixin, **kwds)
-        self.patches = {}
-
-    def variables(self) -> dict[str, list[tuple]]:
-        loops = {}
-        for k, v in self.loops.items():
-            loops[k] = [(k, v, 'au')]
-        return loops
-
-    def circuits(self):
-        from waveforms.scan.base import _try_to_call as try_to_call
-
-        self.assemble()
-        for step in self.scan():
-            for k, v in self.mapping.items():
-                self.set(k, step.kwds[v])
-                if not isinstance(step.kwds[v], dict):
-                    self.patches.setdefault((k, v), []).append(step.kwds[v])
-            circ = try_to_call(self.circuit, (), step.kwds)
-            step.kwds['circuit'] = circ
-            yield step
-        # self.assemble()
-        # for step in self.scan():
-        #     for k, v in self.mapping.items():
-        #         self.set(k, step.kwds[v])
-        #     yield step
-
-    def resolve(self):
-        """
-        Examples: 解析获取变量定义
-            >>> loops
-            ({'x': [('x',  array([-0.5, -0.4, -0.3, -0.2, -0.1,  0. ,  0.1,  0.2,  0.3,  0.4,  0.5]), 'au'),
-                    ('__tmp_0__', array([-0.5, -0.4, -0.3, -0.2, -0.1,  0. ,  0.1,  0.2,  0.3,  0.4,  0.5]), 'au'),
-                    ('__tmp_1__', array([-0.5, -0.4, -0.3, -0.2, -0.1,  0. ,  0.1,  0.2,  0.3,  0.4,  0.5]), au'),
-                    ('__tmp_2__', array([-0.5, -0.4, -0.3, -0.2, -0.1,  0. ,  0.1,  0.2,  0.3,  0.4,  0.5]), 'au'),
-                    ('__tmp_3__',  array([-0.5, -0.4, -0.3, -0.2, -0.1,  0. ,  0.1,  0.2,  0.3,  0.4,  0.5]), 'au')],
-            'frequency': [('frequency', array([-2000000.,  2000000.]), 'au')]},
-            >>> deps
-            ['<Q7.bias>=<x.__tmp_0__',
-            '<Q25.bias>=<x.__tmp_1__',
-            '<Q37.bias>=<x.__tmp_2__',
-            '<Q17.bias>=<x.__tmp_3__'])
-        """
-        loops = self.variables()
-        deps = []
-        for axis, value in loops.items():
-            _val = []
-            for k, v in self.patches.items():
-                self.patches[k] = np.unique(v)
-                target, tmpvar = k
-                if len(self.patches[k]) == len(value[0][1]):
-                    _val.append((tmpvar, self.patches[k], 'au'))
-                    deps.append(f'<{target}>=<{axis}.{tmpvar}>')
-                elif len(self.patches[k]) == 1:
-                    dep = f'<{target}>={self.patches[k][0]}'
-                    if dep not in deps:
-                        deps.append(dep)
-            value.extend(_val)
-        return loops, deps
-
-    def dependencies(self) -> list[str]:
-        deps = []
-        for k, v in self.mapping.items():
-            if isinstance(self[v], str):
-                deps.append(f'<{k}>="{self[v]}"')
-            elif isinstance(self[v], dict):
-                for _k, _v in flattenDictIter(self[v]):
-                    if isinstance(_v, str):
-                        deps.append(f'<{k}.{_k}>="{_v}"')
-                    else:
-                        deps.append(f'<{k}.{_k}>={_v}')
-            else:
-                deps.append(f'<{k}>={self[v]}')
-        return deps
-
-
-class Scanner(_Scanner, TaskMixin):
-    """扩展Scanner2, 可直接替换原Scanner2
-    """
-    def __init__(self, name: str, qubits: list[int], scanner_name: str = '', **kw):
-        super().__init__(name, qubits, scanner_name, **kw)
-
-    def variables(self) -> dict[str, list[tuple]]:
-        loops = {}
-        for k, v in self.sweep_setting.items():
-            if isinstance(k, tuple):
-                loops['temp'] = list(zip(k, v, ['au']*len(k)))
-            else:
-                if 'rb' in self.name.lower() and k == 'gate':
-                    continue
-                loops[k] = [(k, v, 'au')]
-        return loops
-
-    def circuits(self):
-        for step in self.scan():
-            # self.update({v_dict['addr']: step.kwds[k]
-            #              for k, v_dict in self.sweep_config.items()})
-            yield step
-
-    def resolve(self):
-        loops = self.variables()
-        deps = []
-        return loops, deps
-
-    def dependencies(self) -> list[str]:
-        return super().dependencies()
+    #                 if step.iteration == 0:
+    #                     # 获取线路中读取比特列表
+    #                     for ops in cc:
+    #                         if isinstance(ops[0], tuple) and ops[0][0] == 'Measure':
+    #                             qubits.append((ops[0][1], ops[1]))
+    #             else:
+    #                 raise TypeError('Wrong type of step!')
+    #         self.shape = [i + 1 for i in step.index]
+    #     return qubits, circuits

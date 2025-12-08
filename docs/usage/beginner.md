@@ -72,7 +72,7 @@ icon: material/badge-account-horizontal
 ### ***测量环境***
 - 安装[**Python**](https://python.org/)
 
-    进入桌面并创建基于python3.12的工作环境**qlab**(1)。**注意**：python3.12不必事先安装好！
+    进入桌面并创建基于python3.14的工作环境**qlab**(1)。**注意**：python3.14不必事先安装好！
     { .annotate }
         
     1. :material-folder: qlab
@@ -82,7 +82,7 @@ icon: material/badge-account-horizontal
 
     ```bash
     cd ~/Desktop
-    uv init --python 3.12 --vcs none qlab
+    uv init --python 3.14 --vcs none qlab
     ```
 
     进入qlab目录

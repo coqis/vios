@@ -39,11 +39,10 @@ from loguru import logger
 from srpc import connect, loads
 from zee import flatten_dict
 
-from quark.proxy import Task
-
 from . import _dp as dp
 from ._db import get_tid_by_rid
 from ._recipe import Recipe
+from ._task import Task
 
 
 class Super(object):

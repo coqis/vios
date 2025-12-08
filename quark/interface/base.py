@@ -35,3 +35,76 @@ class Registry(object):
             return query_dict_from_string(path, self.source)
         except Exception as e:
             return str(e)
+
+
+SCHEMA = {
+    'type': 'object',
+    'properties': {}
+}
+
+for k in ['drive', 'probe', 'acquire']:
+    SCHEMA['properties'][k] = {'type': 'object',
+                               'properties': {'address': {'type': 'string'},
+                                              'delay': {'type': 'number'},
+                                              'start': {'type': 'number'},
+                                              'end': {'type': 'number'},
+                                              'offset': {'type': 'number'}
+                                              },
+                               'required': ['address']
+                               }
+
+
+class Template(object):
+    def __init__(self):
+        pass
+
+    @classmethod
+    def node(self):
+        return {'Measure': {'duration': 4e-06,
+                            'amp': 0.019,
+                            'frequency': 6964370000.0,
+                            'weight': 'const(1)',
+                            'phi': -2.636421695283167,
+                            'threshold': 8502633802.265065,
+                            'ring_up_amp': 0.024,
+                            'ring_up_waist': 0.006,
+                            'ring_up_time': 6e-07
+                            },
+                'R': {'width': 2.1e-08,
+                      'amp': 0.5140937118030053,
+                      'frequency': 4473337704.6286335,
+                      'delta': 947840.2529478334,
+                      'plateau': 2.1e-08
+                      },
+                'probe': {'address': 'ZW_AD2.CH1.Waveform',
+                          'delay': 5e-0,  # optional
+                          'start': 0,  # optional
+                          'end': 98e-6  # optional
+                          },
+                'drive': {'address': 'ZW_AWG_13.CH2.Waveform',
+                          'delay': 2.52e-07,  # optional
+                          'end': 98e-6  # optional
+                          },
+                'acquire': {'address': 'ZW_AD2.CH13.IQ',
+                            'TRIGD': 5.222e-06  # optional
+                            },
+                'flux': {'address': 'board_all.CH10.Waveform',
+                         'delay': 0,
+                         'distortion': {
+                             'decay': [],
+                             'expfit': [],
+                             'multfit': []
+                         }
+                         },
+                }
+
+    @classmethod
+    def validate(cls, instance: dict):
+        from jsonschema import validate
+
+        try:
+            validate(instance, schema=SCHEMA)
+            return True
+        except Exception as e:
+            print(e)
+            return False

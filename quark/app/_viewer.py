@@ -26,8 +26,8 @@ import numpy as np
 from loguru import logger
 from srpc import connect
 
-from quark.app import ping
-from quark.proxy import Task
+from . import ping
+from ._task import Task
 
 _vs = {'viewer': connect('QuarkViewer', port=2086),
        'studio': connect('QuarkViewer', port=1086)}
