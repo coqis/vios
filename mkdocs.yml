@@ -38,20 +38,32 @@ nav:
   - API Reference:
       # - systemq: systemq/
       - modules: modules/
+      
+  - Releases:
+    - Changelog: usage/quark/notes.md
 
 
 theme:
   palette:
     # Palette toggle for light mode
-    - scheme: default
+    # - media: "(prefers-color-scheme)"
+    #   toggle:
+    #     icon: material/brightness-7
+    #     name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: blue
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
-    # Palette toggle for dark mode
-    - scheme: slate
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: orange
       toggle:
         icon: material/brightness-4
-        name: Switch to light mode
+        name: Switch to system preference
 
 
   name: material

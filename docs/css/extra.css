@@ -79,3 +79,14 @@
 }
 
 
+/* 亮色模式 */
+[data-md-color-scheme="default"] {
+  --md-footer-bg-color: #4351af;
+  --md-footer-fg-color: #1f2937;
+}
+
+/* 暗色模式 */
+[data-md-color-scheme="slate"] {
+  --md-footer-bg-color: #0f172a;
+  --md-footer-fg-color: #cbd5e1;
+}
