@@ -47,11 +47,10 @@ except Exception as e:
 
 try:
     try:
-        from glib import DictDriver, get_arch, qcompile, sample_waveform
+        from glib import get_arch, qcompile, sample_waveform
     except ImportError as e:
         from qlispc import get_arch
         from qlispc.kernel_utils import qcompile, sample_waveform
-        from qlispc.namespace import DictDriver
 except Exception as e:
     logger.critical('qlispc error', e)
     raise e
