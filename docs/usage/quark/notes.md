@@ -1,8 +1,8 @@
 # 更新日志
 
-???+ note "更新"
-    ``` bash
-    quark udpate
+???+ note "更新命令"
+    ``` console
+    $ quark udpate
     ```
 
 <!-- 本日志遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 规范，   -->
@@ -25,5 +25,6 @@
 
 ---
 
-## [**2026-01-19**] sysinfo
+
+### [**2026-01-19**] sysinfo
 - ✨**每次***server启动时，更新`usr.sysinfo`字段（记录python库版本信息）。
