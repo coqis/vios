@@ -34,7 +34,11 @@ Abstract: about envelope
 """
 
 
+import subprocess
+import sys
+
 import dill
+from loguru import logger
 
 from quark.driver import compress, decompress
 from quark.interface import Pulse
@@ -126,3 +130,22 @@ try:
         print_code_with_title(mdev, "Device in QuarkServer")
 except Exception as e:
     pass
+
+
+def sysinfo() -> dict:
+    msg = {}
+
+    try:
+        result = subprocess.run([sys.executable, "-m", "pip", "list"],
+                                timeout=5.0,
+                                capture_output=True,
+                                text=True)
+        if result.stdout:
+            msg = dict([tuple(l.split())[:2]  # ignore editable message
+                        for l in result.stdout.splitlines()[2:]])
+        if result.stderr:
+            logger.error(result.stderr)
+    except Exception as e:
+        logger.error(str(e))
+
+    return msg

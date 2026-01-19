@@ -102,23 +102,6 @@ class Super(object):
         from quark.proxy import init
         init(path)
 
-    def sysinfo(self):
-        try:
-            msg = {}
-            result = subprocess.run([sys.executable, "-m", "pip", "list"],
-                                    timeout=5.0,
-                                    capture_output=True,
-                                    text=True)
-            if result.stdout:
-                msg = dict([tuple(l.split())[:2]  # ignore editable message
-                           for l in result.stdout.splitlines()[2:]])
-            if result.stderr:
-                logger.error(result.stderr)
-        except Exception as e:
-            logger.error(str(e))
-
-        return msg
-
     def __repr__(self):
         try:
             return f'connection to {self.addr}'
@@ -150,8 +133,6 @@ class Super(object):
 
         for name in ['signup', 'submit']:
             setattr(self, name, globals()[name])
-
-        self.update('sys.info', self.sysinfo())
 
     def ping(self):
         return ping(self.qs())
