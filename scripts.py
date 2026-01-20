@@ -49,7 +49,7 @@ def generate(src: list[Path], dst: str = 'reference', included: str = 'quark', e
         # if xpattern.search(str(path)) or not ipattern.search(str(path)):
         #     print('e'*10, path)
         #     continue
-        print('>' * 10, path)
+        
         module_path = path.relative_to(_src).with_suffix("")
         doc_path = path.relative_to(_src).with_suffix(".md")
         full_doc_path = Path(dst, doc_path)
@@ -63,6 +63,8 @@ def generate(src: list[Path], dst: str = 'reference', included: str = 'quark', e
             full_doc_path = full_doc_path.with_name("index.md")
         elif parts[-1].startswith("_"):
             continue
+
+        print('>' * 10, path)
 
         nav_parts = [f"{mod_symbol} {part}" for part in parts]
         nav[tuple(nav_parts)] = doc_path.as_posix()

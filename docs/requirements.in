@@ -13,6 +13,7 @@ mkdocs-video
 
 mkdocs-jupyter
 inset
+quarkstudio
 quarkcircuit
 matplotlib
 networkx

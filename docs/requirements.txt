@@ -22,6 +22,8 @@ charset-normalizer==3.4.2
     # via requests
 click==8.2.1
     # via mkdocs
+clirk==1.4.4
+    # via quarkstudio
 colorama==0.4.6
     # via
     #   click
@@ -57,7 +59,7 @@ griffe==1.7.3
     # via mkdocstrings-python
 idna==3.10
     # via requests
-inset
+inset==1.1.4
     # via -r ./docs/requirements.in
 ipykernel==6.29.5
     # via mkdocs-jupyter
@@ -174,6 +176,8 @@ mkdocstrings==0.29.1
     #   mkdocstrings-python
 mkdocstrings-python==1.16.10
     # via mkdocstrings
+msgpack==1.1.2
+    # via srpc
 nbclient==0.10.2
     # via nbconvert
 nbconvert==7.16.6
@@ -196,6 +200,7 @@ numpy==2.2.6
     #   matplotlib
     #   quarkcircuit
     #   scipy
+    #   srpc
 packaging==25.0
     # via
     #   ipykernel
@@ -213,12 +218,16 @@ pathspec==0.12.1
     # via mkdocs
 pillow==11.2.1
     # via matplotlib
+pip==25.3
+    # via clirk
 platformdirs==4.3.8
     # via
     #   jupyter-core
     #   mkdocs-get-deps
 prompt-toolkit==3.0.51
     # via ipython
+proxy-py==2.4.10
+    # via clirk
 psutil==7.0.0
     # via ipykernel
 pure-eval==0.2.3
@@ -261,12 +270,17 @@ pyzmq==26.4.0
     #   jupyter-client
 quarkcircuit==0.3.1
     # via -r ./docs/requirements.in
+quarkstudio==7.2.2
+    # via -r ./docs/requirements.in
 referencing==0.36.2
     # via
     #   jsonschema
     #   jsonschema-specifications
 requests==2.32.3
-    # via mkdocs-material
+    # via
+    #   clirk
+    #   mkdocs-material
+    #   quarkstudio
 rpds-py==0.25.1
     # via
     #   jsonschema
@@ -279,6 +293,10 @@ smmap==5.0.2
     # via gitdb
 soupsieve==2.7
     # via beautifulsoup4
+srpc==4.7.1
+    # via
+    #   clirk
+    #   quarkstudio
 stack-data==0.6.3
     # via ipython
 tinycss2==1.4.0
