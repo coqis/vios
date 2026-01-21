@@ -27,4 +27,5 @@
 
 
 ### [**2026-01-19**] sysinfo
-- ✨**每次***server启动时，更新`usr.sysinfo`字段（记录python库版本信息）。
+- ✨**每次**server启动时，更新`usr.sysinfo`字段（记录python库版本信息）。
+- **glib**(`glib/__init__.py`)中增加采样函数`sample_waveform`以方便修改诸如失真计算等逻辑

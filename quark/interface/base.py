@@ -50,7 +50,7 @@ class Registry(object):
         try:
             return query_dict_from_string(path, self.source)
         except Exception as e:
-            return str(e)
+            return f'Failed to query {path}: {e}'
 
     @classmethod
     def node(cls):

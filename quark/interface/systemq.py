@@ -229,7 +229,7 @@ class Pulse(object):
 
     @classmethod
     def correct(cls, points: np.ndarray, cali: dict = {}) -> np.ndarray:
-        """失真校准，从 `qlispc.kernel_utils` 复制而来
+        """失真校准，从 `qlispc.kernel_utils` 复制而来。仅测试用，不会在实验中调用。
 
         Args:
             points (np.ndarray): 输入信号
