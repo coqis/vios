@@ -99,6 +99,11 @@ class Super(object):
         open_terminal(command, cwd)
 
     def init(self, path: str | Path = Path.cwd() / 'quark.json'):
+        """path to quark.json
+
+        Args:
+            path (str | Path, optional): path to quark.json. Defaults to Path.cwd()/'quark.json'.
+        """
         from quark.proxy import init
         init(path)
 
@@ -125,6 +130,15 @@ class Super(object):
         return self.qs().user_exists
 
     def login(self, user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088):
+        """login to the server as **user**
+
+        Args:
+            user (str, optional): name of the user(same as signup). Defaults to 'baqis'.
+            verbose (bool, optional): print login info if True. Defaults to True.
+
+        Returns:
+            _type_: a connection to the server
+        """
 
         self._s = login(user, host, port)
 
@@ -138,6 +152,14 @@ class Super(object):
         return ping(self.qs())
 
     def snapshot(self, tid: int = 0):
+        """get snapshot of a task with given **tid** or **rid**
+
+        Args:
+            tid (int, optional): task id. Defaults to 0.
+
+        Returns:
+            dict: _description_
+        """
         if tid and self.addr[0] == '127.0.0.1':
             if tid < 1e10:
                 return get_config_by_rid(tid)
@@ -146,6 +168,17 @@ class Super(object):
             return self.qs().snapshot(tid=tid)
 
     def result(self, tid: int, **kwds):
+        """load data with given **task id(tid)**
+
+        Args:
+            tid (int): task id
+
+        Keyword Arguments: Kwds
+            plot (bool, optional): plot the result in QuarkStudio after the data is loaded(1D or 2D).
+
+        Returns:
+            dict: data & meta
+        """
         if self.addr[0] == '127.0.0.1':
             if tid < 1e10:
                 return get_data_by_rid(tid, **kwds)
@@ -163,12 +196,29 @@ class Super(object):
             return data
 
     def lookup(self, start: str = '', end: str = '', name: str = ''):
+        """lookup records in the database
+
+        Args:
+            start (str, optional): start date. Defaults to ''.
+            end (str, optional): end date. Defaults to ''.
+            name (str, optional): task name. Defaults to ''.
+
+        Returns:
+            _type_: _description_
+        """
         if self.addr[0] == '127.0.0.1':
             return lookup(start, end, name)
         else:
             return lookup(records=self.qs().load(0))
 
     def update(self, path: str, value, failed: list = []):
+        """update cfg
+
+        Args:
+            path (str): dot-separated keys like 'usr.station.name'
+            value (_type_): value to update
+            failed (list, optional): _description_. Defaults to [].
+        """
         qs = self.qs()
         rs: str = qs.update(path, value)
         if rs.startswith('Failed'):
@@ -185,6 +235,11 @@ class Super(object):
             qs.update(path, v)
 
     def delete(self, path: str):
+        """delete an item from the cfg
+
+        Args:
+            path (str): dot-separated keys like 'usr.station.name'
+        """
         qs = self.qs()
         if path.count('.') > 0:
             qs.delete(path)
@@ -205,15 +260,15 @@ def ping(qs):
 
 
 def login(user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088, verbose: bool = True):
-    """login to the server as **user**
+    # """login to the server as **user**
 
-    Args:
-        user (str, optional): name of the user(same as signup). Defaults to 'baqis'.
-        verbose (bool, optional): print login info if True. Defaults to True.
+    # Args:
+    #     user (str, optional): name of the user(same as signup). Defaults to 'baqis'.
+    #     verbose (bool, optional): print login info if True. Defaults to True.
 
-    Returns:
-        _type_: a connection to the server
-    """
+    # Returns:
+    #     _type_: a connection to the server
+    # """
     uid = f'{current_thread().name}: {user}@{host}:{port}'
     try:
         qs = _sp[uid]
@@ -478,17 +533,17 @@ def get_data_by_rid(rid: int, **kwds):
 
 
 def get_data_by_tid(tid: int, **kwds) -> dict:
-    """load data with given **task id(tid)**
+    # """load data with given **task id(tid)**
 
-    Args:
-        tid (int): task id
+    # Args:
+    #     tid (int): task id
 
-    Keyword Arguments: Kwds
-        plot (bool, optional): plot the result in QuarkStudio after the data is loaded(1D or 2D).
+    # Keyword Arguments: Kwds
+    #     plot (bool, optional): plot the result in QuarkStudio after the data is loaded(1D or 2D).
 
-    Returns:
-        dict: data & meta
-    """
+    # Returns:
+    #     dict: data & meta
+    # """
     from ._db import get_dataset_by_tid
     from ._viewer import plot
 
@@ -517,14 +572,14 @@ def get_data_by_tid(tid: int, **kwds) -> dict:
 
 
 def update_remote_wheel(wheel: str, index: str | Path, host: str = '127.0.0.1', sudo: bool = False):
-    """update the package on remote device
+    # """update the package on remote device
 
-    Args:
-        wheel (str): package to be installed.
-        index (str): location of required packages (downloaded from PyPI).
-        host (str, optional): IP address of remote device. Defaults to '127.0.0.1'.
-        sudo (bool, optional): used on Mac or Linux. Defaults to False.
-    """
+    # Args:
+    #     wheel (str): package to be installed.
+    #     index (str): location of required packages (downloaded from PyPI).
+    #     host (str, optional): IP address of remote device. Defaults to '127.0.0.1'.
+    #     sudo (bool, optional): used on Mac or Linux. Defaults to False.
+    # """
     if not host:
         return None, 'host address is required!'
 
