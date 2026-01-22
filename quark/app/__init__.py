@@ -46,13 +46,12 @@ from ._task import Task
 
 
 class Super(object):
+    """Super Admin Tool to interact with `QuarkServer` and database and so on"""
+
     def __init__(self):
         pass
 
     def tree(self, filename: str = '', d: dict = {}, name="root"):
-        from rich.console import Console
-        from rich.tree import Tree
-
         """print nested dict as a tree structure
 
         Args:
@@ -62,6 +61,10 @@ class Super(object):
         Returns:
             _type_: _description_
         """
+
+        from rich.console import Console
+        from rich.tree import Tree
+
         if filename and filename.endswith(('hdf5', 'zarr')):
             from ._db import get_tree_of_file
             d = get_tree_of_file(filename)
@@ -99,7 +102,7 @@ class Super(object):
         open_terminal(command, cwd)
 
     def init(self, path: str | Path = Path.cwd() / 'quark.json'):
-        """path to quark.json
+        """set path to quark.json
 
         Args:
             path (str | Path, optional): path to quark.json. Defaults to Path.cwd()/'quark.json'.
@@ -130,7 +133,7 @@ class Super(object):
         return self.qs().user_exists
 
     def login(self, user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088):
-        """login to the server as **user**
+        """login to the QuarkServer
 
         Args:
             user (str, optional): name of the user(same as signup). Defaults to 'baqis'.
@@ -145,14 +148,39 @@ class Super(object):
         for mth in ['start', 'query', 'write', 'read', 'checkpoint', 'track', 'getid', 'cancel', 'report', 'review', 'tail']:
             setattr(self, mth, getattr(self._s, mth))
 
-        for name in ['signup', 'submit']:
-            setattr(self, name, globals()[name])
+        # for name in ['signup', 'submit']:
+        #     setattr(self, name, globals()[name])
+    
+    def signup(self, user: str, system: str, **kwds):
+        """register a new **user** on the **system**
+
+        Args:
+            user (str): name of the user
+            system (str): name of the system(i.e. the name of the cfg file)
+        """
+        signup(user, system, **kwds)
+
+    def submit(self, task: dict, block: bool = False, **kwds):
+        """submit a task to a backend
+
+        Args:
+            task (dict): description of a task
+            block (bool, optional): block until the task is done if True
+
+        Keyword Arguments: Kwds
+            preview (list): real time display of the waveform
+            plot (bool): plot the result if True(1D or 2D), defaults to False.
+            backend (connection): connection to a backend, defaults to local machine.
+        Raises:
+            TypeError: _description_
+        """
+        return submit(task, block, **kwds)
 
     def ping(self):
         return ping(self.qs())
 
     def snapshot(self, tid: int = 0):
-        """get snapshot of a task with given **tid** or **rid**
+        """get snapshot of a task with given id(**tid** or **rid**)
 
         Args:
             tid (int, optional): task id. Defaults to 0.
@@ -167,8 +195,19 @@ class Super(object):
         else:
             return self.qs().snapshot(tid=tid)
 
+    def rollback(self, tid: int):
+        """rollback the cfg with given given id(**tid** or **rid**)
+
+        Args:
+            tid (int): task id
+        """
+        if tid:
+            rollback(tid)
+        else:
+            raise ValueError('rid or tid is required!')
+
     def result(self, tid: int, **kwds):
-        """load data with given **task id(tid)**
+        """load data with given id(**tid** or **rid**)
 
         Args:
             tid (int): task id
@@ -212,7 +251,7 @@ class Super(object):
             return lookup(records=self.qs().load(0))
 
     def update(self, path: str, value, failed: list = []):
-        """update cfg
+        """update item in the cfg
 
         Args:
             path (str): dot-separated keys like 'usr.station.name'
@@ -283,63 +322,63 @@ def login(user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088, verbos
 
 
 def signup(user: str, system: str, **kwds):
-    """register a new **user** on the **system**
+    # """register a new **user** on the **system**
 
-    Args:
-        user (str): name of the user
-        system (str): name of the system(i.e. the name of the cfg file)
-    """
+    # Args:
+    #     user (str): name of the user
+    #     system (str): name of the system(i.e. the name of the cfg file)
+    # """
     qs = s.qs()
     logger.info(qs.adduser(user, system, **kwds))
     qs.login(user)  # relogin
 
 
 def submit(task: dict, block: bool = False, **kwds):
-    """submit a task to a backend
+    # """submit a task to a backend
 
-    Args:
-        task (dict): description of a task
-        block (bool, optional): block until the task is done if True
+    # Args:
+    #     task (dict): description of a task
+    #     block (bool, optional): block until the task is done if True
 
-    Keyword Arguments: Kwds
-        preview (list): real time display of the waveform
-        plot (bool): plot the result if True(1D or 2D), defaults to False.
-        backend (connection): connection to a backend, defaults to local machine.
+    # Keyword Arguments: Kwds
+    #     preview (list): real time display of the waveform
+    #     plot (bool): plot the result if True(1D or 2D), defaults to False.
+    #     backend (connection): connection to a backend, defaults to local machine.
 
-    Raises:
-        TypeError: _description_
+    # Raises:
+    #     TypeError: _description_
 
-    Example: description of a task
-        ``` {.py3 linenums="1"}
-        {
-            'meta': {'name': f'{filename}: /s21',  # s21 is the name of the dataset
-                     # extra arguments for compiler and others
-                     'other': {'shots': 1234, 'signal': 'iq', 'autorun': False}},
-            'body': {'step': {'main': ['WRITE', ('freq', 'offset', 'power')],  # main is reserved
-                              'step2': ['WRITE', 'trig'],
-                              'step3': ['WAIT', 0.8101],  # wait for some time in the unit of second
-                              'READ': ['READ', 'read'],
-                              'step5': ['WAIT', 0.202]},
-                     'init': [('Trigger.CHAB.TRIG', 0, 'any')],  # initialization of the task
-                     'post': [('Trigger.CHAB.TRIG', 0, 'any')],  # reset of the task
-                     'cirq': ['cc'],  # list of circuits in the type of qlisp
-                     'rule': ['⟨gate.Measure.Q1.params.frequency⟩ = ⟨Q0.setting.LO⟩+⟨Q2.setting.LO⟩+1250'],
-                     'loop': {'freq': [('Q0.setting.LO', np.linspace(0, 10, 2), 'Hz'),
-                                       ('gate.Measure.Q1.index',  np.linspace(0, 1, 2), 'Hz')],
-                              'offset': [('M0.setting.TRIGD', np.linspace(0, 10, 1), 'Hz'),
-                                         ('Q2.setting.LO', np.linspace(0, 10, 1), 'Hz')],
-                              'power': [('Q3.setting.LO', np.linspace(0, 10, 15), 'Hz'),
-                                        ('Q4.setting.POW', np.linspace(0, 10, 15), 'Hz')],
-                              'trig': [('Trigger.CHAB.TRIG', 0, 'any')],
-                              'read': ['NA10.CH1.TraceIQ', 'M0.setting.POW']
-                            }
-                    },
-        }
-        ```
+    # Example: description of a task
+    #     ``` {.py3 linenums="1"}
+    #     {
+    #         'meta': {'name': f'{filename}: /s21',  # s21 is the name of the dataset
+    #                  # extra arguments for compiler and others
+    #                  'other': {'shots': 1234, 'signal': 'iq', 'autorun': False}},
+    #         'body': {'step': {'main': ['WRITE', ('freq', 'offset', 'power')],  # main is reserved
+    #                           'step2': ['WRITE', 'trig'],
+    #                           'step3': ['WAIT', 0.8101],  # wait for some time in the unit of second
+    #                           'READ': ['READ', 'read'],
+    #                           'step5': ['WAIT', 0.202]},
+    #                  'init': [('Trigger.CHAB.TRIG', 0, 'any')],  # initialization of the task
+    #                  'post': [('Trigger.CHAB.TRIG', 0, 'any')],  # reset of the task
+    #                  'cirq': ['cc'],  # list of circuits in the type of qlisp
+    #                  'rule': ['⟨gate.Measure.Q1.params.frequency⟩ = ⟨Q0.setting.LO⟩+⟨Q2.setting.LO⟩+1250'],
+    #                  'loop': {'freq': [('Q0.setting.LO', np.linspace(0, 10, 2), 'Hz'),
+    #                                    ('gate.Measure.Q1.index',  np.linspace(0, 1, 2), 'Hz')],
+    #                           'offset': [('M0.setting.TRIGD', np.linspace(0, 10, 1), 'Hz'),
+    #                                      ('Q2.setting.LO', np.linspace(0, 10, 1), 'Hz')],
+    #                           'power': [('Q3.setting.LO', np.linspace(0, 10, 15), 'Hz'),
+    #                                     ('Q4.setting.POW', np.linspace(0, 10, 15), 'Hz')],
+    #                           'trig': [('Trigger.CHAB.TRIG', 0, 'any')],
+    #                           'read': ['NA10.CH1.TraceIQ', 'M0.setting.POW']
+    #                         }
+    #                 },
+    #     }
+    #     ```
 
-    Todo: fixes
-        * `bugs`
-    """
+    # Todo: fixes
+    #     * `bugs`
+    # """
 
     if 'backend' in kwds:  # from master
         qs = kwds['backend']
@@ -363,26 +402,24 @@ def submit(task: dict, block: bool = False, **kwds):
     return t
 
 
-def rollback(rid: int = 0, tid: int = 0):
-    """rollback the parameters with given task id and checkpoint name
+def rollback(tid: int):
+    # """rollback the parameters with given task id and checkpoint name
 
-    Args:
-        tid (int): task id
-    """
+    # Args:
+    #     tid (int): task id
+    # """
     qs = s.qs()
 
     try:
-        if rid:
-            config = get_config_by_rid(rid)
-        elif tid:
-            config = get_config_by_tid(tid)
+        if tid < 1e10:  # rid
+            config = get_config_by_rid(tid)
         else:
-            raise ValueError('one of rid and tid is required!')
+            config = get_config_by_tid(tid)
         qs.clear()
         for k, v in config.items():
             qs.create(k, v)
     except Exception as e:
-        logger.error(f'Failed to rollback: {e}')
+        logger.error(f'Failed to rollback for {tid}: {e}')
 
 
 def diff(new: int | dict, old: int | dict, fmt: str = 'dict'):
@@ -524,7 +561,7 @@ def get_config_by_tid(tid: int) -> dict:
 
         return loads(commit.tree[file.name].data_stream.read().decode())
     except Exception as e:
-        logger.error(f'Failed to get config: {e}')
+        logger.error(f'Failed to get config for {tid}: {e}')
         return {}
 
 

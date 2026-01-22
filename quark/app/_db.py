@@ -173,7 +173,7 @@ def get_commit_by_tid(tid: int = 0):
 
         return commit, file
     except Exception as e:
-        logger.error(f'Failed to get commit: {e}')
+        logger.error(f'Failed to get commit for {tid}: {e}')
 
 
 def get_tid_by_rid(rid: int):
@@ -184,14 +184,14 @@ def get_record_by_tid(tid: int, table: str = 'task'):
     try:
         return db().execute(f'select * from {table} where tid="{tid}"').fetchall()[0]
     except Exception as e:
-        logger.error(f'Record not found: {e}!')
+        logger.error(f'Record {tid} not found: {e}!')
 
 
 def get_record_by_rid(rid: int, table: str = 'task'):
     try:
         return db().execute(f'select * from {table} where id="{rid}"').fetchall()[0]
     except Exception as e:
-        logger.error(f'Record not found: {e}!')
+        logger.error(f'Record {rid} not found: {e}!')
 
 
 def get_record_list_by_name(task: str, start: str, end: str, table: str = 'task'):
