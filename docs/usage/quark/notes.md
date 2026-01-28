@@ -25,6 +25,10 @@
 
 ---
 
+### [**2026-01-28**] sysinfo
+- [✨] 新增支持传递gates文件内容至server端，用于跨机传输gates库
+- [✨] 新增采样函数`sample_waveform`，位于`glib/gates/`中对应的模块，如`u3`，默认每次reload
+
 
 ### [**2026-01-22**] sysinfo
 - [✨] 新增**每次**server启动时，更新`usr.sysinfo`字段（记录python库版本信息）
