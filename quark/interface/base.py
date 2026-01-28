@@ -20,9 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from pathlib import Path
-import types
 import sys
+import types
+from pathlib import Path
+
 from zee import query_dict_from_string
 
 SCHEMA = {
@@ -111,10 +112,10 @@ def load_module_from_code(code: str, module_name: str = 'xlib') -> types.ModuleT
     # code = Path(file_path).read_text(encoding="utf-8")
 
     module = types.ModuleType(module_name)
-    module.__file__ = 'file_path'
+    module.__file__ = 'glib/gates'
     module.__package__ = module_name.rpartition('.')[0]
     module.__loader__ = None
 
-    # sys.modules[module_name] = module
+    sys.modules[module_name] = module
     exec(code, module.__dict__)
     return module
