@@ -208,8 +208,11 @@ class Recipe(object):
         """
         self.update()
 
-        _lib = Path(self.lib).read_text(
-            'utf-8') if self.lib.endswith('.py') else self.lib
+        if self.lib.endswith('.py'):
+            _lib = {'file': self.lib.split('glib')[1],
+                    'code': Path(self.lib).read_text('utf-8')}
+        else:
+            _lib = self.lib
         return {'meta': {'name': f'{self.filename}:/{self.name}',
                          'priority': self.priority,
                          'other': {'shots': self.shots,

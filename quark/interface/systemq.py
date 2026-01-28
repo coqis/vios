@@ -38,6 +38,8 @@ from waveforms import Waveform, WaveVStack, square, wave_eval
 
 from .base import Registry
 
+LIBCACHE = []
+
 try:
     from glib import stdlib
 except Exception as e:
@@ -56,9 +58,23 @@ except Exception as e:
     raise e
 
 
-def get_gate_lib(lib: str):
+def get_gate_lib(lib: str | dict):
     if lib:
-        return reload(import_module(lib)).lib
+        mp = lib
+        if isinstance(lib, dict):
+            lp = Path(sys.modules['glib'].__file__).parent / lib['file']
+            lh = hash(lib['code'])
+            if lh not in LIBCACHE:
+                print(f'Updating gate lib: {lp}')
+                LIBCACHE.append(lh)
+                with open(lp, 'w', encoding='utf-8') as f:
+                    f.write(lib['code'])
+                if len(LIBCACHE) > 1000:
+                    LIBCACHE.pop(0)
+            mp = 'glib.' + lib['file'].replace('\\', '/').replace('/', '.')
+            mp = mp.removesuffix('.py')
+
+        return reload(import_module(mp)).lib
     else:
         return stdlib
 
