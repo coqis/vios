@@ -209,7 +209,7 @@ class Recipe(object):
         self.update()
 
         if self.lib.endswith('.py'):
-            _lib = {'file': self.lib.split('glib')[1],
+            _lib = {'file': Path(self.lib).name,
                     'code': Path(self.lib).read_text('utf-8')}
         else:
             _lib = self.lib
