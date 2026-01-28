@@ -20,6 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+from pathlib import Path
+import types
+import sys
 from zee import query_dict_from_string
 
 SCHEMA = {
@@ -102,3 +105,16 @@ class Registry(object):
         except Exception as e:
             print(e)
             return False
+
+
+def load_module_from_code(code: str, module_name: str = 'xlib') -> types.ModuleType:
+    # code = Path(file_path).read_text(encoding="utf-8")
+
+    module = types.ModuleType(module_name)
+    module.__file__ = 'file_path'
+    module.__package__ = module_name.rpartition('.')[0]
+    module.__loader__ = None
+
+    # sys.modules[module_name] = module
+    exec(code, module.__dict__)
+    return module
