@@ -54,7 +54,7 @@ The following requirements ***MUST*** be met before starting to use:
     |name|version|check|
     |---|---|---|
     |:material-git: [git](https://git-scm.com/)|~|`git -v`|
-    |:material-language-python: [python](https://python.org)|3.12|`python -V`|
+    |:material-language-python: [python](https://python.org)|>=3.12|`python -V`|
 </div>
 
 <!-- First, download [**SystemQ**](https://gitee.com/baqis/systemq.git), and it is highly recommended to use :material-git:[git](https://git-scm.com/).  -->

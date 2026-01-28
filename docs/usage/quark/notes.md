@@ -26,6 +26,8 @@
 ---
 
 
-### [**2026-01-19**] sysinfo
-- ✨**每次**server启动时，更新`usr.sysinfo`字段（记录python库版本信息）。
-- ✨**glib**(`glib/__init__.py`)中增加采样函数`sample_waveform`以方便修改诸如失真计算等逻辑
+### [**2026-01-22**] sysinfo
+- [✨] 新增**每次**server启动时，更新`usr.sysinfo`字段（记录python库版本信息）
+- [✨] 新增采样函数`sample_waveform`以方便修改失真等逻辑(位于`glib/__init__.py`)
+- [🔧] 更新`s`的`api`及对应的文档（见API Reference）
+- [🐛] 修复`translate`表查询过程中默认值失效的bug
