@@ -207,11 +207,14 @@ class Recipe(object):
             _type_: 任务描述，详见**submit**
         """
         self.update()
+
+        _lib = Path(self.lib).read_text(
+            'utf-8') if self.lib.endswith('.py') else self.lib
         return {'meta': {'name': f'{self.filename}:/{self.name}',
                          'priority': self.priority,
                          'other': {'shots': self.shots,
                                    'signal': self.signal,
-                                   'lib': self.lib,
+                                   'lib': _lib,
                                    'arch': self.arch,
                                    'align_right': self.align_right,
                                    'timeout': float(self.timeout),
