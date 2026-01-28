@@ -119,7 +119,7 @@ class Task(object):
         self.server.cancel(self.tid)
         # self.clear()
 
-    def circuit(self, sid: int = 0, draw: bool = True):
+    def circuit(self, sid: int = 0, draw: bool = False):
         circ = self.step(sid, 'cirq')[0][-1]
         if draw:
             from quark.circuit import QuantumCircuit
