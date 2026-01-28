@@ -64,7 +64,7 @@ def schedule(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
     Args:
         sid (int): step index(starts from 0)
         instruction (dict): where commands are saved
-        circuit (list): qlisp circuit(@HK)
+        circuit (list): qlisp circuit
 
     Returns:
         tuple: instruction, extra arguments

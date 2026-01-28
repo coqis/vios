@@ -135,9 +135,9 @@ def postprocess(result: dict):
     coqis = result['meta'].get('coqis', {})
     # savefig(result)
     if not coqis.get('eid', ''):  # to sqc
-        return QuarkProxy.process(result, False)
+        return QuarkProxy.process(result)  # , False)
 
-    res = QuarkProxy.process(result, True)
+    res = QuarkProxy.process(result)  # , True)
     rshot = 0
     post_data = {"task_id": coqis['eid'],
                  "status": res['status'].lower(),

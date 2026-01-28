@@ -28,6 +28,7 @@ Abstract: **about proxy**
 
 import json
 import os
+import random
 import string
 import sys
 from pathlib import Path
@@ -228,13 +229,28 @@ class QuarkProxy(object):
             return f'No data found for {tid}!'
 
     @classmethod
-    def process(cls, result: dict, dropout: bool = False):
+    def process(cls, result: dict):
+
+        def dropout(data: dict, num: int = 0):
+            while num > 0:
+
+                tmp = np.cumsum(list(data.values()))
+                val = np.random.randint(tmp[-1] + 1)
+                idx = np.searchsorted(tmp, val)
+                key = list(data)[idx]  # random.choice
+
+                data[key] -= 1
+                if data[key] == 0:
+                    data.pop(key, 0)
+
+                num -= 1
+
         meta = result['meta']
         coqis = meta.get('coqis', {})
         status = 'Failed'
         if meta['status'] in ['Finished', 'Archived']:
             try:
-                # data: list[dict] = result['data']['count']
+                shots = coqis.get('shots', 1024)
                 signal = meta['other'].get('signal', 'count')
                 data: list[np.ndarray] = result['data'][signal]
                 status = 'Finished'
@@ -252,6 +268,8 @@ class QuarkProxy(object):
                     base = tuple(kv[:-1] - 1)  # from 1&2 to 0&1
                     dres[base] = dres.get(base, 0) + int(kv[-1])
 
+            dropout(dres, sum(dres.values()) - shots)
+
             try:
                 if coqis['correct']:
                     cdres = cls.proxy().process(dres, meta['other']['measure'])
@@ -264,6 +282,7 @@ class QuarkProxy(object):
         ret = {'count': {''.join((str(i) for i in k)): v for k, v in dres.items()},
                'corrected': {''.join((str(i) for i in k)): v for k, v in cdres.items()},
                'chip': coqis.get('chip', ''),
+               'shots': shots,
                'circuit': coqis.get('circuit', ''),
                'transpiled': coqis.get('qasm', ''),
                'qlisp': coqis.get('qlisp', ''),
