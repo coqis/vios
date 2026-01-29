@@ -25,9 +25,10 @@
 
 ---
 
-### [**2026-01-28**] sysinfo
+### [**2026-01-29**] sysinfo
 - [✨] 新增支持传递gates文件内容至server端，用于跨机传输gates库
 - [✨] 新增采样函数`sample_waveform`，位于`glib/gates/`中对应的模块，如`u3`，默认每次reload
+- [🐛] 修复`circuit`查询接口，即使编译失败时也可返回线路
 
 
 ### [**2026-01-22**] sysinfo
