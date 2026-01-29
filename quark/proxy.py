@@ -247,10 +247,11 @@ class QuarkProxy(object):
 
         meta = result['meta']
         coqis = meta.get('coqis', {})
+        shots = coqis.get('shots', 1024)
+
         status = 'Failed'
         if meta['status'] in ['Finished', 'Archived']:
             try:
-                shots = coqis.get('shots', 1024)
                 signal = meta['other'].get('signal', 'count')
                 data: list[np.ndarray] = result['data'][signal]
                 status = 'Finished'
