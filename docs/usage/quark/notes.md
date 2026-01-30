@@ -25,13 +25,17 @@
 
 ---
 
-### [**2026-01-29**] sysinfo
-- [✨] 新增支持传递gates文件内容至server端，用于跨机传输gates库
-- [✨] 新增采样函数`sample_waveform`，位于`glib/gates/`中对应的模块，如`u3`，默认每次reload
+### [**2026-01-30**] canvas host
+- [✨] 新增设置`etc.canvas.host`，可指定在另一台电脑画图
 - [🐛] 修复`circuit`查询接口，即使编译失败时也可返回线路
 
 
-### [**2026-01-22**] sysinfo
+### [**2026-01-27**] lib text
+- [✨] 新增支持传递gates文件内容至server端，用于跨机传输gates库
+- [✨] 新增采样函数`sample_waveform`，位于`gates`模块，如`u3`，默认每次reload
+
+
+### [**2026-01-22**] sys info
 - [✨] 新增**每次**server启动时，更新`usr.sysinfo`字段（记录python库版本信息）
 - [✨] 新增采样函数`sample_waveform`以方便修改失真等逻辑(位于`glib/__init__.py`)
 - [🔧] 更新`s`的`api`及对应的文档（见API Reference）
