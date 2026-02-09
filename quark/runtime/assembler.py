@@ -168,7 +168,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
 
             # get sample rate from device
             dev, channel, quantity = _target.split('.')
-            srate = query(f'dev.{dev}.srate')
+            srate = -1.0 if dev == 'Timer' else query(f'dev.{dev}.srate')
 
             # context设置, 用于calculator.calculate
             try:
