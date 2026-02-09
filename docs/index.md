@@ -113,7 +113,7 @@ task = {
 Now you can run the task with the following script
 
 ```python
-tid = tmgr.run(task, repeat=1) # shots = repeat*1024
+tid = tmgr.run(task)
 print(tid) # tid means task id
 # output: 2024041917095371986
 ```

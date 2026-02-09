@@ -715,7 +715,7 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = True,
         if isinstance(value[1], (Waveform, np.ndarray)):
             _target = value[-1]['target']
             if _target.split('.')[0] in keys:
-                value[-1]['filter'] = []
+                # value[-1]['filter'] = []
 
                 calibration = value[-1].get('calibration', {})
 
@@ -740,9 +740,10 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = True,
                     except Exception as e:
                         logger.error(f'{target, e}')
 
-                xt = np.arange(start, end, 1 / srate) / unit
-                (_, _, cmd), _ = calculate('main', target, value)
-                wf[_target] = cmd[1] + index * offset
+                # xt = np.arange(start, end, 1 / srate) / unit
+                _, line = calculate('main', target, value, {'filter': keys})
+                xt = line[_target]['xdata'] / unit
+                wf[_target] = line[_target]['ydata'] + index * offset
                 index += 1
 
                 ax.plot(xt, wf[_target])

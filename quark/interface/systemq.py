@@ -466,6 +466,8 @@ class Workflow(object):
         elif isinstance(func, np.ndarray):
             # 失真校准
             # logger.debug(f"Calculate waveform distortion for {kwds['target']}")
+            if not func.flags.writeable:
+                func = func.copy()
             func[:] = Pulse.correct(func, cali=cali)
             pulse = func
         else:
