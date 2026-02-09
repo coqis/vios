@@ -48,7 +48,7 @@ class Registry(object):
         self.source = source
 
     def keys(self):
-        return list(self.source.keys())
+        return list(self.source)
 
     def query(self, path: str):
         try:
