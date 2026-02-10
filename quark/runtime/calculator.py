@@ -26,14 +26,14 @@ from loguru import logger
 from quark.interface import Pulse, Workflow
 
 
-def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
+def calculate(step: str, target: str, cmd: dict, canvas: dict = {}) -> tuple:
     """preprocess each command such as predistortion and sampling
 
     Args:
         step (str): step name, e.g., main/step1/...
         target (str): hardware channel like **AWG.CH1.Offset**
-        cmd (list): command, in the type of tuple **(ctype, value, unit, kwds)**, where ctype
-            must be one of **WRITE/READ/WAIT**, see `assembler.preprocess` for more details. 
+        cmd (dict): command like **{'ctype': ctype, 'value': value, 'unit': unit, 'cargs': cargs}**,\
+            where ctype must be one of **WRITE/READ/WAIT**. 
         canvas (dict): `QuarkCanvas` settings from `etc.canvas`
 
     Returns:
@@ -41,10 +41,13 @@ def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
 
     Example:
         ``` {.py3 linenums="1"}
-        calculate('main', 'AWG.CH1.Waveform',('WRITE',square(100e-6),'au',{'calibration':{}}))
+        calculate('main', 'AWG.CH1.Waveform',{'ctype': 'WRITE', 'value': square(100e-6), 'unit': 'au', 'cargs': {'calibration': {}}})
         ```
     """
-    ctype, value, unit, kwds = cmd
+    ctype = cmd['ctype']
+    value = cmd['value']
+    unit = cmd['unit']
+    kwds = cmd['cargs']
 
     line = {}
 
@@ -53,16 +56,16 @@ def calculate(step: str, target: str, cmd: list, canvas: dict = {}) -> tuple:
 
     isobject = target.startswith(tuple(kwds.get('filter', ['Waveform'])))
 
-    cmd[1], delay, offset, srate = Workflow.calculate(
+    cmd['value'], delay, offset, srate = Workflow.calculate(
         value, **(kwds | {'isobject': isobject}))
 
     # _value[:] = _value * 1000
 
-    cmd[-1] = {'sid': kwds['sid'], 'target': kwds['target']}
+    cmd['cargs'] = {'sid': kwds['sid'], 'target': kwds['target']}
 
     try:
-        opts = cmd[-1] | canvas | {'type': target.split('.')[-1]}
-        line = sample(cmd[1], delay, offset, srate, **opts)
+        opts = cmd['cargs'] | canvas | {'type': target.split('.')[-1]}
+        line = sample(cmd['value'], delay, offset, srate, **opts)
     except Exception as e:
         logger.error(
             f"{'>' * 30}'  failed to calculate waveform', {e}, {type(e).__name__}")
@@ -93,6 +96,7 @@ def sample(pulse, delay: float = 0.0, offset: float = 0.0, srate: float = 1e9, *
     if kwds['target'].split('.')[0] not in kwds.get('filter', []):
         return {}
 
+    print(kwds['target'], pulse)
     ptype = kwds.get('type', 'Waveform')
     if ptype.endswith(('Waveform', 'Offset')):
         t1, t2 = kwds.get('range', [0, 100e-6])

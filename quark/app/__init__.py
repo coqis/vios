@@ -707,13 +707,13 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = True,
 
     ax: Axes = plt.subplot() if not ax else ax
     wf, index = {}, 0
-    for target, value in deepcopy(cmds).items():
-        if isinstance(value[1], (Waveform, np.ndarray)):
-            _target = value[-1]['target']
+    for target, cmd in deepcopy(cmds).items():
+        if isinstance(cmd['value'], (Waveform, np.ndarray)):
+            _target = cmd['cargs']['target']
             if _target.split('.')[0] in keys:
                 # value[-1]['filter'] = []
 
-                calibration = value[-1].get('calibration', {})
+                calibration = cmd['cargs'].get('calibration', {})
 
                 if srate:
                     calibration['srate'] = srate
@@ -737,7 +737,7 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = True,
                         logger.error(f'{target, e}')
 
                 # xt = np.arange(start, end, 1 / srate) / unit
-                _, line = calculate('main', target, value, {'filter': keys})
+                _, line = calculate('main', target, cmd, {'filter': keys})
                 xt = line[_target]['xdata'] / unit
                 wf[_target] = line[_target]['ydata'] + index * offset
                 index += 1

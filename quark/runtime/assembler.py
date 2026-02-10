@@ -96,7 +96,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
 
     Args:
         sid (int): step index
-        instruction (dict[str, list[str, str, Any, str]]): see cccompile
+        instruction (dict[str, list[str, str, Any, str]]): see `schedule`
 
     Raises:
         TypeError: srate should be float, defaults to -1.0
@@ -131,7 +131,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                 logger.warning(f'Unknown command type: {ctype}!')
                 continue
 
-            kwds = {'sid': sid, 'target': target,
+            cargs = {'sid': sid, 'target': target,
                     # 'shared': ctx.correct(query('etc.server.shared'), 0),
                     'filter': ctx.correct(query('etc.driver.filter'), [])}
 
@@ -172,7 +172,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
 
             # context设置, 用于calculator.calculate
             try:
-                kwds['calibration'] = {
+                cargs['calibration'] = {
                     'srate': srate,
                     'end': context['waveform']['LEN'],
                     'offset': context.get('setting', {}).get('OFFSET', 0)
@@ -183,18 +183,20 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                 if quantity == 'Waveform':
                     end = ctx.query('station', {}).get(
                         'waveform_length', 98e-6)
-                kwds['calibration'] = context | {'end': end, 'srate': srate}
-            cmd = [ctype, value, unit, kwds]
+                cargs['calibration'] = context | {'end': end, 'srate': srate}
+            # cmd = [ctype, value, unit, kwds]
+            cmd = {'ctype': ctype, 'value': value, 'unit': unit, 'cargs': cargs}
 
             # Merge commands with the same channel
             try:
                 if _target in scmd and quantity == 'Waveform':
-                    if isinstance(scmd[_target][1], str):
-                        scmd[_target][1] = Pulse.fromstr(scmd[_target][1])
-                    if isinstance(cmd[1], str):
-                        cmd[1] = Pulse.fromstr(cmd[1])
-                    scmd[_target][1] += cmd[1]
-                    scmd[_target][-1].update(cmd[-1])
+                    if isinstance(scmd[_target]['value'], str):
+                        scmd[_target]['value'] = Pulse.fromstr(
+                            scmd[_target]['value'])
+                    if isinstance(cmd['value'], str):
+                        cmd['value'] = Pulse.fromstr(cmd['value'])
+                    scmd[_target]['value'] += cmd['value']
+                    scmd[_target]['cargs'].update(cmd['cargs'])
                 else:
                     scmd[_target] = cmd
             except Exception as e:
