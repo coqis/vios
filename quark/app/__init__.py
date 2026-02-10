@@ -1,6 +1,6 @@
 # MIT License
 
-# Copyright (c) 2021 YL Feng
+# Copyright (c) 2021 YL Feng <fengyulong@pku.org.cn>
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -285,44 +285,18 @@ class Super(object):
         """
         return preview(cmds, keys, calibrate, start, end, srate, unit, offset, space, ax)
 
-    def tree(self, filename: str = '', d: dict = {}, name="root"):
-        """Print nested dict as a tree structure
+    def diff(self, new: int | dict, old: int | dict, fmt: str = 'dict'):
+        """Compare two snapshots or records
 
         Args:
-            filename (str, optional): hdf5 or zarr file. Defaults to ''.
-            d (dict): dict to be printed as tree.
-            name (str, optional): root name. Defaults to "root".
+            new (int | dict): new snapshot or record id or dict
+            old (int | dict): old snapshot or record id or dict
+            fmt (str, optional): format of the output. Defaults to 'dict'.
 
         Returns:
             _type_: _description_
         """
-
-        from rich.console import Console
-        from rich.tree import Tree
-
-        if filename and filename.endswith(('hdf5', 'zarr')):
-            from ._db import get_tree_of_file
-            d = get_tree_of_file(filename)
-            if not d:
-                return
-            name = 'hdf5'
-
-        root = Tree(f"[bold]{name}[/bold]")
-
-        def add_nodes(parent, node):
-            for k, v in node.items():
-                if isinstance(v, dict):
-                    # 递归添加子节点
-                    child = parent.add(f"{k}")
-                    add_nodes(child, v)
-                else:
-                    # 叶子普通值
-                    parent.add(f"{k}: {v}")
-
-        add_nodes(root, d)
-
-        console = Console()
-        console.print(root)
+        return diff(new, old, fmt)
 
     def fig(self):
         from ._viewer import fig
@@ -335,6 +309,28 @@ class Super(object):
     def terminal(self, command: str | None = None, cwd: str | None = None):
         from quark.terminal import open_terminal
         open_terminal(command, cwd)
+
+    def display(self, d: dict | np.ndarray = {}, filename: str = '', title="root", **kwds):
+        """Print nested dict as a tree
+
+        Args:
+            d (dict): dict to be printed as tree.
+            filename (str, optional): hdf5 or zarr file. Defaults to ''.
+            title (str, optional): root name. Defaults to "root".
+
+        Returns:
+            _type_: _description_
+        """
+
+        if filename and filename.endswith(('hdf5', 'zarr')):
+            from ._db import get_tree_of_file
+            d = get_tree_of_file(filename)
+            if not d:
+                return
+            title = 'hdf5'
+
+        from quark.terminal import display
+        display(d, title, **kwds)
 
 
 _sp = {}  # defaultdict(lambda: connect('QuarkServer', host, port))
@@ -486,16 +482,16 @@ def diff(new: int | dict, old: int | dict, fmt: str = 'dict'):
                 try:
                     if isinstance(fda[k], np.ndarray) and isinstance(fdb[k], np.ndarray):
                         if not np.all(fda[k] == fdb[k]):
-                            changes[k] = f'{fdb[k]}> ⇴ {fda[k]}'
+                            changes[k] = f'{fdb[k]}\r\n->{" ":<{len(k)}}{fda[k]}'
                     elif fda[k] != fdb[k]:
-                        changes[k] = f'{fdb[k]}> ⇴ {fda[k]}'
+                        changes[k] = f'{fdb[k]}\r\n->{" ":<{len(k)}}{fda[k]}'
                 except Exception as e:
                     print(e)
-                    changes[k] = f'{fdb[k]} ⇴ {fda[k]}'
+                    changes[k] = f'{fdb[k]}\r\n->{" ":<{len(k)}}{fda[k]}'
             elif k in fda and k not in fdb:
-                changes[k] = f' ⥅ {fda[k]}'
+                changes[k] = f'🆕\r\n->{" ":<{len(k)}}{fda[k]}'
             elif k not in fda and k in fdb:
-                changes[k] = f'{fdb[k]} ⥇ '
+                changes[k] = f'{fdb[k]}\r\n->{" ":<{len(k)}}🗑️'
 
         return changes
     elif fmt == 'git':
@@ -503,12 +499,12 @@ def diff(new: int | dict, old: int | dict, fmt: str = 'dict'):
         assert isinstance(new, int), 'argument must be an integer'
         assert isinstance(old, int), 'argument must be an integer'
 
-        cma, filea = get_commit_by_tid(get_tid_by_rid(new))
-        cmb, fileb = get_commit_by_tid(get_tid_by_rid(old))
+        cma, fa = get_commit_by_tid(get_tid_by_rid(new))
+        cmb, fb = get_commit_by_tid(get_tid_by_rid(old))
         msg = ''
         for df in cma.diff(cmb, create_patch=True):
             # msg = str([0])
-            if filea.name == df.a_path and fileb.name == df.b_path:
+            if fa.name == df.a_path and fb.name == df.b_path:
                 msg = df.diff.decode('utf-8')
 
         return msg

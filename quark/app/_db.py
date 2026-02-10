@@ -1,6 +1,6 @@
 # MIT License
 
-# Copyright (c) 2021 YL Feng
+# Copyright (c) 2021 YL Feng <fengyulong@pku.org.cn>
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -162,7 +162,7 @@ def get_commit_by_tid(tid: int = 0):
         #     home = Path.home() / 'Desktop/home'
 
         from quark.proxy import HOME
-        file = (HOME / f'cfg/{ckpt}').with_suffix('.json')
+        file: Path = (HOME / f'cfg/{ckpt}').with_suffix('.json')
         print(file)
 
         repo = git.Repo(file.resolve().parent)

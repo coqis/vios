@@ -1,6 +1,6 @@
 # MIT License
 
-# Copyright (c) 2021 YL Feng
+# Copyright (c) 2021 YL Feng <fengyulong@pku.org.cn>
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -89,7 +89,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     # print(args)
 
-    subprocess.run(f'{sys.executable} -m pip install -U vios quarkstudio'.split(' '))
+    subprocess.run(
+        f'{sys.executable} -m pip install -U vios quarkstudio'.split(' '))
     subprocess.run(f'quark update'.split(' '))
 
     # outdir = '.' if not args.outdir else args.outdir
