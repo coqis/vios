@@ -429,17 +429,15 @@ for i, q in enumerate(qubits):
             - s21.step(0)：查看第0步命令 (1)
 
                 ```python 
-                from quark.app import preview
-
                 cmds = s21.step(0)
-                wfv = preview(cmds['main'], start=0, end=20e-6, srate=5e9, keys=['Q0'])
+                wfv = s.preview(cmds['main'], start=0, end=20e-6, keys=['Q0'])
                 ```
                 ![alt text](preview.png)
 
         1.  :man_raising_hand: 查看命令cmds
-            - cmds由编译生成，包含全部指令
+            - cmds由编译生成，包含全部指令 ![](quark/image/cmds.png)
             - cmds由三部分构成，依次顺序执行，分别为
-                - cmds['main']: 写波形（驱动、偏置、读取等所有波形，可由`preview`函数看波形）、设置AD(如Shots、解调系数等)。
+                - cmds['main']: 写波形（驱动、偏置、读取等所有波形，可由`s.preview`函数看波形）、设置AD(如Shots、解调系数等)。
                 - cmds['trig']: 待cmds['main']中命令全部就绪，触发设备开始发**trigger**。***trigger数量务必与AD中的Shots设置一致！！！***
                 - cmds['READ']: 从设备将数据读回。如果没有数据返回或TIMEOUT，***第一时间检查触发设置***！！！
             - 若对下发到设备的指令存疑，可逐一排查cmds或单独执行cmds中命令以确定问题所在！
