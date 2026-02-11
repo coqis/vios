@@ -96,7 +96,6 @@ def sample(pulse, delay: float = 0.0, offset: float = 0.0, srate: float = 1e9, *
     if kwds['target'].split('.')[0] not in kwds.get('filter', []):
         return {}
 
-    print(kwds['target'], pulse)
     ptype = kwds.get('type', 'Waveform')
     if ptype.endswith(('Waveform', 'Offset')):
         t1, t2 = kwds.get('range', [0, 100e-6])

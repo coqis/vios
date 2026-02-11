@@ -285,18 +285,19 @@ class Super(object):
         """
         return preview(cmds, keys, calibrate, start, end, srate, unit, offset, space, ax)
 
-    def diff(self, new: int | dict, old: int | dict, fmt: str = 'dict'):
+    def diff(self, new: int | dict, old: int | dict, fmt: str = 'dict', ignore: list[str] = ['unit', 'sid']):
         """Compare two snapshots or records
 
         Args:
             new (int | dict): new snapshot or record id or dict
             old (int | dict): old snapshot or record id or dict
             fmt (str, optional): format of the output. Defaults to 'dict'.
+            ignore (list[str], optional): keys to be ignored. Defaults to ['unit', 'sid'].
 
         Returns:
             _type_: _description_
         """
-        return diff(new, old, fmt)
+        return diff(new, old, fmt, ignore)
 
     def fig(self):
         from ._viewer import fig
@@ -466,7 +467,7 @@ def rollback(tid: int):
         logger.error(f'Failed to rollback for {tid}: {e}')
 
 
-def diff(new: int | dict, old: int | dict, fmt: str = 'dict'):
+def diff(new: int | dict, old: int | dict, fmt: str = 'dict', ignore: list[str] = ['unit', 'sid']):
 
     if fmt == 'dict':
         fda = flatten_dict(get_config_by_rid(
@@ -475,7 +476,7 @@ def diff(new: int | dict, old: int | dict, fmt: str = 'dict'):
             old) if isinstance(old, int) else old)
         changes = {}
         for k in set(fda) | set(fdb):
-            if k.startswith('usr') or k.endswith('pid'):
+            if any(s in k for s in ignore):
                 continue
 
             if k in fda and k in fdb:
