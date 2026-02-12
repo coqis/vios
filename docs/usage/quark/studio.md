@@ -8,7 +8,7 @@ icon: simple/beekeeperstudio
 ### **How to start**
 ???+ example "start"
     ```bash
-    # pip install quarkstudio[full] (if not installed)
+    # pip install quarkstudio (if not installed)
     # quark update --mode=studio (if installed)
     quark studio
     ```

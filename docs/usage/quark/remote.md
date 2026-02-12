@@ -8,7 +8,7 @@ icon: simple/redmine
 ### **How to start**
 ???+ example "start"
     ```bash
-    # pip install quarkstudio[remote] (if not installed)
+    # pip install quarkstudio (if not installed)
     # quark update --mode=remote (if installed)
     quark remote remote.json
     ```
