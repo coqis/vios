@@ -60,6 +60,50 @@ class Super(object):
         from quark.proxy import init
         init(path)
 
+    def recipe(self, name: str = '', **kwds) -> Recipe:
+        """Create a recipe
+
+        Args:
+            name (str, optional): name of the recipe. Defaults to ''.
+
+        Returns:
+            Recipe: a recipe object
+        """
+        return Recipe(name, **kwds)
+
+    def run(self, cmds: dict, dev: dict = {'AD': None, 'AWG': None, 'Trigger': None}, verbose: bool = True):
+        """Execute experiment instruction sequence.
+
+        Args:
+            cmds (dict): Command dictionary containing steps and operation information.
+            dev (dict): Device dictionary containing AD, AWG, Trigger and other device connection objects. Defaults to None.
+            verbose (bool): Whether to print execution information. Defaults to True.
+
+        Returns:
+            dict: Dictionary containing read results.
+
+        Raises:
+            KeyError: When the target device is not in the device list.
+        """
+        result = {}
+        for step, ops in cmds.items():
+            for target, params in ops.items():
+                d, ch, q = target.split('.')
+                if d in dev:
+                    if verbose:
+                        print(
+                            f"Execute instruction: {step}->{target}, params: {params['value']}")
+
+                    if step.lower() == 'read':
+                        # Read data
+                        result[target] = dev[d].getValue(q, ch=ch)
+                    else:
+                        # Write data
+                        dev[d].setValue(q, params['value'], ch=ch)
+                else:
+                    print(
+                        f"Device {d} not in device list, cannot execute instruction: {target}")
+
     def __repr__(self):
         try:
             return f'connection to {self.addr}'
