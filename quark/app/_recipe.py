@@ -33,29 +33,28 @@ class Recipe(object):
     """
 
     syspath: list[str] = sys.path
-    # --ignore=E731
+    # autopep8: --ignore=E731
     before_the_task: list[tuple] = []  # 任务开始前初始化
     before_compiling: list[tuple] = []  # 每步开始前初始化
     after_the_task: list[tuple] = []  # 任务结束后复位
 
-    lib: str = 'lib.gates.u3'
-    arch: str = 'baqis'
-    align_right: bool = False
-    waveform_length: float = 98e-6
+    lib: str = 'lib.gates.u3'  # Overridden by `station.lib`
+    arch: str = 'baqis'  # Overridden by `station.arch`
+    shots: int = 1024  # Overridden by `station.shots`
+    align_right: bool = False  # Overridden by `station.align_right`
+    waveform_length: float = 98e-6  # Overridden by `station.waveform_length`
 
-    def __init__(self, name: str, shots: int = 1024, signal: str = 'iq_avg',
+    def __init__(self, name: str, signal: str = 'iq_avg', 
                  filename: str = 'baqis', priority: int = 0):
         """初始化任务描述
 
         Args:
             name (str, optional): 实验名称, 如 S21. Defaults to ''.
-            shots (int, optional): 触发次数, 1024的整数倍. Defaults to 1024.
             signal (str, optional): 采集信号. Defaults to 'iq_avg'.
             filename (str, optional): 数据存储文件名. Defaults to '~/Desktop/home/dat'.
             priority (int, optional): 任务排队, 越小优先级越高. Defaults to 0.
         """
         self.name = name
-        self.shots = shots
         self.signal = signal
 
         self.filename = filename
