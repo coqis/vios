@@ -69,9 +69,7 @@ def get_dataset_by_tid(tid: int, task: bool = False):
     from quark.proxy import HOME
 
     filename, dataset = get_record_by_tid(tid)[7:9]
-
-    *parts, user, name = Path(filename).parts
-    filename = str(HOME / f'dat/{user}/{name}')
+    filename = str(HOME / f'dat/{Path(filename).name}')
     # print(f'Loading dataset from {filename}')
 
     if filename.endswith('hdf5'):
