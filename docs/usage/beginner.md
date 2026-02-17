@@ -155,14 +155,14 @@ icon: material/badge-account-horizontal
     ```python
     import matplotlib.pyplot as plt
     import numpy as np
-    from quark.app import Recipe, s#(1)!
+    from quark.app import s#(1)!
 
     # s.init('path/to/quark.json') (2)
     ```
 
-    1. :material-language-python: quark.app
-        - Recipe: 记录任务信息，生成任务描述
-        - s: 与server进行交互的工具，如
+    1. :material-language-python: s
+        - 生成任务描述：`s.recipe`
+        - 与server进行交互，如
             - 更新参数：`s.update('Q0.Measure.frequency', 5.321e9)`
             - 查询参数：`s.query('Q0.Measure.frequency')`
             - 删除参数：`s.delete('Q0.Measure.frequency')`
@@ -258,6 +258,7 @@ icon: material/badge-account-horizontal
         "triggercmds": ["Trigger.CH1.TRIG"],  # 触发命令
         "lib": "glib.gates.u3rcp",  # gate库路径
         "arch": "rcp",  # 体系结构，位于glib.arch
+        "shots": 1024, # 测量次数
         "align_right": True,  # 波形对齐右侧
         "waveform_length": 18e-6,  # 波形长度
         "auto_clear": {  # 自动清空的命令
@@ -323,8 +324,9 @@ icon: material/badge-account-horizontal
         cc = [(('Measure', i), q) for i, q in enumerate(qubits)]
         return cc
 
-    rcp = Recipe('s21', signal='iq_avg')
+    rcp = s.recipe('s21', signal='iq_avg')
     rcp.circuit = circuit_s21  # 指定扫描线路函数(1)
+    # rcp.filename = 'baqis' # 数据存储时所用文件名
 
     qubits = ['Q0']
     rcp['qubits'] = tuple(qubits)  # 必须为tuple，传与circuit_s21的qubits
