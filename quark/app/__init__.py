@@ -678,7 +678,7 @@ def get_data_by_tid(tid: int, **kwds) -> dict:
         # Windows: OSError: [Errno 0] Unable to synchronously open file (unable to lock file, errno = 0, error message = 'No error', Win32 GetLastError() = 33)
         # MacOSX: BlockingIOError: [Errno 35] Unable to synchronously open file (unable to lock file, errno = 35, error message = 'Resource Temporarily unavailable')
         try:
-            info, data = get_dataset_by_tid(tid, path=kwds.get('path', ''))
+            info, data = get_dataset_by_tid(tid)
             break
         except Exception as e:
             logger.error(str(e))
