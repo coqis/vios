@@ -678,13 +678,12 @@ def get_data_by_tid(tid: int, **kwds) -> dict:
         # Windows: OSError: [Errno 0] Unable to synchronously open file (unable to lock file, errno = 0, error message = 'No error', Win32 GetLastError() = 33)
         # MacOSX: BlockingIOError: [Errno 35] Unable to synchronously open file (unable to lock file, errno = 35, error message = 'Resource Temporarily unavailable')
         try:
-            info, data = get_dataset_by_tid(tid)
+            info, data = get_dataset_by_tid(tid, path=kwds.get('path', ''))
             break
         except Exception as e:
             logger.error(str(e))
             time.sleep(1)
             retry -= 1
-            continue
 
     if kwds.get('plot', False):
         signal = info['meta']['other']['signal'].split('|')[0]

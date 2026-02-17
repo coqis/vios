@@ -65,8 +65,11 @@ def reshape(raw: np.ndarray | list, shape: tuple | list):
     return data
 
 
-def get_dataset_by_tid(tid: int, task: bool = False):
+def get_dataset_by_tid(tid: int, path: str = '', task: bool = False):
     filename, dataset = get_record_by_tid(tid)[7:9]
+
+    if path:
+        filename = str(Path(path) / Path(filename).name)
 
     if filename.endswith('hdf5'):
         f = h5py.File(filename, 'r')
