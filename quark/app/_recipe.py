@@ -225,7 +225,7 @@ class Recipe(object):
                                    } | {k: v for k, v in self.__dict.items() if not isinstance(v, (list, np.ndarray))}
                          },
                 'body': {'step': {'main': ['WRITE', tuple(self.__loops)],
-                                  'trig': ['WRITE', 'trig'],
+                                #   'trig': ['WRITE', 'trig'],
                                   'read': ['READ', 'read'],
                                   },
                          'init': self.initcmd,

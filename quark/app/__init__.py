@@ -282,8 +282,8 @@ class Super(object):
                         'ring_up_waist': 0.006,
                         'ring_up_time': 6e-07
                     },
-                    'acquire': {'address': 'AD.CH13.IQ', 'TRIGD': 0,'srate':2e9},
-                    'probe': {'address': 'AWG.CH2.Waveform', 'delay': 0,'srate':6e9}
+                    'acquire': {'address': 'AD.CH13.IQ', 'TRIGD': 0, 'srate': 2e9},
+                    'probe': {'address': 'AWG.CH2.Waveform', 'delay': 0, 'srate': 6e9}
                 },
                 'station': {
                     'triggercmds': ['Trigger.CH1.TRIG'],
@@ -536,10 +536,10 @@ def submit(task: dict, block: bool = False, **kwds):
         qs = s.qs()
 
         # trigger: list[str] = qs.query('station.triggercmds')
-        station = s.query('station')
-        task['body']['loop']['trig'] = [(t, 0, 'au')
-                                        for t in station.get('triggercmds', [])]
-        task['meta']['other'].update(station)
+        # station = s.query('station')
+        # task['body']['loop']['trig'] = [(t, 0, 'au')
+        #                                 for t in station.get('triggercmds', [])]
+        # task['meta']['other'].update(station)
 
         # waveforms to be previewed
         qs.update('etc.canvas.filter', kwds.get('preview', []))

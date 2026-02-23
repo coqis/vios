@@ -406,6 +406,8 @@ class Workflow(object):
         if isinstance(precompile, list):
             compiled['main'].extend([('WRITE', *cmd)
                                     for cmd in ctx.autofill(precompile)])
+        compiled['trig'] = [('WRITE', t, 0, 'au')
+                            for t in kwds.get('triggercmds', [])]
 
         ctx.code, (cmds, dmap) = qcompile(circuit,
                                           lib=get_gate_lib(
