@@ -432,7 +432,7 @@ for i, q in enumerate(qubits):
 
                 ```python 
                 cmds = s21.step(0) # 由`etc.server.review`指定step
-                wfv = s.preview(cmds['main'], start=0, end=20e-6, keys=['Q0'])
+                wfv = s.preview(cmds, start=0, end=20e-6, keys=['Q0'])
                 ```
                 ![alt text](preview.png)
 

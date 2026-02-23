@@ -30,6 +30,7 @@ import sys
 import time
 from collections import defaultdict
 from functools import wraps
+from importlib import import_module
 from pathlib import Path
 from threading import current_thread
 from typing import Callable
@@ -70,39 +71,6 @@ class Super(object):
             Recipe: a recipe object
         """
         return Recipe(name, **kwds)
-
-    def run(self, cmds: dict, dev: dict = {'AD': None, 'AWG': None, 'Trigger': None}, verbose: bool = True):
-        """Execute experiment instruction sequence.
-
-        Args:
-            cmds (dict): Command dictionary containing steps and operation information.
-            dev (dict): Device dictionary containing AD, AWG, Trigger and other device connection objects. Defaults to None.
-            verbose (bool): Whether to print execution information. Defaults to True.
-
-        Returns:
-            dict: Dictionary containing read results.
-
-        Raises:
-            KeyError: When the target device is not in the device list.
-        """
-        result = {}
-        for step, ops in cmds.items():
-            for target, params in ops.items():
-                d, ch, q = target.split('.')
-                if d in dev:
-                    if verbose:
-                        print(
-                            f"Execute instruction: {step}->{target}, params: {params['value']}")
-
-                    if step.lower() == 'read':
-                        # Read data
-                        result[target] = dev[d].getValue(q, ch=ch)
-                    else:
-                        # Write data
-                        dev[d].setValue(q, params['value'], ch=ch)
-                else:
-                    print(
-                        f"Device {d} not in device list, cannot execute instruction: {target}")
 
     def __repr__(self):
         try:
@@ -281,7 +249,7 @@ class Super(object):
     def profile(self):
         return self.qs().progress(profile=True)
 
-    def translate(self, circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, tid: int = 0, **kwds) -> tuple:
+    def translate(self, circuit: list = [(('Measure', 0), 'Q0')], cfg: dict = {}, tid: int = 0, **kwds) -> tuple:
         """Translate circuit to executable commands(i.e., waveforms or settings)
 
         Args:
@@ -299,6 +267,32 @@ class Super(object):
             ctx, (cmds, dmap) = s.translate(circuit, cfg=cfg)
             ```
         """
+        if not cfg:
+            # for more details, see https://quarkstudio.readthedocs.io/en/latest/usage/code/cfg2/
+            cfg = {
+                'Q0': {
+                    'Measure': {
+                        'duration': 4e-06,
+                        'amp': 0.019,
+                        'frequency': 6964370000.0,
+                        'weight': 'sqaure(2e-6)>>2e-6',
+                        'phi': -2.636421695283167,
+                        'threshold': 8502633802.265065,
+                        'ring_up_amp': 0.024,
+                        'ring_up_waist': 0.006,
+                        'ring_up_time': 6e-07
+                    },
+                    'acquire': {'address': 'AD.CH13.IQ', 'TRIGD': 0,'srate':2e9},
+                    'probe': {'address': 'AWG.CH2.Waveform', 'delay': 0,'srate':6e9}
+                },
+                'station': {
+                    'triggercmds': ['Trigger.CH1.TRIG'],
+                    'lib': 'glib.gates.u3rcp',
+                    'arch': 'rcp',
+                    'align_right': False,
+                    'waveform_length': 1.8e-05
+                }
+            }
         return translate(circuit, cfg, tid, **kwds)
 
     def preview(self, cmds: dict, keys: tuple[str] = ('',), calibrate: bool = True,
@@ -328,6 +322,73 @@ class Super(object):
             ```
         """
         return preview(cmds, keys, calibrate, start, end, srate, unit, offset, space, ax)
+
+    def run(self, cmds: dict, dev: dict = {
+        'AD': {
+            "addr": "192.168.1.2",
+            "name": "dev.VirtualDevice",
+            "type": "driver"
+        },
+        'AWG': {
+            "host": "192.168.1.3",
+            "port": 40001,
+            "type": "remote"
+        },
+        'Trigger': {
+            "addr": "192.168.1.4",
+            "name": "dev.VirtualDevice",
+            "type": "driver"
+        }
+    }, verbose: bool = True):
+        """Execute experiment instruction sequence.
+
+        Args:
+            cmds (dict): Command dictionary from `task.step` or `s.translate`.
+            dev (dict): Device dictionary.
+            verbose (bool): Whether to print execution information. Defaults to True.
+
+        Returns:
+            dict: Dictionary containing read results.
+
+        Raises:
+            KeyError: When the target device is not in the device list.
+        """
+        dhs = {}
+        for alias, info in dev.items():
+            if info['type'] == 'driver':
+                driver = import_module(info['name']).Driver(**info)
+                driver.open()
+            elif info['type'] == 'remote':
+                driver = connect(alias,
+                                 host=info['host'],
+                                 port=info['port'],
+                                 timeout=3.0
+                                 )
+            else:
+                raise ValueError('unsupported type of device')
+            dhs[alias] = driver
+            logger.info(f'{alias}: {driver.info()}')
+
+        result = {}
+        for step, ops in cmds.items():
+            for target, params in ops.items():
+                d, ch, q = target.split('.')
+                try:
+                    ch = int(ch[2:])
+                except ValueError as e:
+                    ch = ch[2:]
+                if d in dhs:
+                    if verbose:
+                        print(
+                            f"Execute instruction: {step}->{target}, params: {params['value']}")
+
+                    if step.lower() == 'read':
+                        result[target] = dhs[d].getValue(q, ch=ch)
+                    else:
+                        dhs[d].setValue(q, params['value'], ch=ch)
+                else:
+                    print(
+                        f"Device {d} not in device list, cannot execute instruction: {target}")
 
     def diff(self, new: int | dict, old: int | dict, fmt: str = 'dict', ignore: list[str] = ['unit', 'sid']):
         """Compare two snapshots or records
@@ -750,44 +811,38 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = True,
     from quark.runtime import calculate
 
     ax: Axes = plt.subplot() if not ax else ax
-    wf, index = {}, 0
-    for target, cmd in deepcopy(cmds).items():
-        if isinstance(cmd['value'], (Waveform, np.ndarray)):
+    wf, index = deepcopy(cmds), 0
+    for step, operations in wf.items():
+        # if isinstance(cmd['value'], (Waveform, np.ndarray,int,float,dict)):
+        for target, cmd in operations.items():
             _target = cmd['cargs']['target']
-            if _target.split('.')[0] in keys:
-                # value[-1]['filter'] = []
+            # if _target.split('.')[0] in keys:
+            # value[-1]['filter'] = []
 
-                calibration = cmd['cargs'].get('calibration', {})
-
-                if srate:
-                    calibration['srate'] = srate
+            calibration: dict = cmd['cargs'].get('calibration', {})
+            for attr, value, default in [('srate', srate, 0), ('start', start, 0), ('end', end, 100e-6)]:
+                if value:
+                    calibration[attr] = value
                 else:
-                    srate = calibration['srate']
+                    calibration.setdefault(attr, default)
 
-                if start:
-                    calibration['start'] = start
-                else:
-                    start = calibration.get('start', 0)
+            if not calibrate:
+                try:
+                    calibration['delay'] = 0
+                except Exception as e:
+                    logger.error(f'{target, e}')
 
-                if end:
-                    calibration['end'] = end
-                else:
-                    end = calibration.get('end', 100e-6)
-
-                if not calibrate:
-                    try:
-                        calibration['delay'] = 0
-                    except Exception as e:
-                        logger.error(f'{target, e}')
-
-                # xt = np.arange(start, end, 1 / srate) / unit
-                _, line = calculate('main', target, cmd, {'filter': keys})
+            # xt = np.arange(start, end, 1 / srate) / unit
+            _, line = calculate(step, target, cmd, {'filter': keys})
+            if target.endswith('Waveform') and _target.split('.')[0] in keys:
                 xt = line[_target]['xdata'] / unit
-                wf[_target] = line[_target]['ydata'] + index * offset
+                yt = line[_target]['ydata']
+                wf[step][target]['value'] = yt
+                offyt = yt + index * offset
                 index += 1
 
-                ax.plot(xt, wf[_target])
-                ax.text(xt[-1], wf[_target][-1], _target, va='center')
+                ax.plot(xt, offyt)
+                ax.text(xt[-1], offyt[-1], _target, va='center')
                 ax.set_xlim(xt[0] - space, xt[-1] + space)
     # plt.axis('off')
     # plt.legend(tuple(wf))

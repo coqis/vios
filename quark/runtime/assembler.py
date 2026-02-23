@@ -132,8 +132,8 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                 continue
 
             cargs = {'sid': sid, 'target': target,
-                    # 'shared': ctx.correct(query('etc.server.shared'), 0),
-                    'filter': ctx.correct(query('etc.driver.filter'), [])}
+                     # 'shared': ctx.correct(query('etc.server.shared'), 0),
+                     'filter': ctx.correct(query('etc.driver.filter'), [])}
 
             context = {}
             if 'CH' in target or ctype == 'WAIT':
@@ -183,9 +183,10 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                 if quantity == 'Waveform':
                     end = ctx.query('station', {}).get(
                         'waveform_length', 98e-6)
-                cargs['calibration'] = context | {'end': end, 'srate': srate}
+                cargs['calibration'] = {'end': end, 'srate': srate} | context
             # cmd = [ctype, value, unit, kwds]
-            cmd = {'ctype': ctype, 'value': value, 'unit': unit, 'cargs': cargs}
+            cmd = {'ctype': ctype, 'value': value,
+                   'unit': unit, 'cargs': cargs}
 
             # Merge commands with the same channel
             try:

@@ -52,6 +52,7 @@ def calculate(step: str, target: str, cmd: dict, canvas: dict = {}) -> tuple:
     line = {}
 
     if ctype != 'WRITE':
+        cmd['cargs'] = {'sid': kwds['sid'], 'target': kwds['target']}
         return (step, target, cmd), line
 
     isobject = target.startswith(tuple(kwds.get('filter', ['Waveform'])))
@@ -68,7 +69,7 @@ def calculate(step: str, target: str, cmd: dict, canvas: dict = {}) -> tuple:
         line = sample(cmd['value'], delay, offset, srate, **opts)
     except Exception as e:
         logger.error(
-            f"{'>' * 30}'  failed to calculate waveform', {e}, {type(e).__name__}")
+            f"{'>' * 30}'  failed to sample waveform', {e}, {type(e).__name__}")
 
     return (step, target, cmd), line
 
