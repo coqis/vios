@@ -44,7 +44,7 @@ class Recipe(object):
     align_right: bool = False  # Overridden by `station.align_right`
     waveform_length: float = 98e-6  # Overridden by `station.waveform_length`
 
-    def __init__(self, name: str, signal: str = 'iq_avg', 
+    def __init__(self, name: str, signal: str = 'iq_avg',
                  filename: str = 'baqis', priority: int = 0):
         """初始化任务描述
 
@@ -225,7 +225,7 @@ class Recipe(object):
                                    } | {k: v for k, v in self.__dict.items() if not isinstance(v, (list, np.ndarray))}
                          },
                 'body': {'step': {'main': ['WRITE', tuple(self.__loops)],
-                                #   'trig': ['WRITE', 'trig'],
+                                  'trig': ['WRITE', 'trig'],
                                   'read': ['READ', 'read'],
                                   },
                          'init': self.initcmd,
