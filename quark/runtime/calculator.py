@@ -51,9 +51,9 @@ def calculate(step: str, target: str, cmd: dict, canvas: dict = {}) -> tuple:
 
     line = {}
 
-    if ctype != 'WRITE':
-        cmd['cargs'] = {'sid': kwds['sid'], 'target': kwds['target']}
-        return (step, target, cmd), line
+    # if ctype != 'WRITE':
+    #     cmd['cargs'] = {'sid': kwds['sid'], 'target': kwds['target']}
+    #     return (step, target, cmd), line
 
     isobject = target.startswith(tuple(kwds.get('filter', ['Waveform'])))
 
