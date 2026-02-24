@@ -41,21 +41,21 @@ from .base import Registry
 LIBCACHE = []
 
 try:
-    from glib import stdlib
+    from ime import stdlib, get_arch, qcompile, sample_waveform
 except Exception as e:
-    logger.critical('systemq may not be installed', e)
+    logger.critical('run `quark init` to fix this', e)
     raise e
 
 
-try:
-    try:
-        from glib import get_arch, qcompile, sample_waveform
-    except ImportError as e:
-        from qlispc import get_arch
-        from qlispc.kernel_utils import qcompile, sample_waveform
-except Exception as e:
-    logger.critical('qlispc error', e)
-    raise e
+# try:
+#     try:
+#         from glib import get_arch, qcompile, sample_waveform
+#     except ImportError as e:
+#         from qlispc import get_arch
+#         from qlispc.kernel_utils import qcompile, sample_waveform
+# except Exception as e:
+#     logger.critical('qlispc error', e)
+#     raise e
 
 
 def get_gate_lib(lib: str | dict):
@@ -319,17 +319,6 @@ class Workflow(object):
         pass
 
     @classmethod
-    def check(cls):
-        try:
-            with open(Path.home() / 'quark.json', 'r') as f:
-                for path in json.loads(f.read()).get('path', []):
-                    if path not in sys.path:
-                        # logger.warning(f'add {path} to sys.path!')
-                        sys.path.append(path)
-        except Exception as e:
-            pass
-
-    @classmethod
     def qcompile(cls, circuit: list, **kwds):
         """compile circuits to commands
 
@@ -338,57 +327,7 @@ class Workflow(object):
 
         Returns:
             tuple: compiled commands, extra arguments
-
-        Example: compile a circuit to commands
-            ``` {.py3 linenums="1"}
-
-            >>> print(compiled)
-            {'main': [('WRITE', 'Q0503.waveform.DDS', <waveforms.waveform.Waveform at 0x291381b6c80>, ''),
-                    ('WRITE', 'M5.waveform.DDS', <waveforms.waveform.Waveform at 0x291381b7f40>, ''),
-                    ('WRITE', 'ADx86_159.CH5.Shot', 1024, ''),
-                    ('WRITE', 'ADx86_159.CH5.Coefficient', {'start': 2.4000000000000003e-08,
-                                                            'stop': 4.0299999999999995e-06,
-                                                            'wList': [{'Delta': 6932860000.0,
-                                                                        'phase': 0,
-                                                                        'weight': 'const(1)',
-                                                                        'window': (0, 1024),
-                                                                        'w': None,
-                                                                        't0': 3e-08,
-                                                                        'phi': -0.7873217091999384,
-                                                                        'threshold': 2334194991.172387}]}, ''),
-                    ('WRITE', 'ADx86_159.CH5.TriggerDelay', 7e-07, ''),
-                    ('WRITE', 'ADx86_159.CH5.CaptureMode', 'alg', ''),
-                    ('WRITE', 'ADx86_159.CH5.StartCapture', 54328, '')],
-            'READ': [('READ', 'ADx86_159.CH5.IQ', 'READ', '')]
-            }
-
-            >>> print(datamap)
-            {'dataMap': {'cbits': {0: ('READ.ADx86_159.CH5',
-                                    0,
-                                    6932860000.0,
-                                    {'duration': 4e-06,
-                                        'amp': 0.083,
-                                        'frequency': 6932860000.0,
-                                        'phase': [[-1, 1], [-1, 1]],
-                                        'weight': 'const(1)',
-                                        'phi': -0.7873217091999384,
-                                        'threshold': 2334194991.172387,
-                                        'ring_up_amp': 0.083,
-                                        'ring_up_waist': 0.083,
-                                        'ring_up_time': 5e-07,
-                                        'w': None},
-                                    3e-08,
-                                    2.4000000000000003e-08,
-                                    4.0299999999999995e-06)
-                                    },
-                        'signal': 2,
-                        'arch': 'baqis'
-                        }
-            }
-            ```
         """
-        cls.check()
-
         compiled, circuit = split_circuit(circuit)
         rmap = {'signal': kwds['signal'], 'arch': 'undefined'}
         if not circuit:
@@ -435,8 +374,6 @@ class Workflow(object):
 
     @classmethod
     def calculate(cls, value, **kwds):
-        cls.check()
-
         if isinstance(value, str):
             try:
                 func = Pulse.fromstr(value)
@@ -479,5 +416,4 @@ class Workflow(object):
 
     @classmethod
     def analyze(cls, data: dict, datamap: dict):
-        cls.check()
         return get_arch(datamap['arch']).assembly_data(data, datamap)

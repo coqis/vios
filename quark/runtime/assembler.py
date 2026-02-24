@@ -166,7 +166,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                 logger.error(f'wrong target: {target}({_target})')
                 continue
 
-            # get sample rate from device
+            # get sampling rate from device
             dev, channel, quantity = _target.split('.')
             srate = -1.0 if dev == 'Timer' else query(f'dev.{dev}.srate')
 
@@ -184,6 +184,7 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                     end = ctx.query('station', {}).get(
                         'waveform_length', 98e-6)
                 cargs['calibration'] = {'end': end, 'srate': srate} | context
+
             # cmd = [ctype, value, unit, kwds]
             cmd = {'ctype': ctype, 'value': value,
                    'unit': unit, 'cargs': cargs}
