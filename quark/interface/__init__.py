@@ -25,6 +25,6 @@ Abstract: about interface
     - qiskit
     - systemq
 """
+from quark.proxy import HOME
 
-
-from .systemq import create_context, Pulse, Workflow
+from .systemq import Pulse, Workflow, create_context

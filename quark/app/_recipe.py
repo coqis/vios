@@ -32,7 +32,6 @@ class Recipe(object):
     """**Recipe仅用于生成任务**
     """
 
-    syspath: list[str] = sys.path
     # autopep8: --ignore=E731
     before_the_task: list[tuple] = []  # 任务开始前初始化
     before_compiling: list[tuple] = []  # 每步开始前初始化
@@ -184,15 +183,6 @@ class Recipe(object):
         assert len(set(dims)) == 1, f'{target} in {group}: wrong dims {dims}!'
 
     def update(self):
-        if not self.syspath:
-            return
-
-        with open(Path.home() / 'quark.json', 'r') as f:
-            old = json.loads(f.read())
-
-        with open(Path.home() / 'quark.json', 'w') as f:
-            f.write(json.dumps(old | {'path': self.syspath}, indent=4))
-
         # [('AWG.CH1.Waveform', 'zero()', 'au')]
         self.initcmd = [(t, v, 'au') for t, v in self.before_the_task]
         self.postcmd = [(t, v, 'au') for t, v in self.after_the_task]
