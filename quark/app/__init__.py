@@ -389,18 +389,22 @@ class Super(object):
                     logger.error(f"Device {d}({target}) not in device list")
         return result
 
-    def diff(self, new: int | dict, old: int | dict, fmt: str = 'dict', ignore: list[str] = ['unit', 'sid']):
+    def diff(self, new: int | dict | str, old: int | dict | str, fmt: str = 'dict', ignore: list[str] = ['unit', 'sid'], **kwds):
         """Compare two snapshots or records
 
         Args:
-            new (int | dict): new snapshot or record id or dict
-            old (int | dict): old snapshot or record id or dict
+            new (int | dict | str): new snapshot or record id or dict or filepath or text
+            old (int | dict | str): old snapshot or record id or dict or filepath or text
             fmt (str, optional): format of the output. Defaults to 'dict'.
             ignore (list[str], optional): keys to be ignored. Defaults to ['unit', 'sid'].
 
         Returns:
             _type_: _description_
         """
+        if isinstance(new, str) and isinstance(old, str):
+            from quark.toolkit import compare
+            return compare(new, old, **kwds)
+
         return diff(new, old, fmt, ignore)
 
     def fig(self):
@@ -408,11 +412,11 @@ class Super(object):
         return fig
 
     def ssh(self, username: str, password: str, host: str = '192.168.1.42'):
-        from quark.terminal import open_ssh
+        from quark.toolkit import open_ssh
         return open_ssh(username, password, host)
 
     def terminal(self, command: str | None = None, cwd: str | None = None):
-        from quark.terminal import open_terminal
+        from quark.toolkit import open_terminal
         open_terminal(command, cwd)
 
     def display(self, d: dict | np.ndarray = {}, filename: str = '', title="root", **kwds):
@@ -434,7 +438,7 @@ class Super(object):
                 return
             title = 'hdf5'
 
-        from quark.terminal import display
+        from quark.toolkit import display
         kwds.setdefault('end', '')
         display(d, title, **kwds)
 
