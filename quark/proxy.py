@@ -151,7 +151,7 @@ class QuarkProxy(object):
             (Path(HOME) / 'run').mkdir(parents=True, exist_ok=True)
 
             try:
-                from .dag import Scheduler
+                from .sentry import Scheduler
                 Scheduler(self.proxy().dag())
             except Exception as e:
                 logger.error('Failed to start Scheduler')
