@@ -253,7 +253,7 @@ class Super(object):
         """Translate circuit to executable commands(i.e., waveforms or settings)
 
         Args:
-            circuit (list, optional): qlisp circuit. Defaults to [(('Measure', 0), 'Q1001')].
+            circuit (list, optional): qlisp circuit. Defaults to [(('Measure', 0), 'Q0')].
             cfg (dict, optional): parameters of qubits in the circuit. Defaults to {}.
             tid (int, optional): task id used to load cfg. Defaults to 0.
 
@@ -379,16 +379,14 @@ class Super(object):
                     ch = ch[2:]
                 if d in dhs:
                     if verbose:
-                        print(
-                            f"Execute instruction: {step}->{target}, params: {params['value']}")
+                        print(f"Execute: {step}->{target}: {params['value']}")
 
                     if step.lower() == 'read':
                         result[target] = dhs[d].getValue(q, ch=ch)
                     else:
                         dhs[d].setValue(q, params['value'], ch=ch)
                 else:
-                    print(
-                        f"Device {d} not in device list, cannot execute instruction: {target}")
+                    logger.error(f"Device {d}({target}) not in device list")
         return result
 
     def diff(self, new: int | dict, old: int | dict, fmt: str = 'dict', ignore: list[str] = ['unit', 'sid']):
@@ -437,6 +435,7 @@ class Super(object):
             title = 'hdf5'
 
         from quark.terminal import display
+        kwds.setdefault('end', '')
         display(d, title, **kwds)
 
 
@@ -807,14 +806,12 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = True,
 
     import matplotlib.pyplot as plt
     from matplotlib.axes import Axes
-    from waveforms import Waveform
 
     from quark.runtime import calculate
 
     ax: Axes = plt.subplot() if not ax else ax
     wf, index = deepcopy(cmds), 0
     for step, operations in wf.items():
-        # if isinstance(cmd['value'], (Waveform, np.ndarray,int,float,dict)):
         for target, cmd in operations.items():
             _target = cmd['cargs']['target']
             # if _target.split('.')[0] in keys:
