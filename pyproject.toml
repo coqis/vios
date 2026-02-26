@@ -51,9 +51,9 @@ classifiers = [
 
 [tool.setuptools]
 packages = ["quark.app", 
-            "quark.dag",
             "quark.interface",
-            "quark.runtime"]
+            "quark.runtime",
+            "quark.sentry"]
 py-modules = ["quark.proxy"]
 # [tool.setuptools.packages.find]
 # where = ["."]
