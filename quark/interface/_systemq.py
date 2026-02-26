@@ -227,7 +227,7 @@ class Workflow(object):
                                           lib=glib,
                                           cfg=kwds.get('ctx', ctx),
                                           signal=signal,
-                                          shots=kwds['shots'],
+                                          shots=kwds.get('shots', 1024),
                                           context={},
                                           arch=kwds['arch'],
                                           align_right=kwds['align_right'],
