@@ -114,24 +114,24 @@ class Pulse(object):
             return False
 
 
-SCHEMA = {
-    'type': 'object',
-    'properties': {}
-}
-
-for k in ['drive', 'probe', 'acquire']:
-    SCHEMA['properties'][k] = {'type': 'object',
-                               'properties': {'address': {'type': 'string'},
-                                              'delay': {'type': 'number'},
-                                              'start': {'type': 'number'},
-                                              'end': {'type': 'number'},
-                                              'offset': {'type': 'number'}
-                                              },
-                               'required': ['address']
-                               }
-
-
 class Registry(object):
+
+    SCHEMA = {
+        'type': 'object',
+        'properties': {}
+    }
+
+    for k in ['drive', 'probe', 'acquire']:
+        SCHEMA['properties'][k] = {'type': 'object',
+                                   'properties': {'address': {'type': 'string'},
+                                                  'delay': {'type': 'number'},
+                                                  'start': {'type': 'number'},
+                                                  'end': {'type': 'number'},
+                                                  'offset': {'type': 'number'}
+                                                  },
+                                   'required': ['address']
+                                   }
+
     def __init__(self, source: dict):
         self.source = source
 
@@ -189,7 +189,7 @@ class Registry(object):
         from jsonschema import validate
 
         try:
-            validate(instance, schema=SCHEMA)
+            validate(instance, schema=cls.SCHEMA)
             return True
         except Exception as e:
             print(e)
