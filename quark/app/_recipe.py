@@ -44,7 +44,7 @@ class Recipe(object):
     waveform_length: float = 98e-6  # Overridden by `station.waveform_length`
 
     def __init__(self, name: str, signal: str = 'iq_avg',
-                 filename: str = 'baqis', priority: int = 0):
+                 filename: str = 'raw', priority: int = 0):
         """初始化任务描述
 
         Args:

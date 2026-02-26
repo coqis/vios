@@ -50,10 +50,7 @@ def initialize(snapshot, **kwds):
         return os.getpid()
 
     ctx = create_context(kwds.get('arch', 'baqis'), snapshot)
-    # ctx.reset(snapshot)
-    # ctx.initial = kwds.get('initial', {'restore': []})
     ctx.bypass = kwds.get('bypass', {})
-    # ctx._keys = kwds.get('keys', [])
     if kwds.get('main', False):
         return ctx
 
@@ -84,7 +81,6 @@ def schedule(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
     assemble(sid, instruction)
 
     if sid == 0:
-        # kwds['restore'] = ctx.initial
         kwds['clear'] = True
     logger.info(f'✅ Step({sid}): compiled!')
 

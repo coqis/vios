@@ -34,51 +34,39 @@ from pathlib import Path
 import numpy as np
 from loguru import logger
 from qlispc.arch.baqis import QuarkLocalConfig
-from waveforms import Waveform, WaveVStack, square, wave_eval
 
-from .base import Registry
+from .base import Pulse, Registry, Waveform
 
 LIBCACHE = []
 
 try:
-    from ime import stdlib, get_arch, qcompile, sample_waveform
+    from ime import get_arch, qcompile, qsample
 except Exception as e:
-    logger.critical('run `quark init` to fix this', e)
+    logger.critical('try `quark init` to fix this', e)
     raise e
 
 
-# try:
-#     try:
-#         from glib import get_arch, qcompile, sample_waveform
-#     except ImportError as e:
-#         from qlispc import get_arch
-#         from qlispc.kernel_utils import qcompile, sample_waveform
-# except Exception as e:
-#     logger.critical('qlispc error', e)
-#     raise e
-
-
 def get_gate_lib(lib: str | dict):
-    if lib:
-        mp = lib
-        if isinstance(lib, dict):
-            gp = Path(sys.modules['glib'].__file__).parent
-            lp = gp / 'gates' / lib['file']
-            lh = hash(lib['code'])
-            if lh not in LIBCACHE or not lp.exists():
-                logger.warning(f'Updating gate lib: {lp}')
-                LIBCACHE.append(lh)
-                with open(lp, 'w', encoding='utf-8') as f:
-                    f.write(lib['code'])
-                if len(LIBCACHE) > 1000:
-                    LIBCACHE.pop(0)
-            mp = 'glib.gates.'
-            mp = mp + lib['file'].replace('\\', '/').replace('/', '.')
-            mp = mp.removesuffix('.py')
+    if not lib:
+        raise ValueError('gate lib must be specified!')
 
-        return reload(import_module(mp)).lib
-    else:
-        return stdlib
+    mp = lib
+    if isinstance(lib, dict):
+        gp = Path(sys.modules['glib'].__file__).parent
+        lp = gp / 'gates' / lib['file']
+        lh = hash(lib['code'])
+        if lh not in LIBCACHE or not lp.exists():
+            logger.warning(f'Updating gate lib: {lp}')
+            LIBCACHE.append(lh)
+            with open(lp, 'w', encoding='utf-8') as f:
+                f.write(lib['code'])
+            if len(LIBCACHE) > 1000:
+                LIBCACHE.pop(0)
+        mp = 'glib.gates.'
+        mp = mp + lib['file'].replace('\\', '/').replace('/', '.')
+        mp = mp.removesuffix('.py')
+
+    return reload(import_module(mp)).lib
 
 
 def split_circuit(circuit: list):
@@ -115,10 +103,8 @@ class Context(QuarkLocalConfig):
     def __init__(self, data) -> None:
         super().__init__(data)
         self.reset(data)
-        # self.initial = {}
         self.bypass = {}
-        # self._keys = []
-        self.opaques = stdlib.opaques
+        self.opaques = {}
 
         self.__skip = ['Barrier', 'Delay', 'setBias', 'Pulse']
 
@@ -230,90 +216,6 @@ def create_context(arch: str, data):
     return ctx
 
 
-class Pulse(object):
-
-    WINDOW = square(500e-3) >> 150e-3
-
-    def __init__(self):
-        pass
-
-    @classmethod
-    def typeof(cls, pulse: Waveform | np.ndarray):
-        return 'object' if isinstance(pulse, Waveform) else 'array'
-
-    @classmethod
-    def fromstr(cls, pulse: str):
-        return wave_eval(pulse)
-
-    @classmethod
-    def correct(cls, points: np.ndarray, cali: dict = {}) -> np.ndarray:
-        """失真校准，从 `qlispc.kernel_utils` 复制而来。仅测试用，不会在实验中调用。
-
-        Args:
-            points (np.ndarray): 输入信号
-            cali (dict, optional): 校准所需参数. Defaults to {}.
-
-        Returns:
-            np.ndarray: 校准后信号
-        """
-        from wath.signal import (correct_reflection, exp_decay_filter,
-                                 predistort)
-
-        distortion_params = cali.get('distortion', {})
-        if not distortion_params:
-            return points
-
-        if not isinstance(distortion_params, dict):
-            distortion_params = {}
-
-        filters = []
-        ker = None
-        if 'decay' in distortion_params and isinstance(distortion_params['decay'],
-                                                       (list, tuple, np.ndarray)):
-            for amp, tau in distortion_params.get('decay', []):
-                a, b = exp_decay_filter(amp, tau, cali['srate'])
-                filters.append((b, a))
-
-        length = len(points)
-        if length > 0:
-            last = points[-1]
-            try:
-                points = predistort(points, filters, ker, initial=last)
-            except:
-                points = np.hstack([np.full((length, ), last), points])
-                points = predistort(points, filters, ker)[length:]
-            points[-1] = last
-
-        return points
-
-    @classmethod
-    def sample(cls, pulse: Waveform | np.ndarray, cali: dict = {}):
-        cali = cali.get('calibration', cali)
-        if isinstance(pulse, Waveform) and cali:
-            pulse >>= cali.get('delay', 0)
-            pulse.sample_rate = cali['srate']
-            pulse.start = 0
-            pulse.stop = cali['end']
-        return pulse.sample() if isinstance(pulse, Waveform) else pulse
-
-    @classmethod
-    def equal(cls, a, b):
-        try:
-            if isinstance(a, WaveVStack) or isinstance(b, WaveVStack):
-                return False
-
-            if isinstance(a, Waveform) and isinstance(b, Waveform):
-                return (a * cls.WINDOW) == (b * cls.WINDOW)
-
-            res = a == b
-            if isinstance(res, np.ndarray):
-                return np.all(res)
-            return res
-        except Exception as e:
-            logger.warning(f'Failed to compare waveform: {e}')
-            return False
-
-
 class Workflow(object):
     def __init__(self):
         pass
@@ -348,18 +250,18 @@ class Workflow(object):
         compiled['trig'] = [('WRITE', t, 0, 'au')
                             for t in kwds.get('triggercmds', [])]
 
+        glib = get_gate_lib(kwds['lib'])
+        ctx.opaques = glib.opaques  # Q.R/Q.Measure is not a command
+
         ctx.code, (cmds, dmap) = qcompile(circuit,
-                                          lib=get_gate_lib(
-                                              kwds.get('lib', '')),
+                                          lib=glib,
                                           cfg=kwds.get('ctx', ctx),
                                           signal=signal,
-                                          shots=kwds.get('shots', 1024),
-                                          context=kwds.get('context', {}),
-                                          arch=kwds.get('arch', 'baqis'),
-                                          align_right=kwds.get(
-                                              'align_right', False),
-                                          waveform_length=kwds.get(
-                                              'waveform_length', 98e-6)
+                                          shots=kwds['shots'],
+                                          context={},
+                                          arch=kwds['arch'],
+                                          align_right=kwds['align_right'],
+                                          waveform_length=kwds['waveform_length']
                                           )
 
         for cmd in cmds:
@@ -382,22 +284,22 @@ class Workflow(object):
         else:
             func = value
 
-        cali = kwds['calibration']  # {} if kwds['sid'] < 0 else
+        cali = kwds['calibration']
         srate = cali['srate']  # must have key 'srate'
         delay = 0
-        offset = 0  # kwds.get('setting', {}).get('OFFSET', 0)
+        offset = 0
 
         if isinstance(func, Waveform):
             try:
                 # ch = kwds['target'].split('.')[-1]
                 delay = cali.get('delay', 0)
                 offset = cali.get('offset', 0)
-                pulse = sample_waveform(func,
-                                        cali,
-                                        sample_rate=srate,
-                                        start=cali.get('start', 0),
-                                        stop=cali.get('end', 98e-6),
-                                        support_waveform_object=kwds.pop('isobject', False))
+                pulse = qsample(func,
+                                cali,
+                                sample_rate=srate,
+                                start=cali.get('start', 0),
+                                stop=cali.get('end', 98e-6),
+                                support_waveform_object=kwds.pop('isobject', False))
             except Exception as e:
                 # KeyError: 'calibration'
                 logger.error(f"Failed to sample: {e}(@{kwds['target']})")
