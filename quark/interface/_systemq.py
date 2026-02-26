@@ -33,7 +33,7 @@ import numpy as np
 from loguru import logger
 from qlispc.arch.baqis import QuarkLocalConfig
 
-from ._base import Pulse, Registry, Waveform
+from .base import Pulse, Registry, Waveform
 
 LIBCACHE = []
 
