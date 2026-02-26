@@ -24,11 +24,9 @@
 """
 
 
-import json
 import sys
 from copy import deepcopy
 from importlib import import_module, reload
-from itertools import permutations
 from pathlib import Path
 
 import numpy as np
@@ -40,7 +38,7 @@ from ._base import Pulse, Registry, Waveform
 LIBCACHE = []
 
 try:
-    from ime import get_arch, qcompile, qsample
+    from systemq import get_arch, qcompile, qsample
 except Exception as e:
     logger.critical('try `quark init` to fix this', e)
     raise e

@@ -42,8 +42,6 @@ def read(device: BaseDriver, quantity: str, channel: str = 'CH1', **kwds) -> Any
     Returns:
         Any: result from the device
     """
-    # assert isinstance(channel, str) and channel.startswith('CH'), \
-    #     f'channel should be a string starting with "CH", got {channel}'
     chstr = channel[2:]
     ch = int(chstr) if chstr.isdigit() else chstr
     return device.getValue(quantity, ch=ch, **kwds)
@@ -58,8 +56,6 @@ def write(device: BaseDriver, quantity: str, value: Any, channel: str = 'CH1', *
         value (Any): value to be written
         channel (int, optional): channel string. Defaults to 'CH1'.
     """
-    # assert isinstance(channel, str) and channel.startswith('CH'), \
-    #     f'channel should be a string starting with "CH", got {channel}'
     chstr = channel[2:]
     ch = int(chstr) if chstr.isdigit() else chstr
     return device.setValue(quantity, value, ch=ch, **kwds)

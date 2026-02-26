@@ -147,13 +147,11 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                             pass
                         context = deepcopy(query(target))
                         _target = context.pop('address', f'address: {target}')
-                        # kwds['context'] = context
                     else:
                         # old
                         context = query(target.split('.', 1)[0])
                         mapping = query('etc.driver.mapping')
                         _target = decode(target, context, mapping)
-                        # kwds.update({"context": context})
                 except Exception as e:  # (ValueError, KeyError, AttributeError)
                     # logger.error(f'Failed to map {target}: {e}!')
                     continue
@@ -173,7 +171,6 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                     'end': context['waveform']['LEN'],
                     'offset': context.get('setting', {}).get('OFFSET', 0)
                 } | context['calibration'][target.split('.')[-1]]
-                # kwds['setting'] = context['setting']
             except Exception as e:
                 end = None
                 if quantity == 'Waveform':
@@ -220,10 +217,6 @@ MAPPING = {
 }
 
 
-# command filters
-SUFFIX = ('Waveform', )  # 'Shot', 'Coefficient', 'TriggerDelay')
-
-
 def decode(target: str, context: dict, mapping: dict = MAPPING) -> str:
     """decode target to hardware channel
 
@@ -259,9 +252,3 @@ def decode(target: str, context: dict, mapping: dict = MAPPING) -> str:
         channel = '.'.join((channel, quantity))
 
     return channel
-
-
-# %%
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

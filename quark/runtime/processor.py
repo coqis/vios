@@ -27,10 +27,6 @@ from zee import flatten_dict
 from quark.interface import Workflow
 
 
-def demodulate(raw_data, **kwds):
-    pass
-
-
 def process(raw_data, **kwds):
     """processing data
 
@@ -99,8 +95,6 @@ def process(raw_data, **kwds):
     except Exception as e:
         logger.error(
             f"{'>' * 10} 'Failed to process the result', {e}, {'<' * 10}")
-        # print('raw data', raw_data)
-        # print('data map', dataMap)
         raise e
         result['error'] = [
             f'Failed to process the result, raise Exception: {e.__class__.__name__}("{str(e)}")',

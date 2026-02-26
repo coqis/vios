@@ -117,8 +117,3 @@ def sample(pulse, delay: float = 0.0, offset: float = 0.0, srate: float = 1e9, *
 
         return {kwds['target']: line}
     return {}
-
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

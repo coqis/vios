@@ -190,13 +190,6 @@ class QuarkProxy(object):
 
         logger.warning(f'\n\n\n{"#" * 80} task starts to run ...\n')
 
-        # try:
-        #     before = []  # insert circuit
-        #     after = []  # append circuit
-        # except Exception as e:
-        #     before = []
-        #     after = []
-        #     logger.error(f'Failed to extend circuit: {e}!')
         mcq = task['meta']['other']['measure']  # cbits and qubits from Measure
         task['body']['post'] = [(t, v, 'au')
                                 for t, v in self.proxy().clear(mcq)]
