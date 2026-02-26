@@ -35,7 +35,7 @@ import numpy as np
 from loguru import logger
 from qlispc.arch.baqis import QuarkLocalConfig
 
-from .base import Pulse, Registry, Waveform
+from ._base import Pulse, Registry, Waveform
 
 LIBCACHE = []
 
@@ -106,11 +106,9 @@ class Context(QuarkLocalConfig):
         self.bypass = {}
         self.opaques = {}
 
-        self.__skip = ['Barrier', 'Delay', 'setBias', 'Pulse']
-
     def reset(self, snapshot):
         self._getGateConfig.cache_clear()
-        if isinstance(snapshot, dict):
+        if isinstance(snapshot, dict):  # local call
             self._QuarkLocalConfig__driver = Registry(deepcopy(snapshot))
             self._keys = list(snapshot.keys())
         else:
@@ -165,35 +163,9 @@ class Context(QuarkLocalConfig):
 
     def getGate(self, name, *qubits):
         # ------------------------- added -------------------------
-        if name in self.__skip:
+        if name in ['Barrier', 'Delay', 'setBias', 'Pulse']:
             return {}
         return super().getGate(name, *qubits)
-
-        if len(qubits) > 1:
-            order_senstive = self.query(f"gate.{name}.__order_senstive__")
-        else:
-            order_senstive = False
-        # ------------------------- added -------------------------
-
-        if order_senstive is None:
-            order_senstive = True
-        if len(qubits) == 1 or order_senstive:
-            ret = self.query(f"gate.{name}.{'_'.join(qubits)}")
-            if isinstance(ret, dict):
-                ret['qubits'] = tuple(qubits)
-                return ret
-            else:
-                raise Exception(f"gate {name} of {qubits} not calibrated.")
-        else:
-            for qlist in permutations(qubits):
-                try:
-                    ret = self.query(f"gate.{name}.{'_'.join(qlist)}")
-                    if isinstance(ret, dict):
-                        ret['qubits'] = tuple(qlist)
-                        return ret
-                except:
-                    break
-            raise Exception(f"gate {name} of {qubits} not calibrated.")
 
 
 def create_context(arch: str, data):

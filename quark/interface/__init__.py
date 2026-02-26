@@ -27,5 +27,5 @@ Abstract: about interface
 """
 from quark.proxy import HOME
 
-from .base import Pulse
+from ._base import Pulse
 from .systemq import Workflow, create_context
