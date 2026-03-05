@@ -407,6 +407,12 @@ class Super(object):
 
         return diff(new, old, fmt, ignore)
 
+    def remote(self, host: str = '127.0.0.1'):
+        rs = connect('QuarkRemote', host=host, port=2087)
+        for mth in ['info', 'sysinfo', 'restart', 'update']:
+            setattr(rs, mth, getattr(rs, mth))
+        return rs
+
     def fig(self):
         from ._viewer import fig
         return fig
