@@ -130,34 +130,4 @@ def postprocess(result: dict):
         ``` 
     """
 
-    # print(result.keys(),result['meta'].keys())
-
-    coqis = result['meta'].get('coqis', {})
-    # savefig(result)
-    if not coqis.get('eid', ''):  # to sqc
-        return QuarkProxy.process(result)  # , False)
-
-    res = QuarkProxy.process(result)  # , True)
-    rshot = 0
-    post_data = {"task_id": coqis['eid'],
-                 "status": res['status'].lower(),
-                 "raw": "",
-                 "res": "",
-                 'transpiled_circuit': res['transpiled'],
-                 "server": coqis['systemid']}
-
-    if res['status'].lower() == 'finished':
-        rshot = sum(res['count'].values())
-        post_data.update({"raw": str(res['count']).replace("\'", "\""),
-                          "res": str(res['count']).replace("\'", "\""),
-                          })
-
-    try:
-        resp = requests.post(url=f"http://124.70.54.59/qbackend/scq_result/",
-                             data=post_data,
-                             headers={'api_token': coqis['token']})
-        logger.info(f'Back to quafu: {resp.text} {rshot}')
-    except Exception as e:
-        logger.error(f'Failed to post result: {e}')
-
-    return res
+    return QuarkProxy.process(result)
