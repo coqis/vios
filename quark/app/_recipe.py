@@ -81,6 +81,9 @@ class Recipe(object):
             else:
                 self.__circuit = [cirq]
         elif isinstance(cirq, dict):
+            if cirq['code'].endswith('py'):
+                # {'code':'cc.py', 'name':'S21'}
+                cirq['code'] = Path(cirq['code']).read_text('utf-8')
             self.__circuit = {'name': cirq['name'],
                               'code': cirq['code'],
                               'module': '__user__'}
@@ -93,7 +96,8 @@ class Recipe(object):
             except Exception as e:
                 self.__circuit['file'] = inspect.getabsfile(cirq)
         else:
-            raise TypeError(f'invalid circuit: list[list] or function needed!')
+            raise TypeError(
+                f'invalid circuit: list[list] or dict or function needed!')
 
     def __getitem__(self, key: str):
         try:
