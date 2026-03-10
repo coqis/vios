@@ -51,9 +51,20 @@ except Exception as e:
 class Progress(tqdm):
     bar_format = '{desc} {percentage:3.0f}%|{bar}|{n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}{postfix}]'
 
-    def __init__(self, desc='test', total=100, postfix='running', disable: bool = False, leave: bool = True):
+    def __init__(self, desc: str = 'test', total: int = 100, postfix: str = 'running',
+                 disable: bool = False, leave: bool = True, position: int = 0):
+        """progress bar for task
+
+        Args:
+            desc (str, optional): description of the progress bar. Defaults to 'test'.
+            total (int, optional): total number of iterations. Defaults to 100.
+            postfix (str, optional): postfix of the progress bar. Defaults to 'running'.
+            disable (bool, optional): disable the progress bar if True. Defaults to False.
+            leave (bool, optional): leave the progress bar if True. Defaults to True.
+            position (int, optional): position of the progress bar. Defaults to 0.
+        """
         super().__init__([], desc, total, postfix=postfix, disable=disable, leave=leave,
-                         ncols=None, colour='blue', bar_format=self.bar_format, position=0)
+                         ncols=None, colour='blue', bar_format=self.bar_format, position=position)
 
     @property
     def max(self):
@@ -61,11 +72,17 @@ class Progress(tqdm):
 
     @max.setter
     def max(self, value: int):
-        self.reset(value)
+        # current_n = self.n
+        # self.reset(value)
+        # self.n = current_n
+        self.total = value
+        self.refresh()
+        self.display()
 
     def goto(self, index: int):
         self.n = index
         self.refresh()
+        # self.display()
 
     def finish(self, success: bool = True):
         self.colour = 'green' if success else 'red'
@@ -79,6 +96,7 @@ class Task(object):
     handles = {}
     counter = defaultdict(lambda: 0)
     server = None
+    _progress_position = 0
 
     def __init__(self, task: dict, timeout: float | None = None, plot: bool = False) -> None:
         """instantiate a task
@@ -288,26 +306,32 @@ class Task(object):
         Raises:
             TimeoutError: if TimeoutError is raised, the task progress bar will be stopped.
         """
-        while True:
-            try:
-                status = self.status()['status']
-                if status in ['Pending']:
-                    time.sleep(interval)
-                    continue
-                elif status == 'Canceled':
-                    return 'Task canceled!'
-                else:
-                    self.progress = Progress(desc=str(self),
-                                             total=self.report(False)['size'],
-                                             postfix=current_thread().name,
-                                             disable=disable,
-                                             leave=leave)
-                    break
-            except Exception as e:
-                logger.error(
-                    f'Failed to get status: {e},{self.report(False)}')
-                if not hasattr(self.progress, 'disp'):
-                    break
+
+        # 为每个任务分配一个唯一的进度条位置
+        position = Task._progress_position
+        Task._progress_position += 1
+        self.progress = Progress(desc=str(self),
+                                 total=1000,  # self.report(False)['size'],
+                                 postfix=current_thread().name,
+                                 disable=disable,
+                                 leave=leave,
+                                 position=position)
+        # while True:
+        #     try:
+        #         status = self.status()['status']
+        #         if status in ['Pendingss']:
+        #             time.sleep(interval)
+        #             continue
+        #         elif status == 'Canceledss':
+        #             return 'Task canceled!'
+        #         else:
+
+        #             break
+        #     except Exception as e:
+        #         logger.error(
+        #             f'Failed to get status: {e},{self.report(False)}')
+        #         if not hasattr(self.progress, 'disp'):
+        #             break
 
         if isinstance(self.timeout, float):
             while True:
@@ -324,10 +348,29 @@ class Task(object):
         self.progress.close()
 
     def refresh(self, interval: float = 2.0):
-        self.progress.display()
-        if self.update():
+        display = True
+        try:
+            status = self.status()['status']
+            # print('refresh',status)
+            if status in ['Pending']:
+                time.sleep(interval)
+                display = False
+            elif status == 'Canceled':
+                return 'Task canceled!'
+            else:
+                if self.progress.max != self.report(False)['size']:
+                    self.progress.max = self.report(False)['size']
+        except Exception as e:
+            logger.error(
+                f'Failed to get status: {e},{self.report(False)}')
+            if not hasattr(self.progress, 'disp'):
+                return
+
+        if display:
             self.progress.display()
-            return
+            if self.update():
+                self.progress.display()
+                return
         self.handles[self.tid] = asyncio.get_running_loop(
         ).call_later(interval, self.refresh, *(interval,))
 
