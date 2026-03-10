@@ -184,12 +184,13 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
 
             # Merge commands with the same channel
             try:
+                if quantity == 'Waveform' and isinstance(cmd['value'], str):
+                    cmd['value'] = Pulse.fromstr(cmd['value'])
+
                 if _target in scmd and quantity == 'Waveform':
                     if isinstance(scmd[_target]['value'], str):
                         scmd[_target]['value'] = Pulse.fromstr(
                             scmd[_target]['value'])
-                    if isinstance(cmd['value'], str):
-                        cmd['value'] = Pulse.fromstr(cmd['value'])
                     scmd[_target]['value'] += cmd['value']
                     scmd[_target]['cargs'].update(cmd['cargs'])
                 else:
