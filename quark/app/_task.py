@@ -96,7 +96,6 @@ class Task(object):
     handles = {}
     counter = defaultdict(lambda: 0)
     server = None
-    _progress_position = 0
 
     def __init__(self, task: dict, timeout: float | None = None, plot: bool = False) -> None:
         """instantiate a task
@@ -306,32 +305,26 @@ class Task(object):
         Raises:
             TimeoutError: if TimeoutError is raised, the task progress bar will be stopped.
         """
-
-        # 为每个任务分配一个唯一的进度条位置
-        position = Task._progress_position
-        Task._progress_position += 1
-        self.progress = Progress(desc=str(self),
-                                 total=1000,  # self.report(False)['size'],
-                                 postfix=current_thread().name,
-                                 disable=disable,
-                                 leave=leave,
-                                 position=position)
-        # while True:
-        #     try:
-        #         status = self.status()['status']
-        #         if status in ['Pendingss']:
-        #             time.sleep(interval)
-        #             continue
-        #         elif status == 'Canceledss':
-        #             return 'Task canceled!'
-        #         else:
-
-        #             break
-        #     except Exception as e:
-        #         logger.error(
-        #             f'Failed to get status: {e},{self.report(False)}')
-        #         if not hasattr(self.progress, 'disp'):
-        #             break
+        while True:
+            try:
+                status = self.status()['status']
+                if status in ['Pending']:
+                    time.sleep(interval)
+                    continue
+                elif status == 'Canceled':
+                    return 'Task canceled!'
+                else:
+                    self.progress = Progress(desc=str(self),
+                                             total=self.report(False)['size'],
+                                             postfix=current_thread().name,
+                                             disable=disable,
+                                             leave=leave)
+                    break
+            except Exception as e:
+                logger.error(
+                    f'Failed to get status: {e},{self.report(False)}')
+                if not hasattr(self.progress, 'disp'):
+                    break
 
         if isinstance(self.timeout, float):
             while True:
@@ -348,29 +341,10 @@ class Task(object):
         self.progress.close()
 
     def refresh(self, interval: float = 2.0):
-        display = True
-        try:
-            status = self.status()['status']
-            # print('refresh',status)
-            if status in ['Pending']:
-                time.sleep(interval)
-                display = False
-            elif status == 'Canceled':
-                return 'Task canceled!'
-            else:
-                if self.progress.max != self.report(False)['size']:
-                    self.progress.max = self.report(False)['size']
-        except Exception as e:
-            logger.error(
-                f'Failed to get status: {e},{self.report(False)}')
-            if not hasattr(self.progress, 'disp'):
-                return
-
-        if display:
+        self.progress.display()
+        if self.update():
             self.progress.display()
-            if self.update():
-                self.progress.display()
-                return
+            return
         self.handles[self.tid] = asyncio.get_running_loop(
         ).call_later(interval, self.refresh, *(interval,))
 
