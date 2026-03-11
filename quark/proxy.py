@@ -285,7 +285,8 @@ class QuarkProxy(object):
                'status': status,
                'created': meta['created'],
                'finished': meta['finished'],
-               'system': meta['system']
+               'system': meta['system'],
+               'url': coqis.get('url', ''),
                }
         return ret
 
