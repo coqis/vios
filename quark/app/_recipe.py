@@ -80,19 +80,23 @@ class Recipe(object):
                 self.__circuit = cirq
             else:
                 self.__circuit = [cirq]
-        elif isinstance(cirq, dict):
-            if cirq['code'].endswith('py'):
-                # {'code':'cc.py', 'name':'S21'}
-                cirq['code'] = Path(cirq['code']).read_text('utf-8')
-            self.__circuit = {'name': cirq['name'],
-                              'code': cirq['code'],
-                              'module': '__user__'}
+        # elif isinstance(cirq, dict):
+        #     if cirq['code'].endswith('py'):
+        #         # {'code':'cc.py', 'name':'S21'}
+        #         cirq['code'] = Path(cirq['code']).read_text('utf-8')
+        #     self.__circuit = {'name': cirq['name'],
+        #                       'code': cirq['code'],
+        #                       'module': '__user__'}
         elif callable(cirq):
             self.__circuit = {'name': cirq.__name__,
                               'code': inspect.getsource(cirq),
-                              'module': cirq.__module__.split('.')[-1]}
+                              # cirq.__module__.split('.')[-1]
+                              'module': '__user__'
+                              }
             try:
                 self.__circuit['file'] = sys.modules[cirq.__module__].__file__
+                self.__circuit['code'] = Path(
+                    self.__circuit['file']).read_text('utf-8')
             except Exception as e:
                 self.__circuit['file'] = inspect.getabsfile(cirq)
         else:
