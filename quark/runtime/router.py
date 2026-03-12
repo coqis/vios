@@ -82,9 +82,11 @@ def transfer(tid: int, status: str, result: dict, station: str, left: int, **kwd
     # result['token'] = '1E5TIgrYjr1O1qpR[VtIwzpG`NzgXEUZNHr{5Ck6UVs/Rg2lEO{lEP{5TNxdUO5RkN1dUN7JDd5WnJtJTNzpEP1p{NzBDPy1jNx1TOzBkNjpkJ1GXbjxjJvOnMkGnM{mXdiKHRkG4djpkJzW3d2Kzf'
 
     url = result.pop('url', 'https://quafu-sqc.baqis.ac.cn')
+    token = result.pop('token', '')
 
     if kwds.get('debug', False):
-        print(tid, status, result, station, left, kwds, url)
+        print({'tid': tid, 'status': status, 'result': result,
+              'station': station, 'left': left, 'url': url, 'token': token})
 
     resp = requests.post(f'{url}/task/transfer/',
                          data=json.dumps({'tid': tid,
@@ -93,7 +95,7 @@ def transfer(tid: int, status: str, result: dict, station: str, left: int, **kwd
                                           'station': station,
                                           'left': left
                                           }),
-                         headers={'token': kwds['token']})
+                         headers={'token': token})
 
     try:
         return f'response: {json.loads(resp.content.decode())}'
