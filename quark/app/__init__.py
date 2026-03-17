@@ -411,6 +411,15 @@ class Super(object):
         rs = connect('QuarkRemote', host=host, port=2087)
         for mth in ['info', 'sysinfo', 'restart', 'update']:
             setattr(rs, mth, getattr(rs, mth))
+
+        def upload_file(filename: str):
+            fp = Path(filename).resolve()
+            if fp.exists():
+                return rs.upload(fp.name, fp.read_bytes())
+            else:
+                raise FileNotFoundError(f'{fp} not found')
+        rs.upload_file = upload_file
+
         return rs
 
     def fig(self):
@@ -767,29 +776,40 @@ def get_data_by_tid(tid: int, **kwds) -> dict:
     return {'data': data, 'meta': info['meta']}
 
 
-def update_remote_wheel(wheel: str, index: str | Path, host: str = '127.0.0.1', sudo: bool = False):
-    # """update the package on remote device
+def update_dev_from_remote(host: str = '172.26.1.23'):
+    rs = s.remote(host)
+    info = rs.info()
+    for alias, value in info.items():
+        s.update(f'dev.{alias}.host', host)
+        s.update(f'dev.{alias}.port', value['port'])
+        s.update(f'dev.{alias}.type', 'remote')
+    return info
+    # s.display(rs.info(), title='remote')
 
-    # Args:
-    #     wheel (str): package to be installed.
-    #     index (str): location of required packages (downloaded from PyPI).
-    #     host (str, optional): IP address of remote device. Defaults to '127.0.0.1'.
-    #     sudo (bool, optional): used on Mac or Linux. Defaults to False.
-    # """
-    if not host:
-        return None, 'host address is required!'
 
-    links = {}
-    for filename in Path(index).glob('*.whl'):
-        with open(filename, 'rb') as f:
-            print(f'{filename} added to links!')
-            links[filename.parts[-1]] = f.read()
-    rs = connect('QuarkRemote', host=host,
-                 port=2087) if isinstance(host, str) else host
-    sysinfo = rs.install(wheel, links, sudo)
-    print(sysinfo)
-    print(rs.restart())
-    return rs, sysinfo
+# def update_remote_wheel(wheel: str, index: str | Path, host: str = '127.0.0.1', sudo: bool = False):
+#     # """update the package on remote device
+
+#     # Args:
+#     #     wheel (str): package to be installed.
+#     #     index (str): location of required packages (downloaded from PyPI).
+#     #     host (str, optional): IP address of remote device. Defaults to '127.0.0.1'.
+#     #     sudo (bool, optional): used on Mac or Linux. Defaults to False.
+#     # """
+#     if not host:
+#         return None, 'host address is required!'
+
+#     links = {}
+#     for filename in Path(index).glob('*.whl'):
+#         with open(filename, 'rb') as f:
+#             print(f'{filename} added to links!')
+#             links[filename.parts[-1]] = f.read()
+#     rs = connect('QuarkRemote', host=host,
+#                  port=2087) if isinstance(host, str) else host
+#     sysinfo = rs.install(wheel, links, sudo)
+#     print(sysinfo)
+#     print(rs.restart())
+#     return rs, sysinfo
 
 
 def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, tid: int = 0, **kwds) -> tuple:
