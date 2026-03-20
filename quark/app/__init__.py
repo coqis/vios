@@ -412,10 +412,10 @@ class Super(object):
         for mth in ['info', 'sysinfo', 'restart', 'update']:
             setattr(rs, mth, getattr(rs, mth))
 
-        def upload_file(filename: str):
-            fp = Path(filename).resolve()
+        def upload_file(local_path: str, remote_path: str = ''):
+            fp = Path(local_path).resolve()
             if fp.exists():
-                return rs.upload(fp.name, fp.read_bytes())
+                return rs.upload(fp.name, fp.read_bytes(), remote_path)
             else:
                 raise FileNotFoundError(f'{fp} not found')
         rs.upload_file = upload_file
@@ -454,7 +454,11 @@ class Super(object):
             title = 'hdf5'
 
         from quark.toolkit import display
-        kwds.setdefault('end', '')
+        if isinstance(d, dict):
+            kwds.setdefault('end', '')
+        elif isinstance(d, np.ndarray):
+            kwds.setdefault('max_rows', 10)
+            kwds.setdefault('max_cols', 10)
         display(d, title, **kwds)
 
 
@@ -777,8 +781,7 @@ def get_data_by_tid(tid: int, **kwds) -> dict:
 
 
 def update_dev_from_remote(host: str = '172.26.1.23'):
-    rs = s.remote(host)
-    info = rs.info()
+    info = s.remote(host).info()
     for alias, value in info.items():
         s.update(f'dev.{alias}.host', host)
         s.update(f'dev.{alias}.port', value['port'])
