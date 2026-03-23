@@ -88,6 +88,9 @@ def transfer(tid: int, status: str, result: dict, station: str, left: int, **kwd
         print({'tid': tid, 'status': status, 'result': result,
               'station': station, 'left': left, 'url': url, 'token': token})
 
+    if not url or not token:
+        raise Exception('url or token is empty')
+
     resp = requests.post(f'{url}/task/transfer/',
                          data=json.dumps({'tid': tid,
                                           'status': status,
