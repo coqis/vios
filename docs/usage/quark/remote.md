@@ -9,7 +9,7 @@ icon: simple/redmine
 ???+ example "start"
     ```bash
     # pip install quarkstudio (if not installed)
-    # quark update --mode=remote (if installed)
+    # init or update: quark init/update --mode=remote
     quark remote remote.json
     ```
 
@@ -22,11 +22,10 @@ icon: simple/redmine
 You may place the device driver anywhere. The directory structure is shown below:
 ``` bash title="remote folder"
 remote
-├── driver
+├── dev
 │   ├── VirtualDevice.py # (1)!
 │   └── __init__.py
-├── remote.json # (2)!
-└── requirements.txt # (3)!
+└── remote.json # (2)!
 ```
 <!-- └── setup.py # (4)! -->
 
@@ -36,7 +35,7 @@ remote
     ```python title="remote.json"
     {
         "ADC": { # alias of the device
-            "name": "driver.VirtualDevice", # module path of the driver
+            "name": "dev.VirtualDevice", # module path of the driver
             "addr": "192.168.1.42" #  # IP address of the device
             "port": 40001 # service port
         }
@@ -65,7 +64,7 @@ remote
     )
     ```
 
-Then run `pip install -r requirements.txt` in the `remote` folder and `quark remote remote.json` to start the remote service. 
+Then run `quark remote remote.json` in the `remote` folder to start the remote service. 
 
 To connect the device `ADC` on another computer within the same local area network (LAN), please refer to the following example
 ???+ Example "connect to a remote device"

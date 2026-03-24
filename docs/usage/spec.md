@@ -1,22 +1,9 @@
-## 环境一致性
 
-### 基础环境
-
-1. git
-2. python >= 3.12
-
-### 测量环境
-
-1. `quark init`下载dev/glib等并安装所有依赖（systemq的toml文件）。**可反复执行**
-2. `quark update`(uv还需要`uv sync -U`来更新lock文件)更新相关库。**可反复执行**
-
-## Remote设备（含windows或linux）
+### Remote设备（内含windows或linux）配置
 
 - **remote目录结构**
-  > 驱动相关文件统一放`~/Desktop/remote`目录下
-  > 启动服务配置文件命名统一为`quarkremote.service`。后续通过`s.remote`管理。
   ```CoffeeScript
-  remote # 目录结构和命名保持一致
+  remote # 与设备相关的驱动文件统一放`~/Desktop/remote`目录下
   ├── dev
   │   ├── common # 可选，如果有dll/so等动态链接库，放在这里
   │   └── VirtualDevice.py # 继承BaseDriver并实现open/close/write/read 
@@ -33,11 +20,11 @@
   ```JSON
   {
       "AWG1": { # 第一块卡
-          "name": "dev.VirtualDevice",
-          "addr": "192.168.1.41" # 卡地址 
-          "slot": 1,
-          "borad_type":"XY",
-          "srate":4e6,
+          "name": "dev.VirtualDevice", # 必填
+          "addr": "192.168.1.41" # 必填，卡地址 
+          "slot": 1, # 可选
+          "borad_type":"XY", # 可选
+          "srate":4e6, # 可选，传与driver属性`srate`
           "port": 40001 # 端口不能相同，否则会冲突
       },
       "AWG2": { # 第二块卡
@@ -52,14 +39,43 @@
   }
   ```
 
-## 关于实验
+### 测量电脑连接remote设备
 
-能够引起不同的地方，除了设备差异，还有：
+- **连接remote设备**
+  ```Python
+  # 在notebook中快速测试连接
+  from quark import connect
 
-- lib: Recipe.lib = "path/to/u3.py"
-- 线路：rcp.circuit = cc.S21
-- 可执行文件`exp.py`
-  1. 线路定义：def circuit():...
-  2. 入口定义：def run():...
-  3. 执行：`python exp.py`(`if __name__ == "__main__": run()`)
+  # host为设备内x86系统的IP地址，不是卡地址，port为remote.json中配置的端口
+  awg1 = connect('AWG1',host='192.168.1.12',port=40001) 
+  # 如果成功，则返回设备信息
+  awg1.info() 
+  ```
+  ```Python
+  # 在server中配置dev信息
+  {
+      "AWG1": { # 第一块卡
+          "type": "remote", # 必填
+          "host": "192.168.1.12", # 与设备内x86系统的IP地址一致
+          "port": 40001 # 与remote.json中配置的端口一致
+      },
+      "AWG2": { # 第二块卡
+          "type": "remote",
+          "host": "192.168.1.12", # 与设备内x86系统的IP地址一致
+          "port": 40002 # 与remote.json中配置的端口一致
+      },
+      ...
+  }
+  ```
+- **管理remote服务**
+  ```Python
+  # 在notebook中连接remote服务
+  from quark import s
+
+  # host为设备内x86系统的IP地址，不是卡地址
+  rs = s.remote(host='192.168.1.12') 
+  # 如果成功，则返回remote.json中配置的设备信息
+  rs.info() 
+  ```
+
 

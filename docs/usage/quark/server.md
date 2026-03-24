@@ -8,7 +8,7 @@ icon: simple/mockserviceworker
 ???+ example "start"
     ```bash
     # pip install quarkstudio (if not installed)
-    # quark update --mode=server (if installed)
+    # init or update: quark init/update --mode=server
     quark server
     ```
 

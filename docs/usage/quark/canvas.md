@@ -9,7 +9,7 @@ icon: material/clipboard-pulse
 ???+ example "start"
     ```bash
     # pip install quarkstudio (if not installed)
-    # quark update --mode=studio (if installed)
+    # init or update: quark init/update --mode=studio
     quark canvas
     ```
 ### **Real-time Waveform**

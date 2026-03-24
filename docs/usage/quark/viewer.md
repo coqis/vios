@@ -8,7 +8,7 @@ icon: material/chart-timeline-variant-shimmer
 ???+ example "start"
     ```bash
     # pip install quarkstudio (if not installed)
-    # quark update --mode=studio (if installed)
+    # init or update: quark init/update --mode=studio
     quark viewer
     ```
 ### **Data Visualization**
