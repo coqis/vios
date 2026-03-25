@@ -141,42 +141,42 @@ class Super(object):
         """
         return submit(task, block, **kwds)
 
-    def ping(self):
-        return ping(self.qs())
+    def ping(self, srv=None):
+        return ping(srv or self.qs())
 
-    def snapshot(self, tid: int = 0):
-        """Get snapshot of a task with given id(**tid** or **rid**). 
-        If tid is 0, current snapshot will be retrieved from `QuarkServer`.
+    def snapshot(self, idx: int = 0):
+        """Get snapshot of a task with given idx(**tid** or **rid**). 
+        If idx is 0, current snapshot will be retrieved from `QuarkServer`.
 
         Args:
-            tid (int, optional): task id. Defaults to 0.
+            idx (int, optional): tid or rid. Defaults to 0.
 
         Returns:
             dict: _description_
         """
-        if tid and self.addr[0] == '127.0.0.1':
-            if tid < 1e10:
-                return get_config_by_rid(tid)
-            return get_config_by_tid(tid)
+        if idx and self.addr[0] == '127.0.0.1':
+            if idx < 1e10:
+                return get_config_by_rid(idx)
+            return get_config_by_tid(idx)
         else:
-            return self.qs().snapshot(tid=tid)
+            return self.qs().snapshot(idx=idx)
 
-    def rollback(self, tid: int):
-        """Rollback the cfg with given id(**tid** or **rid**)
+    def rollback(self, idx: int):
+        """Rollback the cfg with given idx(**tid** or **rid**)
 
         Args:
-            tid (int): task id
+            idx (int): tid or rid
         """
-        if tid:
-            rollback(tid)
+        if idx:
+            rollback(idx)
         else:
             raise ValueError('rid or tid is required!')
 
-    def result(self, tid: int, task: bool = False, clear: bool = False, **kwds):
-        """Get data with given id(**tid** or **rid**)
+    def result(self, idx: int, task: bool = False, clear: bool = False, **kwds):
+        """Get data with given idx(**tid** or **rid**)
 
         Args:
-            tid (int): task id
+            idx (int): tid or rid
             task (bool, optional): return task info if True. Defaults to False.
             clear (bool, optional): clear cache if True. Defaults to False.
 
@@ -190,17 +190,17 @@ class Super(object):
             self.cache.clear()
             logger.info('Cache cleared.')
 
-        if tid in self.cache:
-            # logger.info(f'Cache hit: {tid}')
-            return self.cache[tid]
+        if idx in self.cache:
+            # logger.info(f'Cache hit: {idx}')
+            return self.cache[idx]
 
         if self.addr[0] == '127.0.0.1':
-            if tid < 1e10:
-                info, data = get_data_by_rid(tid, **kwds)
+            if idx < 1e10:
+                info, data = get_data_by_rid(idx, **kwds)
             else:
-                info, data = get_data_by_tid(tid, **kwds)
+                info, data = get_data_by_tid(idx, **kwds)
         else:
-            info, data = self.qs().load(tid)
+            info, data = self.qs().load(idx)
             try:
                 from ._db import reshape
 
@@ -213,8 +213,8 @@ class Super(object):
         if task:
             return info.get('task', {})
         else:
-            self.cache[tid] = {'data': data, 'meta': info.get('meta', {})}
-            return self.cache[tid]
+            self.cache[idx] = {'data': data, 'meta': info.get('meta', {})}
+            return self.cache[idx]
 
     def lookup(self, start: str = '', end: str = '', name: str = ''):
         """Lookup records in the database
@@ -270,13 +270,12 @@ class Super(object):
     def profile(self):
         return self.qs().progress(profile=True)
 
-    def translate(self, circuit: list = [(('Measure', 0), 'Q0')], cfg: dict = {}, tid: int = 0, **kwds) -> tuple:
+    def translate(self, circuit: list = [(('Measure', 0), 'Q0')], cfg: dict = {}, **kwds) -> tuple:
         """Translate circuit to executable commands(i.e., waveforms or settings)
 
         Args:
             circuit (list, optional): qlisp circuit. Defaults to [(('Measure', 0), 'Q0')].
-            cfg (dict, optional): parameters of qubits in the circuit. Defaults to {}.
-            tid (int, optional): task id used to load cfg. Defaults to 0.
+            cfg (dict, optional): parameters of qubits in the circuit. Defaults to {} Defaults.
 
         Returns:
             tuple: context that contains cfg, translated result
@@ -314,7 +313,7 @@ class Super(object):
                     'waveform_length': 1.8e-05
                 }
             }
-        return translate(circuit, cfg, tid, **kwds)
+        return translate(circuit, cfg, **kwds)
 
     def preview(self, cmds: dict, keys: tuple[str] = ('',), calibrate: bool = True,
                 start: float = 0, end: float = 0, srate: float = 0,
@@ -511,21 +510,13 @@ def recommended(replacement: str = ''):
     return decorator
 
 
-def ping(qs):
-    return qs.ping('hello') == 'hello'
+@recommended(replacement='s.ping')
+def ping(srv):
+    return srv.ping('hello') == 'hello'
 
 
 @recommended(replacement='s.login')
 def login(user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088, verbose: bool = True):
-    # """login to the server as **user**
-
-    # Args:
-    #     user (str, optional): name of the user(same as signup). Defaults to 'baqis'.
-    #     verbose (bool, optional): print login info if True. Defaults to True.
-
-    # Returns:
-    #     _type_: a connection to the server
-    # """
     uid = f'{current_thread().name}: {user}@{host}:{port}'
     try:
         qs = _sp[uid]
@@ -541,12 +532,6 @@ def login(user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088, verbos
 
 @recommended(replacement='s.signup')
 def signup(user: str, system: str, **kwds):
-    # """register a new **user** on the **system**
-
-    # Args:
-    #     user (str): name of the user
-    #     system (str): name of the system(i.e. the name of the cfg file)
-    # """
     qs = s.qs()
     logger.info(qs.adduser(user, system, **kwds))
     qs.login(user)  # relogin
@@ -554,62 +539,10 @@ def signup(user: str, system: str, **kwds):
 
 @recommended(replacement='s.submit')
 def submit(task: dict, block: bool = False, **kwds):
-    # """submit a task to a backend
-
-    # Args:
-    #     task (dict): description of a task
-    #     block (bool, optional): block until the task is done if True
-
-    # Keyword Arguments: Kwds
-    #     preview (list): real time display of the waveform
-    #     plot (bool): plot the result if True(1D or 2D), defaults to False.
-    #     backend (connection): connection to a backend, defaults to local machine.
-
-    # Raises:
-    #     TypeError: _description_
-
-    # Example: description of a task
-    #     ``` {.py3 linenums="1"}
-    #     {
-    #         'meta': {'name': f'{filename}: /s21',  # s21 is the name of the dataset
-    #                  # extra arguments for compiler and others
-    #                  'other': {'shots': 1234, 'signal': 'iq', 'autorun': False}},
-    #         'body': {'step': {'main': ['WRITE', ('freq', 'offset', 'power')],  # main is reserved
-    #                           'step2': ['WRITE', 'trig'],
-    #                           'step3': ['WAIT', 0.8101],  # wait for some time in the unit of second
-    #                           'READ': ['READ', 'read'],
-    #                           'step5': ['WAIT', 0.202]},
-    #                  'init': [('Trigger.CHAB.TRIG', 0, 'any')],  # initialization of the task
-    #                  'post': [('Trigger.CHAB.TRIG', 0, 'any')],  # reset of the task
-    #                  'cirq': ['cc'],  # list of circuits in the type of qlisp
-    #                  'rule': ['⟨gate.Measure.Q1.params.frequency⟩ = ⟨Q0.setting.LO⟩+⟨Q2.setting.LO⟩+1250'],
-    #                  'loop': {'freq': [('Q0.setting.LO', np.linspace(0, 10, 2), 'Hz'),
-    #                                    ('gate.Measure.Q1.index',  np.linspace(0, 1, 2), 'Hz')],
-    #                           'offset': [('M0.setting.TRIGD', np.linspace(0, 10, 1), 'Hz'),
-    #                                      ('Q2.setting.LO', np.linspace(0, 10, 1), 'Hz')],
-    #                           'power': [('Q3.setting.LO', np.linspace(0, 10, 15), 'Hz'),
-    #                                     ('Q4.setting.POW', np.linspace(0, 10, 15), 'Hz')],
-    #                           'trig': [('Trigger.CHAB.TRIG', 0, 'any')],
-    #                           'read': ['NA10.CH1.TraceIQ', 'M0.setting.POW']
-    #                         }
-    #                 },
-    #     }
-    #     ```
-
-    # Todo: fixes
-    #     * `bugs`
-    # """
-
     if 'backend' in kwds:  # from master
         qs = kwds['backend']
     else:
         qs = s.qs()
-
-        # trigger: list[str] = qs.query('station.triggercmds')
-        # station = s.query('station')
-        # task['body']['loop']['trig'] = [(t, 0, 'au')
-        #                                 for t in station.get('triggercmds', [])]
-        # task['meta']['other'].update(station)
 
         # waveforms to be previewed
         qs.update('etc.canvas.filter', kwds.get('preview', []))
@@ -623,24 +556,19 @@ def submit(task: dict, block: bool = False, **kwds):
 
 
 @recommended(replacement='s.rollback')
-def rollback(tid: int):
-    # """rollback the parameters with given task id and checkpoint name
-
-    # Args:
-    #     tid (int): task id
-    # """
+def rollback(idx: int):
     qs = s.qs()
 
     try:
-        if tid < 1e10:  # rid
-            config = get_config_by_rid(tid)
+        if idx < 1e10:  # rid
+            config = get_config_by_rid(idx)
         else:
-            config = get_config_by_tid(tid)
+            config = get_config_by_tid(idx)
         qs.clear()
         for k, v in config.items():
             qs.create(k, v)
     except Exception as e:
-        logger.error(f'Failed to rollback for {tid}: {e}')
+        logger.error(f'Failed to rollback for {idx}: {e}')
 
 
 @recommended(replacement='s.diff')
@@ -760,8 +688,8 @@ def lookup(start: str = '', end: str = '', name: str = '', fmt: str = '%Y-%m-%d-
     # display(output)
 
 
-def run_task_by_rid(rid: int):
-    t = submit(get_task_by_rid(rid) | {'base': get_config_by_rid(rid)})
+def run_task_by_id(idx: int):
+    t = submit(s.result(idx, task=True) | {'base': s.snapshot(idx)})
     t.bar()
     return t
 
@@ -798,17 +726,6 @@ def get_data_by_rid(rid: int, **kwds):
 
 @recommended(replacement='s.result')
 def get_data_by_tid(tid: int, **kwds) -> dict:
-    # """load data with given **task id(tid)**
-
-    # Args:
-    #     tid (int): task id
-
-    # Keyword Arguments: Kwds
-    #     plot (bool, optional): plot the result in QuarkStudio after the data is loaded(1D or 2D).
-
-    # Returns:
-    #     dict: data & meta
-    # """
     from ._db import get_dataset_by_tid
     from ._viewer import plot
 
@@ -870,20 +787,12 @@ def update_dev_from_remote(host: str = '172.26.1.23'):
 #     return rs, sysinfo
 
 @recommended(replacement='s.translate')
-def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, tid: int = 0, **kwds) -> tuple:
-    # """translate circuit to executable commands(i.e., waveforms or settings)
-
-    # Args:
-    #     circuit (list, optional): qlisp circuit. Defaults to [(('Measure', 0), 'Q1001')].
-    #     cfg (dict, optional): parameters of qubits in the circuit. Defaults to {}.
-    #     tid (int, optional): task id used to load cfg. Defaults to 0.
-
-    # Returns:
-    #     tuple: context that contains cfg, translated result
-    # """
+def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, **kwds) -> tuple:
     from quark.runtime import initialize, schedule
 
-    ctx = initialize(cfg if cfg else get_config_by_tid(tid), main=True, **kwds)
+    assert cfg, 'cfg is required!'
+
+    ctx = initialize(cfg, main=True, **kwds)
     return ctx, schedule(0, {}, circuit, signal='iq', **kwds)
 
 
