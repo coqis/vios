@@ -41,7 +41,7 @@ from typing import Callable
 import numpy as np
 from loguru import logger
 from srpc import connect, loads
-from zee import flatten_dict
+from zee import FixedDict, flatten_dict
 
 from . import _dp as dp
 from ._db import get_tid_by_rid
@@ -51,6 +51,8 @@ from ._task import Task
 
 class Super(object):
     """Super Admin Tool to interact with `QuarkServer` and database and so on"""
+
+    cache = FixedDict(maxlen=128)
 
     def __init__(self):
         pass
@@ -170,12 +172,13 @@ class Super(object):
         else:
             raise ValueError('rid or tid is required!')
 
-    def result(self, tid: int, task: bool = False, **kwds):
+    def result(self, tid: int, task: bool = False, clear: bool = False, **kwds):
         """Get data with given id(**tid** or **rid**)
 
         Args:
             tid (int): task id
             task (bool, optional): return task info if True. Defaults to False.
+            clear (bool, optional): clear cache if True. Defaults to False.
 
         Keyword Arguments: Kwds
             plot (bool, optional): plot the result in QuarkStudio after the data is loaded(1D or 2D).
@@ -183,6 +186,14 @@ class Super(object):
         Returns:
             dict: data & meta
         """
+        if clear:
+            self.cache.clear()
+            logger.info('Cache cleared.')
+
+        if tid in self.cache:
+            # logger.info(f'Cache hit: {tid}')
+            return self.cache[tid]
+
         if self.addr[0] == '127.0.0.1':
             if tid < 1e10:
                 info, data = get_data_by_rid(tid, **kwds)
@@ -202,7 +213,8 @@ class Super(object):
         if task:
             return info.get('task', {})
         else:
-            return {'data': data, 'meta': info.get('meta', {})}
+            self.cache[tid] = {'data': data, 'meta': info.get('meta', {})}
+            return self.cache[tid]
 
     def lookup(self, start: str = '', end: str = '', name: str = ''):
         """Lookup records in the database
