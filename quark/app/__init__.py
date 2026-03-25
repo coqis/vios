@@ -49,28 +49,6 @@ from ._recipe import Recipe
 from ._task import Task
 
 
-def recommended(replacement: str = ''):
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            # Get the call stack
-            stack = inspect.stack()
-            caller_frame = stack[1]
-
-            # Check if the caller is at module level (user code)
-            caller_module = inspect.getmodule(caller_frame[0])
-            current_module = inspect.getmodule(func)
-
-            # Only show warning if the caller is not an internal function from the same module
-            if caller_module != current_module:
-                msg = f"`{func.__name__}` is still supported, but `{replacement}` is recommended"
-                warnings.warn(msg, UserWarning, stacklevel=2)
-
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator
-
-
 class Super(object):
     """Super Admin Tool to interact with `QuarkServer` and database and so on"""
 
@@ -208,7 +186,8 @@ class Super(object):
         if self.addr[0] == '127.0.0.1':
             if tid < 1e10:
                 info, data = get_data_by_rid(tid, **kwds)
-            info, data = get_data_by_tid(tid, **kwds)
+            else:
+                info, data = get_data_by_tid(tid, **kwds)
         else:
             info, data = self.qs().load(tid)
             try:
@@ -495,6 +474,29 @@ class Super(object):
 _sp = {}  # defaultdict(lambda: connect('QuarkServer', host, port))
 
 s = Super()
+
+
+def recommended(replacement: str = ''):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            # Get the call stack
+            # stack = inspect.stack()
+            caller_frame = sys._getframe(1)  # stack[1][0]
+
+            # Check if the caller is at module level (user code)
+            caller_module = inspect.getmodule(caller_frame)
+            current_module = inspect.getmodule(func)
+
+            # Only show warning if the caller is not an internal function from the same module
+            if caller_module != current_module:
+                msg = f"`{func.__name__}` is still supported, but `{replacement}` is recommended"
+                # warnings.warn(msg, UserWarning, stacklevel=2)
+                logger.warning(msg)
+
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
 
 
 def ping(qs):
