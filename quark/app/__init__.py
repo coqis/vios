@@ -26,6 +26,7 @@ Abstract: about app
 """
 
 import functools
+import inspect
 import subprocess
 import sys
 import time
@@ -52,9 +53,19 @@ def recommended(replacement: str = ''):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            if replacement:
-                msg = f"Please use `{replacement}` instead, `{func.__name__}` is not recommended!"
+            # Get the call stack
+            stack = inspect.stack()
+            caller_frame = stack[1]
+
+            # Check if the caller is at module level (user code)
+            caller_module = inspect.getmodule(caller_frame[0])
+            current_module = inspect.getmodule(func)
+
+            # Only show warning if the caller is not an internal function from the same module
+            if caller_module != current_module:
+                msg = f"`{func.__name__}` is still supported, but `{replacement}` is recommended"
                 warnings.warn(msg, UserWarning, stacklevel=2)
+
             return func(*args, **kwargs)
         return wrapper
     return decorator
