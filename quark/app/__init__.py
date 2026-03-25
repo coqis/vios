@@ -25,9 +25,11 @@ Abstract: about app
     usefull functions for users to interact with `QuarkServer` and database
 """
 
+import functools
 import subprocess
 import sys
 import time
+import warnings
 from collections import defaultdict
 from functools import wraps
 from importlib import import_module
@@ -44,6 +46,18 @@ from . import _dp as dp
 from ._db import get_tid_by_rid
 from ._recipe import Recipe
 from ._task import Task
+
+
+def recommended(replacement: str = ''):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if replacement:
+                msg = f"Please use `{replacement}` instead, `{func.__name__}` is not recommended!"
+                warnings.warn(msg, UserWarning, stacklevel=2)
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
 
 
 class Super(object):
@@ -167,11 +181,12 @@ class Super(object):
         else:
             raise ValueError('rid or tid is required!')
 
-    def result(self, tid: int, **kwds):
+    def result(self, tid: int, task: bool = False, **kwds):
         """Get data with given id(**tid** or **rid**)
 
         Args:
             tid (int): task id
+            task (bool, optional): return task info if True. Defaults to False.
 
         Keyword Arguments: Kwds
             plot (bool, optional): plot the result in QuarkStudio after the data is loaded(1D or 2D).
@@ -181,19 +196,23 @@ class Super(object):
         """
         if self.addr[0] == '127.0.0.1':
             if tid < 1e10:
-                return get_data_by_rid(tid, **kwds)
-            return get_data_by_tid(tid, **kwds)
+                info, data = get_data_by_rid(tid, **kwds)
+            info, data = get_data_by_tid(tid, **kwds)
         else:
-            data = self.qs().load(tid)
+            info, data = self.qs().load(tid)
             try:
                 from ._db import reshape
 
-                shape = data['meta']['other']['shape']
+                shape = info['meta']['other']['shape']
                 data['data'] = {k: reshape(np.asarray(v), shape)
-                                for k, v in data['data'].items()}
+                                for k, v in data.items()}
             except Exception as e:
                 logger.error(f'Failed to reshape data: {e}')
-            return data
+
+        if task:
+            return info.get('task', {})
+        else:
+            return {'data': data, 'meta': info.get('meta', {})}
 
     def lookup(self, start: str = '', end: str = '', name: str = ''):
         """Lookup records in the database
@@ -471,6 +490,7 @@ def ping(qs):
     return qs.ping('hello') == 'hello'
 
 
+@recommended(replacement='s.login')
 def login(user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088, verbose: bool = True):
     # """login to the server as **user**
 
@@ -494,6 +514,7 @@ def login(user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088, verbos
     return qs
 
 
+@recommended(replacement='s.signup')
 def signup(user: str, system: str, **kwds):
     # """register a new **user** on the **system**
 
@@ -506,6 +527,7 @@ def signup(user: str, system: str, **kwds):
     qs.login(user)  # relogin
 
 
+@recommended(replacement='s.submit')
 def submit(task: dict, block: bool = False, **kwds):
     # """submit a task to a backend
 
@@ -575,6 +597,7 @@ def submit(task: dict, block: bool = False, **kwds):
     return t
 
 
+@recommended(replacement='s.rollback')
 def rollback(tid: int):
     # """rollback the parameters with given task id and checkpoint name
 
@@ -595,6 +618,7 @@ def rollback(tid: int):
         logger.error(f'Failed to rollback for {tid}: {e}')
 
 
+@recommended(replacement='s.diff')
 def diff(new: int | dict, old: int | dict, fmt: str = 'dict', ignore: list[str] = ['unit', 'sid']):
 
     if fmt == 'dict':
@@ -639,6 +663,7 @@ def diff(new: int | dict, old: int | dict, fmt: str = 'dict', ignore: list[str] 
         return msg
 
 
+@recommended(replacement='s.lookup')
 def lookup(start: str = '', end: str = '', name: str = '', fmt: str = '%Y-%m-%d-%H-%M-%S', records: list = []):
     import itables
     import pandas as pd
@@ -716,16 +741,19 @@ def run_task_by_rid(rid: int):
     return t
 
 
+@recommended(replacement='s.result(tid, task=True)')
 def get_task_by_rid(rid: int):
     from ._db import get_dataset_by_tid
 
     return get_dataset_by_tid(get_tid_by_rid(rid), True)
 
 
+@recommended(replacement='s.snapshot')
 def get_config_by_rid(rid: int):
     return get_config_by_tid(get_tid_by_rid(rid))
 
 
+@recommended(replacement='s.snapshot')
 def get_config_by_tid(tid: int) -> dict:
     # git config --global --add safe.directory path/to/cfg
     from ._db import get_commit_by_tid
@@ -738,10 +766,12 @@ def get_config_by_tid(tid: int) -> dict:
         return {}
 
 
+@recommended(replacement='s.result')
 def get_data_by_rid(rid: int, **kwds):
     return get_data_by_tid(get_tid_by_rid(rid), **kwds)
 
 
+@recommended(replacement='s.result')
 def get_data_by_tid(tid: int, **kwds) -> dict:
     # """load data with given **task id(tid)**
 
@@ -777,7 +807,7 @@ def get_data_by_tid(tid: int, **kwds) -> dict:
         task.index = len(data[signal]) + 1
         return plot(task, backend=kwds.get('backend', 'studio'))
 
-    return {'data': data, 'meta': info['meta']}
+    return info, data  # {'data': data, 'meta': info['meta']}
 
 
 def update_dev_from_remote(host: str = '172.26.1.23'):
@@ -814,7 +844,7 @@ def update_dev_from_remote(host: str = '172.26.1.23'):
 #     print(rs.restart())
 #     return rs, sysinfo
 
-
+@recommended(replacement='s.translate')
 def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, tid: int = 0, **kwds) -> tuple:
     # """translate circuit to executable commands(i.e., waveforms or settings)
 
@@ -832,6 +862,7 @@ def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, tid: 
     return ctx, schedule(0, {}, circuit, signal='iq', **kwds)
 
 
+@recommended(replacement='s.preview')
 def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = True,
             start: float = 0, end: float = 0, srate: float = 0,
             unit: float = 1e-6, offset: float = 0, space: float = 0, ax=None):
