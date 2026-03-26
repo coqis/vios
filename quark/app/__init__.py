@@ -52,10 +52,8 @@ from ._task import Task
 class Super(object):
     """Super Admin Tool to interact with `QuarkServer` and database and so on"""
 
-    cache = FixedDict(maxlen=128)
-
     def __init__(self):
-        pass
+        self.__cache = FixedDict(maxlen=128)
 
     def init(self, path: str | Path = Path.cwd() / 'quark.json'):
         """Set path to `quark.json`
@@ -187,34 +185,34 @@ class Super(object):
             dict: data & meta
         """
         if clear:
-            self.cache.clear()
+            self.__cache.clear()
             logger.info('Cache cleared.')
 
-        if idx in self.cache:
-            # logger.info(f'Cache hit: {idx}')
-            return self.cache[idx]
-
-        if self.addr[0] == '127.0.0.1':
-            if idx < 1e10:
-                info, data = get_data_by_rid(idx, **kwds)
-            else:
-                info, data = get_data_by_tid(idx, **kwds)
+        if idx in self.__cache:
+            logger.info(f'Cache hit: {idx}')
+            r = self.__cache[idx]
         else:
-            info, data = self.qs().load(idx)
-            try:
-                from ._db import reshape
+            if self.addr[0] == '127.0.0.1':
+                if idx < 1e10:
+                    r = get_data_by_rid(idx, **kwds)
+                else:
+                    r = get_data_by_tid(idx, **kwds)
+            else:
+                r = self.qs().load(idx)
+                try:
+                    from ._db import reshape
 
-                shape = info['meta']['other']['shape']
-                data['data'] = {k: reshape(np.asarray(v), shape)
-                                for k, v in data.items()}
-            except Exception as e:
-                logger.error(f'Failed to reshape data: {e}')
+                    shape = r['meta']['other']['shape']
+                    r['data'] = {k: reshape(np.asarray(v), shape)
+                                 for k, v in r['data'].items()}
+                except Exception as e:
+                    logger.error(f'Failed to reshape data: {e}')
+            self.__cache[idx] = r
 
         if task:
-            return info.get('task', {})
+            return r.get('task', {})
         else:
-            self.cache[idx] = {'data': data, 'meta': info.get('meta', {})}
-            return self.cache[idx]
+            return {'data': r['data'], 'meta': r['meta']}
 
     def lookup(self, start: str = '', end: str = '', name: str = ''):
         """Lookup records in the database
@@ -749,7 +747,7 @@ def get_data_by_tid(tid: int, **kwds) -> dict:
         task.index = len(data[signal]) + 1
         return plot(task, backend=kwds.get('backend', 'studio'))
 
-    return info, data  # {'data': data, 'meta': info['meta']}
+    return {'data': data, 'meta': info['meta'], 'task': info['task']}
 
 
 def update_dev_from_remote(host: str = '172.26.1.23'):
