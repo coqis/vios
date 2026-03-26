@@ -151,10 +151,14 @@ class Super(object):
         Returns:
             int: task id(tid)
         """
-        if self.addr[0] == '127.0.0.1':
-            return int(get_tid_by_rid(idx))
-        else:
-            return int(self.qs().getid(idx=idx))
+        try:
+            if idx and self.addr[0] == '127.0.0.1':
+                return int(get_tid_by_rid(idx))
+            else:
+                r = self.qs().getid(idx=idx)
+                return int(r[1]) if idx else int(r)
+        except Exception as e:
+            logger.error(f'rid or tid is not found: {e}')
 
     def snapshot(self, idx: int = 0):
         """Get snapshot of a task with given idx(**tid** or **rid**). 

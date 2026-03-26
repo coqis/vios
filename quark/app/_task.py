@@ -124,8 +124,11 @@ class Task(object):
 
     @cached_property
     def rid(self):
-        from ._db import get_record_by_tid
-        return get_record_by_tid(self.tid)[0]
+        if self.server.raddr[0] == '127.0.0.1':
+            from ._db import get_record_by_tid
+            return get_record_by_tid(self.tid)[0]
+        else:
+            return int(self.server.getid(idx=self.tid)[0])
 
     def __repr__(self):
         return f'{self.name}(tid={self.tid})'  # rid={self.rid},
