@@ -27,7 +27,7 @@ from pathlib import Path
 import numpy as np
 from loguru import logger
 from waveforms import Waveform, WaveVStack, square, wave_eval
-from zee import query_dict_from_string
+from zee import find_matches_from_dict, query_dict_from_string
 
 
 class Pulse(object):
@@ -140,6 +140,8 @@ class Registry(object):
 
     def query(self, path: str):
         try:
+            if '*' in path:
+                return find_matches_from_dict(self.source, path)
             return query_dict_from_string(path, self.source)
         except Exception as e:
             return f'Failed to query {path}: {e}'

@@ -141,21 +141,27 @@ class Context(QuarkLocalConfig):
         parts = target.split('.')
         return not any(s in parts for s in self.opaques)
 
-    def autofill(self, keys: list[str | tuple] = ['drive', 'flux']):
-        """autofill commands with given keys"""
+    def autofill(self, keys: list[str] = ['drive', 'flux']):
+        """autofill commands with given keys
 
-        if all(isinstance(cmd, tuple) for cmd in keys):
-            # from before_the_task, after_the_task, before_compiling
-            return keys
+        Args:
+            keys (list[str], optional): keys to autofill. Defaults to ['drive', 'flux'].
+
+        Returns:
+            list: autofilled commands
+        """
 
         cmds = []
+        for key in keys:
+            for path, value in self.snapshot().query(f'**.{key}'):
+                cmds.append((path, 'zero()', 'au'))
+        # if all(isinstance(cmd, tuple) for cmd in keys):
+        #     # from before_the_task, after_the_task, before_compiling
+        #     return keys
 
-        if not keys:
-            return cmds
-
-        for node, value in self.export().items():
-            for key in set.intersection(*(set(value), keys)):
-                cmds.append((f'{node}.{key}', 'zero()', 'au'))
+        # for node, value in self.export().items():
+        #     for key in set.intersection(*(set(value), keys)):
+        #         cmds.append((f'{node}.{key}', 'zero()', 'au'))
 
         return cmds
 

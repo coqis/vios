@@ -217,7 +217,7 @@ class Recipe(object):
                                    'arch': self.arch,
                                    'align_right': self.align_right,
                                    'timeout': float(self.timeout),
-                                   'precompile': self.prestep,
+                                   #   'precompile': self.prestep,
                                    'waveform_length': self.waveform_length,
                                    'shape': [len(v[0][1]) for v in self.__loops.values()],
                                    } | {k: v for k, v in self.__dict.items() if not isinstance(v, (list, np.ndarray))}
@@ -226,8 +226,8 @@ class Recipe(object):
                                   'trig': ['WRITE', 'trig'],
                                   'read': ['READ', 'read'],
                                   },
-                         'init': self.initcmd,
-                         'post': self.postcmd,
+                         #  'init': self.initcmd,
+                         #  'post': self.postcmd,
                          'cirq': self.circuit,
                          'rule': self.__rules,
                          'loop': {} | self.__loops

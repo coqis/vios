@@ -173,7 +173,7 @@ class Super(object):
         if idx and self.addr[0] == '127.0.0.1':
             return get_config_by_tid(self.getid(idx))
         else:
-            return self.qs().snapshot(tid=self.getid(idx))
+            return self.qs().snapshot(tid=self.getid(idx) if idx else idx)
 
     def rollback(self, idx: int):
         """Rollback the cfg with given idx(**tid** or **rid**)
