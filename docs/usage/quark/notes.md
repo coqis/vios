@@ -24,6 +24,12 @@
 - 标记旧版 API `/v1/old-api` 为废弃 -->
 
 ---
+### [**2026-03-12**] s.query
+- [✨] 新增通配符查询功能，如`s.query('*.*')`
+- [🔧] 统一远程本地的所有接口行为
+- [⚠️] 废弃Recipe中的before_the_task、before_compiling和after_the_task字段
+
+
 ### [**2026-03-12**] s.remote
 - [✨] 新增`s.remote`，用于查看`remote`设备信息
 - [🔧] 修复初始或复位操作时波形清除异常问题
