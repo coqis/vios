@@ -157,7 +157,7 @@ class Super(object):
                 return get_config_by_rid(idx)
             return get_config_by_tid(idx)
         else:
-            return self.qs().snapshot(idx=idx)
+            return self.qs().snapshot(tid=idx)
 
     def rollback(self, idx: int):
         """Rollback the cfg with given idx(**tid** or **rid**)
@@ -189,7 +189,7 @@ class Super(object):
             logger.info('Cache cleared.')
 
         if idx in self.__cache:
-            logger.info(f'Cache hit: {idx}')
+            # logger.info(f'Cache hit: {idx}')
             r = self.__cache[idx]
         else:
             if self.addr[0] == '127.0.0.1':
@@ -485,6 +485,10 @@ _sp = {}  # defaultdict(lambda: connect('QuarkServer', host, port))
 s = Super()
 
 
+def ping(srv):
+    return srv.ping('hello') == 'hello'
+
+
 def recommended(replacement: str = ''):
     def decorator(func):
         @functools.wraps(func)
@@ -506,11 +510,6 @@ def recommended(replacement: str = ''):
             return func(*args, **kwargs)
         return wrapper
     return decorator
-
-
-@recommended(replacement='s.ping')
-def ping(srv):
-    return srv.ping('hello') == 'hello'
 
 
 @recommended(replacement='s.login')
