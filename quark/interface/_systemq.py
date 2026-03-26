@@ -212,8 +212,8 @@ class Workflow(object):
         ctx.snapshot().cache = kwds.pop('cache', {})
 
         kwds.update(ctx.query('station', {}))
-        precompile = kwds.get('auto_clear', kwds.pop(
-            'precompile', []))  # for changing targets
+        precompile = kwds.get('auto_clear', {}).get(
+            'main', kwds.pop('precompile', []))  # for changing targets
         if isinstance(precompile, list):
             compiled['main'].extend([('WRITE', *cmd)
                                     for cmd in ctx.autofill(precompile)])
