@@ -108,7 +108,7 @@ class Super(object):
 
         self._s = login(user, host, port)
 
-        for mth in ['start', 'query', 'write', 'read', 'checkpoint', 'track', 'getid', 'cancel', 'report', 'review', 'tail']:
+        for mth in ['start', 'query', 'write', 'read', 'checkpoint', 'track', 'cancel', 'report', 'review', 'tail']:
             setattr(self, mth, getattr(self._s, mth))
 
         # for name in ['signup', 'submit']:
@@ -142,6 +142,20 @@ class Super(object):
     def ping(self, srv=None):
         return ping(srv or self.qs())
 
+    def getid(self, idx: int = 0) -> int:
+        """Get the id of a task with given idx(**tid** or **rid**)
+
+        Args:
+            idx (int, optional): tid or rid. Defaults to 0.
+
+        Returns:
+            int: task id(tid)
+        """
+        if self.addr[0] == '127.0.0.1':
+            return int(get_tid_by_rid(idx))
+        else:
+            return int(self.qs().getid(idx=idx))
+
     def snapshot(self, idx: int = 0):
         """Get snapshot of a task with given idx(**tid** or **rid**). 
         If idx is 0, current snapshot will be retrieved from `QuarkServer`.
@@ -153,11 +167,9 @@ class Super(object):
             dict: _description_
         """
         if idx and self.addr[0] == '127.0.0.1':
-            if idx < 1e10:
-                return get_config_by_rid(idx)
-            return get_config_by_tid(idx)
+            return get_config_by_tid(self.getid(idx))
         else:
-            return self.qs().snapshot(tid=idx)
+            return self.qs().snapshot(tid=self.getid(idx))
 
     def rollback(self, idx: int):
         """Rollback the cfg with given idx(**tid** or **rid**)
@@ -166,7 +178,7 @@ class Super(object):
             idx (int): tid or rid
         """
         if idx:
-            rollback(idx)
+            rollback(self.getid(idx))
         else:
             raise ValueError('rid or tid is required!')
 
@@ -193,12 +205,9 @@ class Super(object):
             r = self.__cache[idx]
         else:
             if self.addr[0] == '127.0.0.1':
-                if idx < 1e10:
-                    r = get_data_by_rid(idx, **kwds)
-                else:
-                    r = get_data_by_tid(idx, **kwds)
+                r = get_data_by_tid(self.getid(idx), **kwds)
             else:
-                r = self.qs().load(idx)
+                r = self.qs().load(self.getid(idx))
                 try:
                     from ._db import reshape
 
@@ -614,7 +623,7 @@ def diff(new: int | dict, old: int | dict, fmt: str = 'dict', ignore: list[str] 
 
 
 @recommended(replacement='s.lookup')
-def lookup(start: str = '', end: str = '', name: str = '', fmt: str = '%Y-%m-%d-%H-%M-%S', records: list = []):
+def lookup(start: str = '', end: str = '', name: str = '', fmt: str = '%Y-%m-%d %H:%M:%S', records: list = []):
     import itables
     import pandas as pd
 

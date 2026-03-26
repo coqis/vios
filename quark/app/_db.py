@@ -181,7 +181,12 @@ def get_commit_by_tid(tid: int = 0):
 
 
 def get_tid_by_rid(rid: int):
-    return get_record_by_rid(rid)[1]
+    if rid < 1e10:
+        try:
+            return get_record_by_rid(rid)[1]
+        except Exception as e:
+            return logger.error(f'tid corresponding to {rid} not found!')
+    return rid
 
 
 def get_record_by_tid(tid: int, table: str = 'task'):
