@@ -27,15 +27,45 @@ from pathlib import Path
 
 import numpy as np
 
+warning = '''
+***before_the_task*** is deprecated, please use ***station.auto_clear.init***
+\r\n***before_compiling*** is deprecated, please use ***station.auto_clear.main***
+\r\n***after_the_task*** is deprecated, please use ***station.auto_clear.post***
+   
+    {
+        'station': {
+            'auto_clear': {
+                'init': ['flux', 'drive'], # ['*.waveform.DDS', '*.waveform.Z']
+                'main': ['flux', 'drive'],
+                'post': ['flux', 'drive', 'probe']
+
+            }
+        }
+    }          
+'''
+
+try:
+    from rich.console import Console
+    from rich.markdown import Markdown
+    from rich.panel import Panel
+    Console().print(Panel.fit(Markdown(warning),
+                              title="Recipe Warning",
+                              style="yellow",
+                              border_style="cyan",
+                              padding=(1, 2),
+                              width=96))
+except ImportError:
+    print(warning)
+
 
 class Recipe(object):
     """**Recipe仅用于生成任务**
     """
 
     # autopep8: --ignore=E731
-    before_the_task: list[tuple] = []  # 任务开始前初始化
-    before_compiling: list[tuple] = []  # 每步开始前初始化
-    after_the_task: list[tuple] = []  # 任务结束后复位
+    # before_the_task: list[tuple] = []  # 任务开始前初始化
+    # before_compiling: list[tuple] = []  # 每步开始前初始化
+    # after_the_task: list[tuple] = []  # 任务结束后复位
 
     lib: str = 'lib.gates.u3'  # Overridden by `station.lib`
     arch: str = 'baqis'  # Overridden by `station.arch`
@@ -190,11 +220,11 @@ class Recipe(object):
         dims = [len(d) for k, d, u in self.__loops[group]]
         assert len(set(dims)) == 1, f'{target} in {group}: wrong dims {dims}!'
 
-    def update(self):
-        # [('AWG.CH1.Waveform', 'zero()', 'au')]
-        self.initcmd = [(t, v, 'au') for t, v in self.before_the_task]
-        self.postcmd = [(t, v, 'au') for t, v in self.after_the_task]
-        self.prestep = [(t, v, 'au') for t, v in self.before_compiling]
+    # def update(self):
+    #     # [('AWG.CH1.Waveform', 'zero()', 'au')]
+    #     self.initcmd = [(t, v, 'au') for t, v in self.before_the_task]
+    #     self.postcmd = [(t, v, 'au') for t, v in self.after_the_task]
+    #     self.prestep = [(t, v, 'au') for t, v in self.before_compiling]
 
     def export(self):
         """导出任务
@@ -202,7 +232,7 @@ class Recipe(object):
         Returns:
             _type_: 任务描述，详见**submit**
         """
-        self.update()
+        # self.update()
 
         if self.lib.endswith('.py'):
             _lib = {'file': Path(self.lib).name,
