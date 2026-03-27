@@ -153,7 +153,7 @@ class Context(QuarkLocalConfig):
 
         cmds = []
         for key in keys:
-            for path, value in self.snapshot().query(f'**.{key}'):
+            for path, value in self.snapshot().query(f'**.{key}', True).items():
                 cmds.append((path, 'zero()', 'au'))
         # if all(isinstance(cmd, tuple) for cmd in keys):
         #     # from before_the_task, after_the_task, before_compiling

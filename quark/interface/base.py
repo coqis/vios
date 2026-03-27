@@ -138,10 +138,10 @@ class Registry(object):
     def keys(self):
         return list(self.source)
 
-    def query(self, path: str):
+    def query(self, path: str, restore: bool = False):
         try:
             if '*' in path:
-                return find_matches_from_dict(self.source, path)
+                return dict(find_matches_from_dict(self.source, path))
             return query_dict_from_string(path, self.source)
         except Exception as e:
             return f'Failed to query {path}: {e}'
