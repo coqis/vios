@@ -24,7 +24,7 @@
 - 标记旧版 API `/v1/old-api` 为废弃 -->
 
 ---
-### [**2026-03-12**] s.query
+### [**2026-03-27**] s.query
 - [✨] 新增通配符查询功能，如`s.query('*.*')`
 - [🔧] 统一远程本地的所有接口行为
 - [⚠️] 废弃Recipe中的before_the_task、before_compiling和after_the_task字段
