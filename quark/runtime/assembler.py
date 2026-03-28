@@ -192,7 +192,11 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
                         scmd[_target]['value'] = Pulse.fromstr(
                             scmd[_target]['value'])
                     scmd[_target]['value'] += cmd['value']
-                    scmd[_target]['cargs'].update(cmd['cargs'])
+
+                    sh, st = scmd[_target]['cargs']['target'].split('.', 1)
+                    ch, ct = cmd['cargs']['target'].split('.', 1)
+                    mh = sorted(set(sh.split('_') + ch.split('_')))
+                    scmd[_target]['cargs']['target'] = '_'.join(mh) + '.' + st
                 else:
                     scmd[_target] = cmd
             except Exception as e:

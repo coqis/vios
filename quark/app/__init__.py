@@ -840,7 +840,7 @@ def preview(cmds: dict, keys: tuple[str] = ('',), calibrate: bool = True,
 
             # xt = np.arange(start, end, 1 / srate) / unit
             _, line = calculate(step, target, cmd, {'filter': keys})
-            if target.endswith('Waveform') and _target.split('.')[0] in keys:
+            if target.endswith('Waveform') and line.get(_target, {}):
                 xt = line[_target]['xdata'] / unit
                 yt = line[_target]['ydata']
                 wf[step][target]['value'] = yt

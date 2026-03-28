@@ -94,7 +94,8 @@ def sample(pulse, delay: float = 0.0, offset: float = 0.0, srate: float = 1e9, *
     if not kwds.get('reset', False) and kwds['sid'] < 0:
         return {}
 
-    if kwds['target'].split('.')[0] not in kwds.get('filter', []):
+    # if kwds['target'].split('.')[0] not in kwds.get('filter', []):
+    if not set.intersection(set(kwds['target'].split('.')[0].split('_')), set(kwds.get('filter', []))):
         return {}
 
     ptype = kwds.get('type', 'Waveform')
