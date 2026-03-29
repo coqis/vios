@@ -101,7 +101,6 @@ class Context(QuarkLocalConfig):
     def __init__(self, data) -> None:
         super().__init__(data)
         self.reset(data)
-        self.bypass = {}
         self.opaques = {}
 
     def reset(self, snapshot):

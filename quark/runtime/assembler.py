@@ -31,13 +31,14 @@ from quark.interface import Pulse, Workflow, create_context
 ctx = None  # create_context('baqis', {})
 
 
-def initialize(snapshot, **kwds):
+def initialize(tid: int, snapshot, **kwds):
     """compiler context for current task
 
     Note:
         every task has its own context
 
     Args:
+        tid (int): task id
         snapshot (_type_): frozen snapshot for current task
 
     Returns:
@@ -45,12 +46,12 @@ def initialize(snapshot, **kwds):
 
     """
     global ctx
+    # logger.info(f'🔗 Task({tid}): initializing ...')
 
     if isinstance(snapshot, int):
         return os.getpid()
 
     ctx = create_context(kwds.get('arch', 'baqis'), snapshot)
-    ctx.bypass = kwds.get('bypass', {})
     if kwds.get('main', False):
         return ctx
 
@@ -101,7 +102,6 @@ def assemble(sid: int, instruction: dict[str, list[tuple[str, str, Any, str]]], 
     try:
         # for s.write and s.read
         query = kw.get('ctx', ctx).query
-        ctx.bypass = {}  # clear bypass cache
     except AttributeError as e:
         query = ctx.query
 
