@@ -27,6 +27,8 @@
 ### [**2026-03-27**] s.query
 - [✨] 新增通配符查询功能，如`s.query('*.*')`
 - [🔧] 统一远程本地的所有接口行为
+- [🔧] 修复多通道共用时曲线名未完整显示的问题
+- [🔧] 移除bypass
 - [⚠️] 废弃Recipe中的before_the_task、before_compiling和after_the_task字段
 
 
