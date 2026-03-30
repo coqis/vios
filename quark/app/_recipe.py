@@ -35,7 +35,7 @@ warning = '''
     {
         'station': {
             'auto_clear': {
-                'init': ['flux', 'drive'], # ['*.waveform.DDS', '*.waveform.Z']
+                'init': ['flux', 'drive'], # ['waveform.DDS', 'waveform.Z']
                 'main': ['flux', 'drive'],
                 'post': ['flux', 'drive', 'probe']
 

@@ -51,7 +51,7 @@ def initialize(tid: int, snapshot, **kwds):
     if isinstance(snapshot, int):
         return os.getpid()
 
-    ctx = create_context(kwds.get('arch', 'baqis'), snapshot)
+    ctx = create_context(tid, kwds.get('arch', 'baqis'), snapshot)
     if kwds.get('main', False):
         return ctx
 

@@ -98,10 +98,11 @@ def split_circuit(circuit: list):
 
 class Context(QuarkLocalConfig):
 
-    def __init__(self, data) -> None:
+    def __init__(self, tid: int, data) -> None:
         super().__init__(data)
         self.reset(data)
         self.opaques = {}
+        self.tid = tid
 
     def reset(self, snapshot):
         self._getGateConfig.cache_clear()
@@ -171,7 +172,7 @@ class Context(QuarkLocalConfig):
         return super().getGate(name, *qubits)
 
 
-def create_context(arch: str, data):
+def create_context(tid: int, arch: str, data):
 
     if isinstance(data, dict):
         station = data.get('station', {})
@@ -183,7 +184,7 @@ def create_context(arch: str, data):
 
     base = get_arch(arch).snapshot_factory
     Context.__bases__ = (base,)
-    ctx = Context(data)
+    ctx = Context(tid, data)
     ctx.arch = arch
     print(f'using {arch} from ', sys.modules[base.__module__].__file__)
     # if hasattr(ctx, 'test'):
