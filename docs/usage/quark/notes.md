@@ -26,8 +26,9 @@
 ---
 ### [**2026-03-27**] s.query
 - [✨] 新增通配符查询功能，如`s.query('*.*')`
+- [✨] `etc.driver.mode`为"debug"时，打印所有命令信息
 - [🔧] 统一远程本地的所有接口行为
-- [🔧] 修复多通道共用时曲线名未完整显示的问题
+- [🔧] 多通道共用时曲线名完整显示所有关联的对象名
 - [🔧] 移除bypass
 - [⚠️] 废弃Recipe中的before_the_task、before_compiling和after_the_task字段
 

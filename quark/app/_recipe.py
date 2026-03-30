@@ -63,9 +63,6 @@ class Recipe(object):
     """
 
     # autopep8: --ignore=E731
-    # before_the_task: list[tuple] = []  # 任务开始前初始化
-    # before_compiling: list[tuple] = []  # 每步开始前初始化
-    # after_the_task: list[tuple] = []  # 任务结束后复位
 
     lib: str = 'lib.gates.u3'  # Overridden by `station.lib`
     arch: str = 'baqis'  # Overridden by `station.arch`
@@ -220,19 +217,12 @@ class Recipe(object):
         dims = [len(d) for k, d, u in self.__loops[group]]
         assert len(set(dims)) == 1, f'{target} in {group}: wrong dims {dims}!'
 
-    # def update(self):
-    #     # [('AWG.CH1.Waveform', 'zero()', 'au')]
-    #     self.initcmd = [(t, v, 'au') for t, v in self.before_the_task]
-    #     self.postcmd = [(t, v, 'au') for t, v in self.after_the_task]
-    #     self.prestep = [(t, v, 'au') for t, v in self.before_compiling]
-
     def export(self):
         """导出任务
 
         Returns:
             _type_: 任务描述，详见**submit**
         """
-        # self.update()
 
         if self.lib.endswith('.py'):
             _lib = {'file': Path(self.lib).name,
