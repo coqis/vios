@@ -802,7 +802,7 @@ def translate(circuit: list = [(('Measure', 0), 'Q1001')], cfg: dict = {}, **kwd
 
     assert cfg, 'cfg is required!'
 
-    ctx = initialize(cfg, main=True, **kwds)
+    ctx = initialize(0, cfg, main=True, **kwds)
     return ctx, schedule(0, {}, circuit, signal='iq', **kwds)
 
 

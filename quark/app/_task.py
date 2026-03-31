@@ -207,7 +207,7 @@ class Task(object):
         else:
             return 'supported arguments are: {rumtime, compile}'
 
-    def report(self, show=True):
+    def report(self, show: bool = True, width: int = 120):
         r: dict = self.server.report(self.tid)
         if show:
             for k, v in r.items():
@@ -222,7 +222,7 @@ class Task(object):
                 elif k == 'cirq':
                     msg = v.replace("\n", "\n    ")
                 print(textwrap.fill(f'{k}: {msg}',
-                                    width=120,
+                                    width=width,
                                     replace_whitespace=False))
         return r
 
