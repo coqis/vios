@@ -97,16 +97,17 @@ class Super(object):
     def user_exists(self):
         return self.qs().user_exists
 
-    def login(self, user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088):
+    def login(self, user: str = 'baqis', host: str = '127.0.0.1', port: int = 2088, verbose: bool = True):
         """Login to the QuarkServer
 
         Args:
             user (str, optional): name of the user(same as signup). Defaults to 'baqis'.
             host (str, optional): server host. Defaults to '127.0.0.1'.
             port (str, optional): server port. Defaults to 2088.
+            verbose (bool, optional): print the login info. Defaults to True.
         """
 
-        self._s = login(user, host, port)
+        self._s = login(user, host, port, verbose)
 
         for mth in ['start', 'query', 'write', 'read', 'checkpoint', 'track', 'cancel', 'report', 'review', 'tail']:
             setattr(self, mth, getattr(self._s, mth))
