@@ -1,0 +1,161 @@
+{
+    "Q0": {
+        "Measure": {
+            "duration": 4e-06,
+            "amp": 0.019,
+            "frequency": 6964370000.0,
+            "weight": "const(1)",
+            "phi": -2.636421695283167,
+            "threshold": 8502633802.265065,
+            "ring_up_amp": 0.024,
+            "ring_up_waist": 0.006,
+            "ring_up_time": 6e-07
+        },
+        "acquire": {
+            "address": "AD.CH0.IQ",
+            "TRIGD": 0
+        },
+        "probe": {
+            "address": "AD.CH0.Waveform",
+            "delay": 0
+        },
+        "flux": {
+            "address": "AWG4.CH0.Waveform",
+            "delay": 2e-06
+        },
+        "drive": {
+            "address": "AWG0.CH0.Waveform"
+        }
+    },
+    "dev": {
+        "AD": {
+            "host": "172.26.1.23",
+            "port": 40005,
+            "type": "remote",
+            "srate": 1000000000.0,
+            "inuse": true
+        },
+        "AWG0": {
+            "host": "172.26.1.23",
+            "port": 40000,
+            "type": "remote",
+            "srate": 1000000000.0,
+            "inuse": true
+        },
+        "AWG1": {
+            "host": "172.26.1.23",
+            "port": 40001,
+            "type": "remote",
+            "srate": 1000000000.0,
+            "inuse": true
+        },
+        "AWG2": {
+            "host": "172.26.1.23",
+            "port": 40002,
+            "type": "remote",
+            "srate": 1000000000.0,
+            "inuse": true
+        },
+        "AWG3": {
+            "host": "172.26.1.23",
+            "port": 40003,
+            "type": "remote",
+            "srate": 1000000000.0,
+            "inuse": true
+        },
+        "AWG4": {
+            "host": "172.26.1.23",
+            "port": 40004,
+            "type": "remote",
+            "srate": 1000000000.0,
+            "inuse": true
+        }
+    },
+    "station": {
+        "sample": "sample2025",
+        "triggercmds": [
+            "Trigger.CH1.TRIG"
+        ],
+        "lib": "glib.gates.u3rcp",
+        "arch": "rcp",
+        "align_right": false,
+        "waveform_length": 9.8e-05,
+        "auto_clear": {
+            "main": [
+                "xflux"
+            ]
+        }
+    },
+    "etc": {
+        "driver": {
+            "path": "C:/Users/drice/Desktop/home/dev",
+            "concurrent": true,
+            "timeout": 30.0,
+            "filter": [
+                "AD"
+            ],
+            "mapping": {
+                "setting_LO": "LO.Frequency",
+                "setting_POW": "LO.Power",
+                "setting_OFFSET": "ZBIAS.Offset",
+                "waveform_RF_I": "I.Waveform",
+                "waveform_RF_Q": "Q.Waveform",
+                "waveform_TRIG": "TRIG.Marker1",
+                "waveform_DDS": "DDS.Waveform",
+                "waveform_SW": "SW.Marker1",
+                "waveform_Z": "Z.Waveform",
+                "setting_PNT": "ADC.PointNumber",
+                "setting_SHOT": "ADC.Shot",
+                "setting_TRIGD": "ADC.TriggerDelay"
+            },
+            "presample": false,
+            "dedup": [
+                "Waveform"
+            ],
+            "jit": false,
+            "compress": true,
+            "mode": "run",
+            "deduplication": {
+                "target": [
+                    "Waveform"
+                ],
+                "level": "task"
+            }
+        },
+        "server": {
+            "workers": 4,
+            "shared": 1024,
+            "delay": 10.0,
+            "cached": 5,
+            "review": [
+                -2,
+                -1,
+                0,
+                1,
+                2
+            ],
+            "presample": true,
+            "jit": true
+        },
+        "canvas": {
+            "range": [
+                0,
+                0.0001
+            ],
+            "filter": [],
+            "host": "127.0.0.1"
+        },
+        "cloud": {
+            "id": 1,
+            "online": false,
+            "station": "Tai",
+            "url": "http://127.0.0.1:8657"
+        },
+        "dirver": {
+            "filter": [
+                "AD"
+            ],
+            "timeout": 30.0
+        }
+    }
+}
