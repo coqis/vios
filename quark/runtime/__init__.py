@@ -42,6 +42,7 @@ from loguru import logger
 
 from quark.driver import compress, decompress
 from quark.interface import Pulse
+from quark.proxy import __version__
 
 from .assembler import MAPPING, assemble, decode, initialize, schedule
 from .calculator import calculate
@@ -111,6 +112,15 @@ def is_main_process():
     return mp.current_process().name == 'MainProcess'
 
 
+def check_for_update(name: str = 'vios'):
+    import requests
+    info = requests.get(f'https://pypi.org/pypi/{name}/json').json()
+    if info['info']['version'] > __version__:
+        # print(f"New version available, please run `quark update` to update")
+        return info['info']['version']
+    return ''
+
+
 try:
     import os
 
@@ -128,6 +138,14 @@ try:
                           border_style="cyan", expand=False, padding=(0, 1)))
 
         print_code_with_title(mdev, "Device in QuarkServer")
+
+        if check_for_update():
+            print_code_with_title(
+                "New version available, please run `quark update` to latest version\r\n" +
+                "for more details see [notes](https://quarkstudio.readthedocs.io/en/latest/usage/quark/notes)",
+                "Update Available", "markdown")
+
+
 except Exception as e:
     pass
 
