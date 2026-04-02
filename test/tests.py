@@ -62,7 +62,7 @@ def test_submit():
     qubits = ['Q0']
 
     rcp = s.recipe('s21', signal='iq_avg')
-    rcp.lib = r'c:\Users\drice\Desktop\quarkstudio\systemq\glib\gates\u3rcp.py'  # 指定体系结构
+    rcp.lib = r'glib.gates.u3rcp'  # 指定体系结构
     rcp.arch = 'rcp'  # 指定体系结构
     rcp.circuit = [
         # *[('X', q) for q in qubits] * 10,
