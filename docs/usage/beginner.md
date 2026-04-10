@@ -96,7 +96,7 @@ icon: material/badge-account-horizontal
     uv add quarkstudio jupyterlab --default-index=https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
     ```
 
-    下载驱动等文件到指定目录，如***./home*** (1)
+    下载驱动等文件到指定目录并安装依赖，如***./home*** (1)
     { .annotate }
     
     1. **home配置**

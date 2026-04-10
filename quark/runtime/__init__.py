@@ -122,9 +122,7 @@ def check_for_update(name: str = 'vios'):
 
 
 try:
-    import os
-
-    if is_main_process() and 'DRIVER' in os.environ:
+    if is_main_process():
         from rich.console import Console
         from rich.panel import Panel
         from rich.syntax import Syntax

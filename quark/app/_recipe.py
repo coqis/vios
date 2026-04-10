@@ -48,12 +48,14 @@ try:
     from rich.console import Console
     from rich.markdown import Markdown
     from rich.panel import Panel
-    Console().print(Panel.fit(Markdown(warning),
-                              title="Recipe Warning",
-                              style="yellow",
-                              border_style="cyan",
-                              padding=(1, 2),
-                              width=96))
+
+    if not hasattr(sys.modules.get('__main__'), '__file__'):  # jupyter
+        Console().print(Panel.fit(Markdown(warning),
+                                  title="Recipe Warning",
+                                  style="yellow",
+                                  border_style="cyan",
+                                  padding=(1, 2),
+                                  width=96))
 except ImportError:
     print(warning)
 
