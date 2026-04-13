@@ -135,11 +135,11 @@ try:
             console.print(Panel(syntax, title=title,  # style="bold",
                           border_style="cyan", expand=False, padding=(0, 1)))
 
-        print_code_with_title(mdev, "Device in QuarkServer")
+        # print_code_with_title(mdev, "Device in QuarkServer")
 
         if check_for_update():
             print_code_with_title(
-                "New version available, please run `quark update` to latest version\r\n" +
+                "New version available, please run `quark update` to latest version,\r\n" +
                 "for more details see [notes](https://quarkstudio.readthedocs.io/en/latest/usage/quark/notes)",
                 "Update Available", "markdown")
 
