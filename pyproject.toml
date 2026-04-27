@@ -31,6 +31,8 @@ dependencies = [
     "inset",
     "apscheduler",
     "networkx",
+    "prompt_toolkit",
+    "openai",
     "qlispc"
 ]
 classifiers = [
