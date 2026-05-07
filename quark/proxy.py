@@ -45,10 +45,11 @@ def init(path: str | Path = Path.cwd() / 'quark.json'):
 
     try:
         QUARK = {"server": {"home": Path.home() / "Desktop/home"}}
-        for qjs in [Path(path), Path.home() / 'quark.json']:
+        for qp in path.parents:
+            qjs = qp / 'quark.json'
             if qjs.exists():
                 with open(qjs, 'r') as f:
-                    # print(f'Load settings from {qjs}')
+                    print(f'config loaded from {qjs}')
                     QUARK = json.loads(f.read())
                     break
         HOME = Path(QUARK['server']['home']).resolve()
