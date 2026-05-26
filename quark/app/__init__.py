@@ -27,23 +27,17 @@ Abstract: about app
 
 import functools
 import inspect
-import subprocess
 import sys
 import time
-import warnings
-from collections import defaultdict
-from functools import wraps
 from importlib import import_module
 from pathlib import Path
 from threading import current_thread
-from typing import Callable
 
 import numpy as np
 from loguru import logger
 from srpc import connect, loads
 from zee import FixedDict, flatten_dict
 
-from . import _dp as dp
 from ._db import get_tid_by_rid
 from ._recipe import Recipe
 from ._task import Task
@@ -434,8 +428,7 @@ class Super(object):
             _type_: _description_
         """
         if isinstance(new, str) and isinstance(old, str):
-            from quark.toolkit import compare
-            return compare(new, old, **kwds)
+            return 'not supported type of diff'
 
         return diff(new, old, fmt, ignore)
 
@@ -458,14 +451,6 @@ class Super(object):
         from ._viewer import fig
         return fig
 
-    def ssh(self, username: str, password: str, host: str = '192.168.1.42'):
-        from quark.toolkit import open_ssh
-        return open_ssh(username, password, host)
-
-    def terminal(self, command: str | None = None, cwd: str | None = None):
-        from quark.toolkit import open_terminal
-        open_terminal(command, cwd)
-
     def display(self, d: dict | np.ndarray = {}, filename: str = '', title="root", **kwds):
         """Print nested dict as a tree
 
@@ -483,15 +468,9 @@ class Super(object):
             d = get_tree_of_file(filename)
             if not d:
                 return
-            title = 'hdf5'
 
-        from quark.toolkit import display
-        if isinstance(d, dict):
-            kwds.setdefault('end', '')
-        elif isinstance(d, np.ndarray):
-            kwds.setdefault('max_rows', 10)
-            kwds.setdefault('max_cols', 10)
-        display(d, title, **kwds)
+        import rich
+        rich.print(d)
 
 
 _sp = {}  # defaultdict(lambda: connect('QuarkServer', host, port))
