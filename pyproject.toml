@@ -28,7 +28,6 @@ dependencies = [
     "dill",
     "itables",
     "pandas",
-    "inset",
     "apscheduler",
     "networkx",
     "prompt_toolkit",

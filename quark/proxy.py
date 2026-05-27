@@ -37,7 +37,7 @@ from queue import Empty, Queue
 import numpy as np
 from loguru import logger
 
-__version__ = "3.9.9"
+__version__ = "4.0.0"
 
 
 def init(path: str | Path = Path.cwd() / 'quark.json'):

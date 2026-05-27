@@ -12,7 +12,6 @@ mkdocs-git-revision-date-localized-plugin
 mkdocs-video
 
 mkdocs-jupyter
-inset
 quarkstudio
 quarkcircuit
 matplotlib
