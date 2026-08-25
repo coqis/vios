@@ -70,6 +70,7 @@ def get_dataset_by_tid(tid: int, task: bool = False, **kwds):
 
     if filename := kwds.get('filename',''):
         assert (dataset := kwds.get('dataset','')), f'Dataset({dataset}) not found: {filename}'
+        dataset = f'{dataset}/{tid}'
         filename = Path(filename).as_posix()
     else:
         filename, dataset = get_record_by_tid(tid)[7:9]
