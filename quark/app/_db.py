@@ -65,11 +65,15 @@ def reshape(raw: np.ndarray | list, shape: tuple | list):
     return data
 
 
-def get_dataset_by_tid(tid: int, task: bool = False):
+def get_dataset_by_tid(tid: int, task: bool = False, **kwds):
     from quark.proxy import HOME
 
-    filename, dataset = get_record_by_tid(tid)[7:9]
-    filename = str(HOME / f'dat/{Path(filename).name}')
+    if filename := kwds.get('filename',''):
+        assert (dataset := kwds.get('dataset','')), f'Dataset({dataset}) not found: {filename}'
+        filename = Path(filename).as_posix()
+    else:
+        filename, dataset = get_record_by_tid(tid)[7:9]
+        filename = str(HOME / f'dat/{Path(filename).name}')
     # print(f'Loading dataset from {filename}')
 
     if filename.endswith('hdf5'):
@@ -137,7 +141,8 @@ def get_tree_of_file(filename: str):
             if isinstance(val, h5py.Group):
                 file_to_dict(val, v)
             else:
-                v = f'{str(val.dtype)} {val.shape} {val.nbytes}'  # val.name
+                # v = f'{str(val.dtype)} {val.shape} {val.nbytes}'  # val.name
+                v = (val.dtype, val.shape, val.nbytes)  # val.name
             d[key] = v
             v = {}
         return d
